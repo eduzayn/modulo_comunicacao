@@ -13,7 +13,7 @@ export function useTemplates(params?: GetTemplatesInput) {
   
   const queryString = params 
     ? `?${Object.entries(params)
-        .filter(([_, value]) => value !== undefined)
+        .filter(([, value]) => value !== undefined)
         .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
         .join('&')}`
     : '';
