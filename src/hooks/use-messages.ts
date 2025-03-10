@@ -56,6 +56,8 @@ export function useMessages(conversationId: string) {
       return response.json() as Promise<Message>;
     },
     onMutate: async (newMessageData) => {
+      if (!queryClient) return { previousMessages: [] };
+      
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['messages', conversationId] });
       
@@ -80,11 +82,13 @@ export function useMessages(conversationId: string) {
     },
     onError: (err, newMessage, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousMessages) {
+      if (context?.previousMessages && queryClient) {
         queryClient.setQueryData(['messages', conversationId], context.previousMessages);
       }
     },
     onSuccess: (newMessage) => {
+      if (!queryClient) return;
+      
       // Update the messages query with the actual message from the server
       queryClient.setQueryData(['messages', conversationId], (old: Message[] = []) => {
         // Remove the optimistic message and add the real one

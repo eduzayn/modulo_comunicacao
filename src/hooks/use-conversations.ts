@@ -9,8 +9,19 @@ import type {
   GetConversationsInput
 } from '@/types/conversations';
 
+// Create a function to get the query client
+const getQueryClient = () => {
+  try {
+    return useQueryClient();
+  } catch (error) {
+    console.error('Error getting QueryClient:', error);
+    return null;
+  }
+};
+
 export function useConversations(params?: GetConversationsInput) {
-  const queryClient = useQueryClient();
+  // Get the query client safely
+  const queryClient = getQueryClient();
   
   const queryString = params 
     ? `?${Object.entries(params)
@@ -48,7 +59,7 @@ export function useConversations(params?: GetConversationsInput) {
       return response.json() as Promise<Conversation>;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient?.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
   
@@ -95,8 +106,8 @@ export function useConversation(id: string) {
       return response.json() as Promise<Conversation>;
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(['conversation', id], data);
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient?.setQueryData(['conversation', id], data);
+      queryClient?.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
   
@@ -118,14 +129,14 @@ export function useConversation(id: string) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversation', id] });
-      queryClient.invalidateQueries({ queryKey: ['messages', id] });
+      queryClient?.invalidateQueries({ queryKey: ['conversation', id] });
+      queryClient?.invalidateQueries({ queryKey: ['messages', id] });
     },
   });
   
   // Add prefetch function for messages
   const prefetchMessages = async (conversationId: string = id) => {
-    if (!conversationId) return;
+    if (!conversationId || !queryClient) return;
     
     await queryClient.prefetchQuery({
       queryKey: ['messages', conversationId],
