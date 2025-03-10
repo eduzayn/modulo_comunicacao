@@ -1,13 +1,13 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Conversation } from '@/src/modules/communication/types';
+import type { Conversation } from '@/src/types';
 import type { 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
   GetConversationsInput
-} from '@/src/modules/communication/types/conversations';
+} from '@/src/types/conversations';
 
 export function useConversations(params?: GetConversationsInput) {
   const queryClient = useQueryClient();

@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AISettings } from '@/src/modules/communication/types';
-import type { UpdateAISettingsInput } from '@/src/modules/communication/types/ai';
+import type { AISettings } from '@/src/types';
+import type { UpdateAISettingsInput } from '@/src/types/ai';
 
 export function useAISettings() {
   const queryClient = useQueryClient();
