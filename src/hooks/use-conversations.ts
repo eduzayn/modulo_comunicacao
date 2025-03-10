@@ -119,8 +119,25 @@ export function useConversation(id: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
+      queryClient.invalidateQueries({ queryKey: ['messages', id] });
     },
   });
+  
+  // Add prefetch function for messages
+  const prefetchMessages = async (conversationId: string = id) => {
+    if (!conversationId) return;
+    
+    await queryClient.prefetchQuery({
+      queryKey: ['messages', conversationId],
+      queryFn: async () => {
+        const response = await fetch(`/api/communication/conversations/${conversationId}/messages`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch messages');
+        }
+        return response.json();
+      },
+    });
+  };
   
   return {
     conversation: conversationQuery.data,
@@ -131,5 +148,6 @@ export function useConversation(id: string) {
     isUpdating: updateConversationMutation.isPending,
     sendMessage: sendMessageMutation.mutate,
     isSending: sendMessageMutation.isPending,
+    prefetchMessages,
   };
 }
