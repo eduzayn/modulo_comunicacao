@@ -1,8 +1,35 @@
+'use client';
+
 import Link from 'next/link';
-import { Card } from '../../components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
+import { StatsCard } from '../../components/dashboard/stats-card';
+import { RecentActivity } from '../../components/dashboard/recent-activity';
+import { ChannelStats } from '../../components/dashboard/channel-stats';
+import { useChannels } from '../../hooks/use-channels';
+import { useConversations } from '../../hooks/use-conversations';
+import { useTemplates } from '../../hooks/use-templates';
+import { MessageSquare, Users, FileText, Settings, BarChart } from 'lucide-react';
 
 export default function CommunicationDashboard() {
+  const { channels, isLoading: isLoadingChannels } = useChannels();
+  const { conversations, isLoading: isLoadingConversations } = useConversations();
+  const { templates, isLoading: isLoadingTemplates } = useTemplates();
+  
+  // Get all messages from all conversations
+  const allMessages = conversations?.flatMap(conv => conv.messages || []) || [];
+  
+  // Sort messages by date (newest first)
+  const recentMessages = [...allMessages].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  
+  // Count active conversations
+  const activeConversations = conversations?.filter(conv => conv.status === 'open')?.length || 0;
+  
+  // Count active templates
+  const activeTemplates = templates?.filter(template => template.status === 'active')?.length || 0;
+  
   const modules = [
     {
       title: 'Canais',
@@ -24,40 +51,86 @@ export default function CommunicationDashboard() {
       description: 'Crie e gerencie templates para mensagens automáticas e campanhas.',
       href: '/templates',
     },
-    {
-      title: 'Automação',
-      description: 'Configure fluxos automatizados de comunicação baseados em eventos.',
-      href: '/automation',
-    },
-    {
-      title: 'Relatórios',
-      description: 'Visualize métricas e relatórios sobre a comunicação na plataforma.',
-      href: '/reports',
-    },
   ];
-
+  
   return (
     <div className="px-4 py-6 sm:px-0">
-      <h1 className="text-2xl font-semibold text-gray-900">Módulo de Comunicação</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Gerencie todos os canais de comunicação, conversas, templates e configurações de IA.
-      </p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Módulo de Comunicação</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Visão geral e estatísticas do sistema de comunicação
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm">
+            <BarChart className="h-4 w-4 mr-2" />
+            Relatórios
+          </Button>
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Configurações
+          </Button>
+        </div>
+      </div>
       
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard 
+          title="Total de Canais" 
+          value={isLoadingChannels ? '...' : channels?.length || 0}
+          description="Canais de comunicação ativos"
+          icon={<MessageSquare className="h-4 w-4" />}
+          change={5}
+          changeLabel="desde o mês passado"
+        />
+        
+        <StatsCard 
+          title="Conversas Ativas" 
+          value={isLoadingConversations ? '...' : activeConversations}
+          description="Conversas em andamento"
+          icon={<Users className="h-4 w-4" />}
+          change={12}
+          changeLabel="desde a semana passada"
+        />
+        
+        <StatsCard 
+          title="Templates" 
+          value={isLoadingTemplates ? '...' : activeTemplates}
+          description="Templates ativos"
+          icon={<FileText className="h-4 w-4" />}
+        />
+        
+        <StatsCard 
+          title="Mensagens" 
+          value={allMessages.length}
+          description="Total de mensagens"
+          change={-3}
+          changeLabel="desde ontem"
+        />
+      </div>
+      
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <RecentActivity messages={recentMessages} />
+        </div>
+        
+        <div>
+          <ChannelStats channels={channels || []} />
+        </div>
+      </div>
+      
+      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {modules.map((module) => (
           <Card key={module.href} className="overflow-hidden">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900">{module.title}</h3>
-              <p className="mt-1 text-sm text-gray-500">{module.description}</p>
-              <div className="mt-4">
-                <Link 
-                  href={module.href}
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-                >
-                  Acessar {module.title}
-                </Link>
-              </div>
-            </div>
+            <CardHeader>
+              <CardTitle>{module.title}</CardTitle>
+              <CardDescription>{module.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href={module.href}>
+                <Button className="w-full">Acessar {module.title}</Button>
+              </Link>
+            </CardContent>
           </Card>
         ))}
       </div>
