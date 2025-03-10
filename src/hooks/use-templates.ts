@@ -1,12 +1,12 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Template } from '@/src/types';
+import type { Template } from '@/types';
 import type { 
   CreateTemplateInput, 
   UpdateTemplateInput,
   GetTemplatesInput
-} from '@/src/types/templates';
+} from '@/types/templates';
 
 export function useTemplates(params?: GetTemplatesInput) {
   const queryClient = useQueryClient();
