@@ -3,10 +3,15 @@ import type { Database } from './database.types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Client for browser usage (with anon key)
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-// For server-side operations that need the service role key
-export const supabaseAdmin = (process.env.SUPABASE_SERVICE_ROLE_KEY) 
-  ? createClient<Database>(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY)
-  : null;
+// Admin client for server-side operations that need to bypass RLS
+export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});

@@ -34,7 +34,7 @@ export async function getAISettings() {
 
 export async function updateAISettings(settings: UpdateAISettingsInput) {
   // First get the current settings to get the ID
-  const { data: currentSettings, error: fetchError } = await supabase
+  const { data: currentSettings, error: fetchError } = await adminClient
     .from('ai_settings')
     .select('id')
     .limit(1)
