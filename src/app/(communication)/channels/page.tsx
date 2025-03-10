@@ -1,6 +1,6 @@
 'use client';
 
-import { useChannels } from '@/app/hooks/use-channels';
+import { useChannels } from '@/hooks/use-channels';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';

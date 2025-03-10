@@ -1,6 +1,6 @@
 'use client';
 
-import { useConversations } from '@/app/hooks/use-conversations';
+import { useConversations } from '@/hooks/use-conversations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';

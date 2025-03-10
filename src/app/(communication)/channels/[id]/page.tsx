@@ -1,6 +1,6 @@
 'use client';
 
-import { useChannel } from '@/app/hooks/use-channels';
+import { useChannel } from '@/hooks/use-channels';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useParams, useRouter } from 'next/navigation';

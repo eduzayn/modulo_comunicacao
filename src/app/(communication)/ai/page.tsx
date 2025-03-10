@@ -1,10 +1,10 @@
 'use client';
 
-import { useAISettings } from '@/app/hooks/use-ai-settings';
-import { Button } from '../../../components/ui/button';
-import { Card } from '../../../components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../../../components/ui/form';
-import { Input } from '../../../components/ui/input';
+import { useAISettings } from '@/hooks/use-ai-settings';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Checkbox } from '../../../components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { Slider } from '../../../components/ui/slider';

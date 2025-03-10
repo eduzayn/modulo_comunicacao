@@ -1,6 +1,6 @@
 'use client';
 
-import { useTemplates } from '@/app/hooks/use-templates';
+import { useTemplates } from '@/hooks/use-templates';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
