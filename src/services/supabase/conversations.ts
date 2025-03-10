@@ -1,11 +1,41 @@
 import { supabase } from '../../lib/supabase';
-import type { Conversation } from '../../types';
+import type { Conversation, Message } from '../../types';
 import type { 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
   GetConversationsInput
 } from '../../types/conversations';
+import type { Database } from '../../lib/database.types';
+
+// Helper function to convert database model to application model
+function mapDbToConversation(data: Database['public']['Tables']['conversations']['Row']): Conversation {
+  return {
+    id: data.id,
+    channelId: data.channel_id,
+    participants: data.participants,
+    messages: [], // Messages are loaded separately
+    status: data.status as Conversation['status'],
+    priority: data.priority as Conversation['priority'],
+    context: data.context as Conversation['context'],
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at)
+  };
+}
+
+// Helper function to convert database model to application model
+function mapDbToMessage(data: Database['public']['Tables']['messages']['Row']): Message {
+  return {
+    id: data.id,
+    conversationId: data.conversation_id,
+    senderId: data.sender_id,
+    content: data.content,
+    type: data.media_url ? 'document' : 'text', // Infer type based on media_url
+    status: data.read ? 'read' : 'delivered', // Infer status based on read flag
+    metadata: {}, // Default metadata
+    createdAt: new Date(data.created_at)
+  };
+}
 
 export async function getConversations(params?: GetConversationsInput) {
   let query = supabase
@@ -35,7 +65,7 @@ export async function getConversations(params?: GetConversationsInput) {
     throw new Error(`Error fetching conversations: ${error.message}`);
   }
   
-  return data as Conversation[];
+  return data.map(mapDbToConversation);
 }
 
 export async function getConversationById(id: string) {
@@ -49,13 +79,23 @@ export async function getConversationById(id: string) {
     throw new Error(`Error fetching conversation: ${error.message}`);
   }
   
-  return data as Conversation;
+  return mapDbToConversation(data);
 }
 
 export async function createConversation(conversation: CreateConversationInput) {
+  // Convert to database schema
+  const dbConversation = {
+    channel_id: conversation.channelId,
+    participants: conversation.participants,
+    status: 'open', // Default status
+    priority: 'medium', // Default priority
+    context: 'support', // Default context
+    last_message_at: new Date().toISOString()
+  };
+  
   const { data, error } = await supabase
     .from('conversations')
-    .insert(conversation)
+    .insert(dbConversation)
     .select()
     .single();
   
@@ -63,13 +103,19 @@ export async function createConversation(conversation: CreateConversationInput) 
     throw new Error(`Error creating conversation: ${error.message}`);
   }
   
-  return data as Conversation;
+  return mapDbToConversation(data);
 }
 
 export async function updateConversation(id: string, conversation: UpdateConversationInput) {
+  // Convert to database schema
+  const dbConversation: any = {};
+  if (conversation.status !== undefined) dbConversation.status = conversation.status;
+  if (conversation.priority !== undefined) dbConversation.priority = conversation.priority;
+  if (conversation.context !== undefined) dbConversation.context = conversation.context;
+  
   const { data, error } = await supabase
     .from('conversations')
-    .update(conversation)
+    .update(dbConversation)
     .eq('id', id)
     .select()
     .single();
@@ -78,7 +124,7 @@ export async function updateConversation(id: string, conversation: UpdateConvers
     throw new Error(`Error updating conversation: ${error.message}`);
   }
   
-  return data as Conversation;
+  return mapDbToConversation(data);
 }
 
 export async function getConversationMessages(conversationId: string) {
@@ -92,7 +138,7 @@ export async function getConversationMessages(conversationId: string) {
     throw new Error(`Error fetching messages: ${error.message}`);
   }
   
-  return data;
+  return data.map(mapDbToMessage);
 }
 
 export async function sendMessage(conversationId: string, message: SendMessageInput) {
@@ -101,9 +147,9 @@ export async function sendMessage(conversationId: string, message: SendMessageIn
     .from('messages')
     .insert({
       conversation_id: conversationId,
-      sender_id: message.sender_id,
+      sender_id: message.senderId,
       content: message.content,
-      media_url: message.media_url,
+      media_url: message.mediaUrl || null,
       read: false
     })
     .select()
@@ -123,5 +169,5 @@ export async function sendMessage(conversationId: string, message: SendMessageIn
     throw new Error(`Error updating conversation: ${updateError.message}`);
   }
   
-  return messageData;
+  return mapDbToMessage(messageData);
 }

@@ -5,6 +5,21 @@ import type {
   UpdateTemplateInput,
   GetTemplatesInput
 } from '../../types/templates';
+import type { Database } from '../../lib/database.types';
+
+// Helper function to convert database model to application model
+function mapDbToTemplate(data: Database['public']['Tables']['templates']['Row']): Template {
+  return {
+    id: data.id,
+    name: data.name,
+    content: data.content,
+    channelType: data.channel_type as Template['channelType'],
+    category: data.category || '',
+    variables: data.variables,
+    version: 1, // Default version since not in DB schema
+    status: data.status as Template['status']
+  };
+}
 
 export async function getTemplates(params?: GetTemplatesInput) {
   let query = supabase
@@ -30,7 +45,7 @@ export async function getTemplates(params?: GetTemplatesInput) {
     throw new Error(`Error fetching templates: ${error.message}`);
   }
   
-  return data as Template[];
+  return data.map(mapDbToTemplate);
 }
 
 export async function getTemplateById(id: string) {
@@ -44,13 +59,23 @@ export async function getTemplateById(id: string) {
     throw new Error(`Error fetching template: ${error.message}`);
   }
   
-  return data as Template;
+  return mapDbToTemplate(data);
 }
 
 export async function createTemplate(template: CreateTemplateInput) {
+  // Convert to database schema
+  const dbTemplate = {
+    name: template.name,
+    content: template.content,
+    channel_type: template.channelType,
+    category: template.category || null,
+    variables: template.variables || [],
+    status: template.status
+  };
+  
   const { data, error } = await supabase
     .from('templates')
-    .insert(template)
+    .insert(dbTemplate)
     .select()
     .single();
   
@@ -58,13 +83,22 @@ export async function createTemplate(template: CreateTemplateInput) {
     throw new Error(`Error creating template: ${error.message}`);
   }
   
-  return data as Template;
+  return mapDbToTemplate(data);
 }
 
 export async function updateTemplate(id: string, template: UpdateTemplateInput) {
+  // Convert to database schema
+  const dbTemplate: any = {};
+  if (template.name !== undefined) dbTemplate.name = template.name;
+  if (template.content !== undefined) dbTemplate.content = template.content;
+  if (template.channelType !== undefined) dbTemplate.channel_type = template.channelType;
+  if (template.category !== undefined) dbTemplate.category = template.category;
+  if (template.variables !== undefined) dbTemplate.variables = template.variables;
+  if (template.status !== undefined) dbTemplate.status = template.status;
+  
   const { data, error } = await supabase
     .from('templates')
-    .update(template)
+    .update(dbTemplate)
     .eq('id', id)
     .select()
     .single();
@@ -73,7 +107,7 @@ export async function updateTemplate(id: string, template: UpdateTemplateInput) 
     throw new Error(`Error updating template: ${error.message}`);
   }
   
-  return data as Template;
+  return mapDbToTemplate(data);
 }
 
 export async function deleteTemplate(id: string) {

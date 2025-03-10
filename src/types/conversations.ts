@@ -14,8 +14,9 @@ export interface UpdateConversationInput {
 }
 
 export interface SendMessageInput {
-  conversationId: string;
+  senderId: string;
   content: string;
+  mediaUrl?: string;
   type?: 'text' | 'image' | 'file' | 'audio';
   metadata?: Record<string, any>;
 }
