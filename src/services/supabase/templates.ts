@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import type { Template } from '../../types';
 import type { 
   CreateTemplateInput, 
@@ -6,6 +6,9 @@ import type {
   GetTemplatesInput
 } from '../../types/templates';
 import type { Database } from '../../lib/database.types';
+
+// Use admin client for operations that need to bypass RLS
+const adminClient = supabaseAdmin || supabase;
 
 // Helper function to convert database model to application model
 function mapDbToTemplate(data: Database['public']['Tables']['templates']['Row']): Template {
@@ -111,7 +114,7 @@ export async function updateTemplate(id: string, template: UpdateTemplateInput) 
 }
 
 export async function deleteTemplate(id: string) {
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('templates')
     .delete()
     .eq('id', id);

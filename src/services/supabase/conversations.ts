@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import type { Conversation, Message } from '../../types';
 import type { 
   CreateConversationInput, 
@@ -7,6 +7,9 @@ import type {
   GetConversationsInput
 } from '../../types/conversations';
 import type { Database } from '../../lib/database.types';
+
+// Use admin client for operations that need to bypass RLS
+const adminClient = supabaseAdmin || supabase;
 
 // Helper function to convert database model to application model
 function mapDbToConversation(data: Database['public']['Tables']['conversations']['Row']): Conversation {
@@ -160,7 +163,7 @@ export async function sendMessage(conversationId: string, message: SendMessageIn
   }
   
   // Then update the conversation's last_message_at
-  const { error: updateError } = await supabase
+  const { error: updateError } = await adminClient
     .from('conversations')
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', conversationId);

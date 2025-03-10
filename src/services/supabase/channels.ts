@@ -1,7 +1,10 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import type { Channel } from '../../types';
 import type { CreateChannelInput, UpdateChannelInput } from '../../types/channels';
 import type { Database } from '../../lib/database.types';
+
+// Use admin client for operations that need to bypass RLS
+const adminClient = supabaseAdmin || supabase;
 
 // Type for database insert
 type ChannelInsert = Database['public']['Tables']['channels']['Insert'];
@@ -105,7 +108,7 @@ export async function updateChannel(id: string, channel: UpdateChannelInput) {
 }
 
 export async function deleteChannel(id: string) {
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('channels')
     .delete()
     .eq('id', id);

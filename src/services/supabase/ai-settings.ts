@@ -1,7 +1,10 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import type { AISettings } from '../../types';
 import type { UpdateAISettingsInput } from '../../types/ai';
 import type { Database } from '../../lib/database.types';
+
+// Use admin client for operations that need to bypass RLS
+const adminClient = supabaseAdmin || supabase;
 
 // Helper function to convert database model to application model
 function mapDbToAISettings(data: Database['public']['Tables']['ai_settings']['Row']): AISettings {
@@ -16,7 +19,7 @@ function mapDbToAISettings(data: Database['public']['Tables']['ai_settings']['Ro
 }
 
 export async function getAISettings() {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('ai_settings')
     .select('*')
     .limit(1)
@@ -42,7 +45,7 @@ export async function updateAISettings(settings: UpdateAISettingsInput) {
   }
   
   // Then update the settings
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('ai_settings')
     .update(settings)
     .eq('id', currentSettings.id)
