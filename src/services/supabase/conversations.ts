@@ -41,7 +41,7 @@ function mapDbToMessage(data: Database['public']['Tables']['messages']['Row']): 
 }
 
 export async function getConversations(params?: GetConversationsInput) {
-  let query = supabase
+  let query = adminClient
     .from('conversations')
     .select('*')
     .order('last_message_at', { ascending: false });
@@ -72,7 +72,7 @@ export async function getConversations(params?: GetConversationsInput) {
 }
 
 export async function getConversationById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('conversations')
     .select('*')
     .eq('id', id)
@@ -96,7 +96,7 @@ export async function createConversation(conversation: CreateConversationInput) 
     last_message_at: new Date().toISOString()
   };
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('conversations')
     .insert(dbConversation)
     .select()
@@ -116,7 +116,7 @@ export async function updateConversation(id: string, conversation: UpdateConvers
   if (conversation.priority !== undefined) dbConversation.priority = conversation.priority;
   if (conversation.context !== undefined) dbConversation.context = conversation.context;
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('conversations')
     .update(dbConversation)
     .eq('id', id)
@@ -131,7 +131,7 @@ export async function updateConversation(id: string, conversation: UpdateConvers
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('messages')
     .select('*')
     .eq('conversation_id', conversationId)
@@ -146,7 +146,7 @@ export async function getConversationMessages(conversationId: string) {
 
 export async function sendMessage(conversationId: string, message: SendMessageInput) {
   // First send the message
-  const { data: messageData, error: messageError } = await supabase
+  const { data: messageData, error: messageError } = await adminClient
     .from('messages')
     .insert({
       conversation_id: conversationId,
