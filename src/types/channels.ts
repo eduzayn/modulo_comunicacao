@@ -33,11 +33,14 @@ export interface PushConfig {
   projectId: string;
 }
 
+// Define as Json compatible type for database storage
 export type ChannelConfig = WhatsAppConfig | EmailConfig | SMSConfig | ChatConfig | PushConfig;
+export type ChannelConfigJson = Record<string, any>;
 
 export interface CreateChannelInput {
   name: string;
   type: Channel['type'];
+  status?: Channel['status'];
   config: ChannelConfig;
 }
 
