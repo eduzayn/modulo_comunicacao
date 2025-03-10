@@ -10,6 +10,7 @@ import Forms from "./forms";
 import Icons from "./icons";
 import Layout from "./layout";
 import InteractiveElements from "./interactive-elements";
+import Animations from "./animations";
 
 interface TabProps {
   title: string;
@@ -33,7 +34,7 @@ const Tab: React.FC<TabProps> = ({ title, isActive, onClick }) => {
 };
 
 export const DesignSystem: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"colors" | "typography" | "buttons" | "cards" | "navigation" | "forms" | "icons" | "layout" | "interactive">("colors");
+  const [activeTab, setActiveTab] = useState<"colors" | "typography" | "buttons" | "cards" | "navigation" | "forms" | "icons" | "layout" | "interactive" | "animations">("colors");
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-8">
@@ -94,6 +95,11 @@ export const DesignSystem: React.FC = () => {
                 isActive={activeTab === "interactive"}
                 onClick={() => setActiveTab("interactive")}
               />
+              <Tab
+                title="Animations"
+                isActive={activeTab === "animations"}
+                onClick={() => setActiveTab("animations")}
+              />
             </div>
           </div>
 
@@ -107,6 +113,7 @@ export const DesignSystem: React.FC = () => {
             {activeTab === "icons" && <Icons />}
             {activeTab === "layout" && <Layout />}
             {activeTab === "interactive" && <InteractiveElements />}
+            {activeTab === "animations" && <Animations />}
           </div>
         </div>
       </div>

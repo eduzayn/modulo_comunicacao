@@ -2,13 +2,14 @@
  * Edunéxia Communication Module Design System
  * 
  * This file combines all design system styles into a single import.
- * It includes colors, typography, gradients, and navigation styles.
+ * It includes colors, typography, gradients, navigation styles, and animations.
  */
 
 @import './colors.ts';
 @import './theme.css';
 @import './gradients.css';
 @import './navigation.css';
+@import './animations.css';
 
 /* Card styles */
 .card {
