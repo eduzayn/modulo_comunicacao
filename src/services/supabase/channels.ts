@@ -10,7 +10,7 @@ const adminClient = supabaseAdmin || supabase;
 type ChannelInsert = Database['public']['Tables']['channels']['Insert'];
 
 export async function getChannels() {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('channels')
     .select('*')
     .order('name');
@@ -30,7 +30,7 @@ export async function getChannels() {
 }
 
 export async function getChannelById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('channels')
     .select('*')
     .eq('id', id)
@@ -59,7 +59,7 @@ export async function createChannel(channel: CreateChannelInput) {
     config: channel.config as any // Cast to Json compatible type
   };
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('channels')
     .insert(dbChannel)
     .select()
@@ -86,7 +86,7 @@ export async function updateChannel(id: string, channel: UpdateChannelInput) {
   if (channel.status !== undefined) dbChannel.status = channel.status;
   if (channel.config !== undefined) dbChannel.config = channel.config as any;
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('channels')
     .update(dbChannel)
     .eq('id', id)
