@@ -37,7 +37,16 @@ export async function POST(request: Request) {
       );
     }
     
-    const channel = await createChannel(result.data);
+    // Convert Zod validated data to CreateChannelInput type
+    const channelInput: CreateChannelInput = {
+      name: result.data.name,
+      type: result.data.type,
+      // Status is optional in CreateChannelInput
+      ...(result.data.status && { status: result.data.status }),
+      // Convert config to appropriate type based on channel type
+      config: result.data.config || {} as any
+    };
+    const channel = await createChannel(channelInput);
     return NextResponse.json(channel, { status: 201 });
   } catch (error: any) {
     console.error('Error in channels POST route:', error);
