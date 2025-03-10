@@ -3,7 +3,7 @@ import { getConversations, createConversation } from '../../../../services/supab
 import { z } from 'zod';
 
 const createConversationSchema = z.object({
-  channelId: z.string().uuid(),
+  channelId: z.string().uuid().optional(),
   participants: z.array(z.string()),
   status: z.enum(['open', 'closed', 'archived']).default('open'),
   priority: z.enum(['high', 'medium', 'low']).default('medium'),
@@ -44,16 +44,15 @@ export async function POST(request: Request) {
       );
     }
     
-    // Transform the data to match the database schema
-    const conversationData = {
-      channel_id: result.data.channelId,
+    // Create conversation using the validated data directly
+    // The createConversation function already handles the field name conversion
+    const conversation = await createConversation({
+      channelId: result.data.channelId,
       participants: result.data.participants,
       status: result.data.status,
       priority: result.data.priority,
       context: result.data.context
-    };
-    
-    const conversation = await createConversation(conversationData as any);
+    });
     return NextResponse.json(conversation);
   } catch (error: any) {
     return NextResponse.json(
