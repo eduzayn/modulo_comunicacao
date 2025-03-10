@@ -44,17 +44,16 @@ export async function POST(request: Request) {
       );
     }
     
-    // Transform the data to match the database schema
-    const templateData = {
+    // Create template using the validated data directly
+    // The createTemplate function already handles the field name conversion
+    const template = await createTemplate({
       name: result.data.name,
       content: result.data.content,
-      channel_type: result.data.channelType,
+      channelType: result.data.channelType,
       category: result.data.category,
       variables: result.data.variables || [],
       status: result.data.status
-    };
-    
-    const template = await createTemplate(templateData as any);
+    });
     return NextResponse.json(template);
   } catch (error: any) {
     return NextResponse.json(
