@@ -1,77 +1,60 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Channel } from '@/types';
-import type { CreateChannelInput, UpdateChannelInput } from '@/types/channels';
+import { 
+  fetchChannels, 
+  fetchChannelById, 
+  addChannel, 
+  editChannel, 
+  removeChannel 
+} from '../app/actions/channel-actions';
+import type { Channel } from '../types';
+import type { CreateChannelInput, UpdateChannelInput } from '../types/channels';
 
 export function useChannels() {
   const queryClient = useQueryClient();
   
   const channelsQuery = useQuery({
     queryKey: ['channels'],
-    queryFn: async () => {
-      const response = await fetch('/api/communication/channels');
-      if (!response.ok) {
-        throw new Error('Failed to fetch channels');
-      }
-      return response.json() as Promise<Channel[]>;
-    },
+    queryFn: () => fetchChannels(),
   });
   
   const createChannelMutation = useMutation({
-    mutationFn: async (data: CreateChannelInput) => {
-      const response = await fetch('/api/communication/channels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create channel');
-      }
-      
-      return response.json() as Promise<Channel>;
-    },
+    mutationFn: (data: CreateChannelInput) => addChannel(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['channels'] });
     },
   });
   
   const updateChannelMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateChannelInput }) => {
-      const response = await fetch(`/api/communication/channels/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update channel');
+    mutationFn: ({ id, data }: { id: string; data: UpdateChannelInput }) => 
+      editChannel(id, data),
+    onSuccess: (result) => {
+      if (result.data) {
+        queryClient.setQueryData(['channel', result.data.id], result.data);
+        queryClient.invalidateQueries({ queryKey: ['channels'] });
       }
-      
-      return response.json() as Promise<Channel>;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['channel', data.id], data);
-      queryClient.invalidateQueries({ queryKey: ['channels'] });
     },
   });
   
+  const deleteChannelMutation = useMutation({
+    mutationFn: (id: string) => removeChannel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['channels'] });
+    }
+  });
+
   return {
-    channels: channelsQuery.data || [],
+    channels: channelsQuery.data?.data || [],
     isLoading: channelsQuery.isLoading,
     isError: channelsQuery.isError,
-    error: channelsQuery.error,
+    error: channelsQuery.error || channelsQuery.data?.error,
     createChannel: createChannelMutation.mutate,
     updateChannel: updateChannelMutation.mutate,
+    deleteChannel: deleteChannelMutation.mutate,
     isCreating: createChannelMutation.isPending,
     isUpdating: updateChannelMutation.isPending,
+    isDeleting: deleteChannelMutation.isPending
   };
 }
 
@@ -80,44 +63,25 @@ export function useChannel(id: string) {
   
   const channelQuery = useQuery({
     queryKey: ['channel', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/communication/channels/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch channel');
-      }
-      return response.json() as Promise<Channel>;
-    },
+    queryFn: () => fetchChannelById(id),
     enabled: !!id,
   });
   
   const updateChannelMutation = useMutation({
-    mutationFn: async (data: UpdateChannelInput) => {
-      const response = await fetch(`/api/communication/channels/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update channel');
+    mutationFn: (data: UpdateChannelInput) => editChannel(id, data),
+    onSuccess: (result) => {
+      if (result.data) {
+        queryClient.setQueryData(['channel', id], result.data);
+        queryClient.invalidateQueries({ queryKey: ['channels'] });
       }
-      
-      return response.json() as Promise<Channel>;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['channel', id], data);
-      queryClient.invalidateQueries({ queryKey: ['channels'] });
     },
   });
   
   return {
-    channel: channelQuery.data,
+    channel: channelQuery.data?.data,
     isLoading: channelQuery.isLoading,
     isError: channelQuery.isError,
-    error: channelQuery.error,
+    error: channelQuery.error || channelQuery.data?.error,
     updateChannel: updateChannelMutation.mutate,
     isUpdating: updateChannelMutation.isPending,
   };
