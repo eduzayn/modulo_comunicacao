@@ -1,62 +1,42 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Conversation } from '@/types';
+import { 
+  fetchConversations, 
+  fetchConversationById, 
+  fetchConversationMessages,
+  addConversation, 
+  editConversation,
+  sendMessageToConversation
+} from '../app/actions/conversation-actions';
+import type { Conversation } from '../types';
 import type { 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
   GetConversationsInput
-} from '@/types/conversations';
+} from '../types/conversations';
 
 export function useConversations(params?: GetConversationsInput) {
   const queryClient = useQueryClient();
   
-  const queryString = params 
-    ? `?${Object.entries(params)
-        .filter(([, value]) => value !== undefined)
-        .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-        .join('&')}`
-    : '';
-  
   const conversationsQuery = useQuery({
     queryKey: ['conversations', params],
-    queryFn: async () => {
-      const response = await fetch(`/api/communication/conversations${queryString}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch conversations');
-      }
-      return response.json() as Promise<Conversation[]>;
-    },
+    queryFn: () => fetchConversations(params),
   });
   
   const createConversationMutation = useMutation({
-    mutationFn: async (data: CreateConversationInput) => {
-      const response = await fetch('/api/communication/conversations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create conversation');
-      }
-      
-      return response.json() as Promise<Conversation>;
-    },
+    mutationFn: (data: CreateConversationInput) => addConversation(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
   
   return {
-    conversations: conversationsQuery.data || [],
+    conversations: conversationsQuery.data?.data || [],
     isLoading: conversationsQuery.isLoading,
     isError: conversationsQuery.isError,
-    error: conversationsQuery.error,
+    error: conversationsQuery.error || conversationsQuery.data?.error,
     createConversation: createConversationMutation.mutate,
     isCreating: createConversationMutation.isPending,
   };
@@ -67,66 +47,40 @@ export function useConversation(id: string) {
   
   const conversationQuery = useQuery({
     queryKey: ['conversation', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/communication/conversations/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch conversation');
-      }
-      return response.json() as Promise<Conversation>;
-    },
+    queryFn: () => fetchConversationById(id),
+    enabled: !!id,
+  });
+  
+  const messagesQuery = useQuery({
+    queryKey: ['conversation', id, 'messages'],
+    queryFn: () => fetchConversationMessages(id),
     enabled: !!id,
   });
   
   const updateConversationMutation = useMutation({
-    mutationFn: async (data: UpdateConversationInput) => {
-      const response = await fetch(`/api/communication/conversations/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update conversation');
+    mutationFn: (data: UpdateConversationInput) => editConversation(id, data),
+    onSuccess: (result) => {
+      if (result.data) {
+        queryClient.setQueryData(['conversation', id], result.data);
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
       }
-      
-      return response.json() as Promise<Conversation>;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['conversation', id], data);
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
   
   const sendMessageMutation = useMutation({
-    mutationFn: async (data: SendMessageInput) => {
-      const response = await fetch(`/api/communication/conversations/${id}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send message');
-      }
-      
-      return response.json();
-    },
+    mutationFn: (message: SendMessageInput) => sendMessageToConversation(id, message),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', id, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
     },
   });
   
   return {
-    conversation: conversationQuery.data,
-    isLoading: conversationQuery.isLoading,
-    isError: conversationQuery.isError,
-    error: conversationQuery.error,
+    conversation: conversationQuery.data?.data,
+    messages: messagesQuery.data?.data || [],
+    isLoading: conversationQuery.isLoading || messagesQuery.isLoading,
+    isError: conversationQuery.isError || messagesQuery.isError,
+    error: conversationQuery.error || conversationQuery.data?.error || messagesQuery.error || messagesQuery.data?.error,
     updateConversation: updateConversationMutation.mutate,
     isUpdating: updateConversationMutation.isPending,
     sendMessage: sendMessageMutation.mutate,
