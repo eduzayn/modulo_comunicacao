@@ -68,6 +68,58 @@ O Módulo de Comunicação é uma solução completa e integrada para gerenciar 
 - **Gerenciamento de Estado**: TanStack Query
 - **Validação**: Zod
 - **Cache**: TanStack Query com estratégias de cache inteligente
+## Sistema de Email
+
+O módulo inclui um sistema completo de email para envio de notificações e mensagens aos usuários. Ele suporta:
+
+- Configuração SMTP com múltiplos provedores
+- Templates de email com variáveis dinâmicas
+- Suporte a emails HTML e texto plano
+- Logs detalhados de envio e entrega
+- Interface de administração para gerenciamento
+
+### Configuração de Email
+
+```
+SMTP_HOST= "brasil.svrdedicado.org"
+SMTP_PORT= 587
+SMTP_USER= contato@eduzayn.com.br
+SMTP_PASS= "sua-senha"
+```
+
+Estas configurações são armazenadas no Supabase e podem ser gerenciadas através da interface administrativa. O sistema suporta múltiplas configurações SMTP, permitindo alternar entre diferentes provedores conforme necessário.
+
+### Templates de Email
+
+O sistema de templates permite:
+
+- Criação de templates HTML com design responsivo
+- Versão em texto plano para compatibilidade
+- Substituição de variáveis usando a sintaxe `{{variavel}}`
+- Versionamento e histórico de alterações
+- Ativação/desativação de templates
+
+### Envio de Emails
+
+O módulo oferece várias formas de envio:
+
+- Envio direto via API
+- Envio através de Server Actions
+- Agendamento de envios
+- Envio em lote para múltiplos destinatários
+- Personalização por destinatário
+
+### Logs e Monitoramento
+
+Todos os emails enviados são registrados com:
+
+- Status de envio (enviado, falha, pendente)
+- Timestamp de envio
+- Destinatário e remetente
+- Assunto e conteúdo
+- Erros detalhados em caso de falha
+- Métricas de entrega e abertura (quando disponível)
+
 
 ## Funcionalidades Principais
 
