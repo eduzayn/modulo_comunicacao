@@ -7,6 +7,8 @@ import Buttons from "./buttons";
 import Cards from "./card";
 import Navigation from "./navigation";
 import Forms from "./forms";
+import Icons from "./icons";
+import Layout from "./layout";
 
 interface TabProps {
   title: string;
@@ -30,7 +32,7 @@ const Tab: React.FC<TabProps> = ({ title, isActive, onClick }) => {
 };
 
 export const DesignSystem: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"colors" | "typography" | "buttons" | "cards" | "navigation" | "forms">("colors");
+  const [activeTab, setActiveTab] = useState<"colors" | "typography" | "buttons" | "cards" | "navigation" | "forms" | "icons" | "layout">("colors");
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-8">
@@ -76,6 +78,16 @@ export const DesignSystem: React.FC = () => {
                 isActive={activeTab === "forms"}
                 onClick={() => setActiveTab("forms")}
               />
+              <Tab
+                title="Icons"
+                isActive={activeTab === "icons"}
+                onClick={() => setActiveTab("icons")}
+              />
+              <Tab
+                title="Layout"
+                isActive={activeTab === "layout"}
+                onClick={() => setActiveTab("layout")}
+              />
             </div>
           </div>
 
@@ -86,6 +98,8 @@ export const DesignSystem: React.FC = () => {
             {activeTab === "cards" && <Cards />}
             {activeTab === "navigation" && <Navigation />}
             {activeTab === "forms" && <Forms />}
+            {activeTab === "icons" && <Icons />}
+            {activeTab === "layout" && <Layout />}
           </div>
         </div>
       </div>
