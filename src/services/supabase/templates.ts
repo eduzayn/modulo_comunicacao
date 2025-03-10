@@ -52,7 +52,7 @@ export async function getTemplates(params?: GetTemplatesInput) {
 }
 
 export async function getTemplateById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('templates')
     .select('*')
     .eq('id', id)
@@ -76,7 +76,7 @@ export async function createTemplate(template: CreateTemplateInput) {
     status: template.status
   };
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('templates')
     .insert(dbTemplate)
     .select()
@@ -99,7 +99,7 @@ export async function updateTemplate(id: string, template: UpdateTemplateInput) 
   if (template.variables !== undefined) dbTemplate.variables = template.variables;
   if (template.status !== undefined) dbTemplate.status = template.status;
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('templates')
     .update(dbTemplate)
     .eq('id', id)
