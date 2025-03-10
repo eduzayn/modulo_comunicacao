@@ -1,17 +1,50 @@
 'use client';
 
+import React, { useState } from 'react';
 import { useConversation } from '@/hooks/use-conversations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { MessageList } from '@/components/chat/message-list';
+import { MessageInput } from '@/components/chat/message-input';
+import { SentimentAnalysis } from '@/components/ai/sentiment-analysis';
+import { ResponseSuggestions } from '@/components/ai/response-suggestions';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function ConversationDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { conversation, isLoading, error, addMessage, updateStatus } = useConversation(params?.id as string);
-  const [newMessage, setNewMessage] = useState('');
+  const { toast } = useToast();
+  const { conversation, messages = [], isLoading, error, sendMessage } = useConversation(params?.id as string);
+  const [isSending, setIsSending] = useState(false);
+  
+  const handleSendMessage = async (content: string, mediaUrl?: string) => {
+    if (!content.trim()) return;
+    
+    setIsSending(true);
+    
+    try {
+      await sendMessage({
+        senderId: 'current-user', // In a real app, this would be the authenticated user's ID
+        content,
+        mediaUrl,
+      });
+      
+      toast({
+        title: "Mensagem enviada",
+        description: "Sua mensagem foi enviada com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: "Não foi possível enviar sua mensagem. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
   
   if (isLoading) {
     return <div className="text-center py-10">Carregando conversa...</div>;
@@ -21,105 +54,61 @@ export default function ConversationDetailPage() {
     return <div className="text-center py-10 text-red-500">Erro ao carregar conversa</div>;
   }
   
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-    
-    addMessage({
-      content: newMessage,
-      senderId: 'agent-456', // This would be the current user's ID in a real app
-      type: 'text',
-    });
-    
-    setNewMessage('');
-  };
-  
-  const handleStatusChange = (status: 'open' | 'closed' | 'pending') => {
-    updateStatus(status);
-  };
-  
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-  
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="flex justify-between items-center">
+    <div className="px-4 py-6 sm:px-0 h-[calc(100vh-6rem)]">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Conversa com {conversation.participants.join(', ')}
-          </h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Conversa</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {conversation.context} - Prioridade: {conversation.priority}
+            Canal: {conversation.channelId || 'Chat Interno'}
           </p>
         </div>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            Voltar
-          </Button>
-          <Button 
-            variant={conversation.status === 'open' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('open')}
-          >
-            Abrir
-          </Button>
-          <Button 
-            variant={conversation.status === 'pending' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('pending')}
-          >
-            Pendente
-          </Button>
-          <Button 
-            variant={conversation.status === 'closed' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('closed')}
-          >
-            Fechar
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => router.back()}>
+          Voltar
+        </Button>
       </div>
       
-      <div className="mt-6">
-        <Card className="overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="space-y-4 max-h-96 overflow-y-auto mb-4">
-              {conversation.messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`flex ${message.senderId.startsWith('agent') ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-md p-3 rounded-lg ${
-                      message.senderId.startsWith('agent') 
-                        ? 'bg-blue-100 text-blue-900' 
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
-                  >
-                    <p>{message.content}</p>
-                    <p className="text-xs mt-1 text-gray-500">
-                      {formatDate(message.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[calc(100%-4rem)]">
+        <Card className="overflow-hidden flex flex-col md:col-span-3 h-full">
+          <div className="border-b px-4 py-3">
+            <div className="flex items-center">
+              <div>
+                <h3 className="font-medium">
+                  {conversation.participants.length > 0 
+                    ? `${conversation.participants.length} participantes` 
+                    : 'Sem participantes'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {conversation.status === 'open' ? 'Conversa aberta' : 
+                  conversation.status === 'closed' ? 'Conversa fechada' : 
+                  'Conversa arquivada'}
+                  {' • '}
+                  {conversation.priority === 'high' ? 'Alta prioridade' : 
+                    conversation.priority === 'medium' ? 'Média prioridade' : 
+                    'Baixa prioridade'}
+                </p>
+              </div>
             </div>
-            
-            <form onSubmit={handleSendMessage} className="flex space-x-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Digite sua mensagem..."
-                className="flex-1"
-              />
-              <Button type="submit">Enviar</Button>
-            </form>
           </div>
+          
+          <MessageList 
+            messages={messages} 
+            currentUserId="current-user" // In a real app, this would be the authenticated user's ID
+          />
+          
+          <MessageInput 
+            onSendMessage={handleSendMessage}
+            isLoading={isSending}
+          />
         </Card>
+        
+        <div className="space-y-4 hidden md:block">
+          <SentimentAnalysis messages={messages} />
+          <ResponseSuggestions 
+            messages={messages} 
+            onSelectSuggestion={(suggestion) => handleSendMessage(suggestion)}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,63 +1,51 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Template } from '@/types';
+import { 
+  fetchTemplates, 
+  fetchTemplateById, 
+  addTemplate, 
+  editTemplate, 
+  removeTemplate 
+} from '../app/actions/template-actions';
+import type { Template } from '../types';
 import type { 
   CreateTemplateInput, 
   UpdateTemplateInput,
   GetTemplatesInput
-} from '@/types/templates';
+} from '../types/templates';
 
 export function useTemplates(params?: GetTemplatesInput) {
   const queryClient = useQueryClient();
   
-  const queryString = params 
-    ? `?${Object.entries(params)
-        .filter(([, value]) => value !== undefined)
-        .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-        .join('&')}`
-    : '';
-  
   const templatesQuery = useQuery({
     queryKey: ['templates', params],
-    queryFn: async () => {
-      const response = await fetch(`/api/communication/templates${queryString}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch templates');
-      }
-      return response.json() as Promise<Template[]>;
-    },
+    queryFn: () => fetchTemplates(params),
   });
   
   const createTemplateMutation = useMutation({
-    mutationFn: async (data: CreateTemplateInput) => {
-      const response = await fetch('/api/communication/templates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create template');
-      }
-      
-      return response.json() as Promise<Template>;
-    },
+    mutationFn: (data: CreateTemplateInput) => addTemplate(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates'] });
     },
   });
   
+  const deleteTemplateMutation = useMutation({
+    mutationFn: (id: string) => removeTemplate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    }
+  });
+  
   return {
-    templates: templatesQuery.data || [],
+    templates: templatesQuery.data?.data || [],
     isLoading: templatesQuery.isLoading,
     isError: templatesQuery.isError,
-    error: templatesQuery.error,
+    error: templatesQuery.error || templatesQuery.data?.error,
     createTemplate: createTemplateMutation.mutate,
+    deleteTemplate: deleteTemplateMutation.mutate,
     isCreating: createTemplateMutation.isPending,
+    isDeleting: deleteTemplateMutation.isPending
   };
 }
 
@@ -66,44 +54,25 @@ export function useTemplate(id: string) {
   
   const templateQuery = useQuery({
     queryKey: ['template', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/communication/templates/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch template');
-      }
-      return response.json() as Promise<Template>;
-    },
+    queryFn: () => fetchTemplateById(id),
     enabled: !!id,
   });
   
   const updateTemplateMutation = useMutation({
-    mutationFn: async (data: UpdateTemplateInput) => {
-      const response = await fetch(`/api/communication/templates/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update template');
+    mutationFn: (data: UpdateTemplateInput) => editTemplate(id, data),
+    onSuccess: (result) => {
+      if (result.data) {
+        queryClient.setQueryData(['template', id], result.data);
+        queryClient.invalidateQueries({ queryKey: ['templates'] });
       }
-      
-      return response.json() as Promise<Template>;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['template', id], data);
-      queryClient.invalidateQueries({ queryKey: ['templates'] });
     },
   });
   
   return {
-    template: templateQuery.data,
+    template: templateQuery.data?.data,
     isLoading: templateQuery.isLoading,
     isError: templateQuery.isError,
-    error: templateQuery.error,
+    error: templateQuery.error || templateQuery.data?.error,
     updateTemplate: updateTemplateMutation.mutate,
     isUpdating: updateTemplateMutation.isPending,
   };

@@ -6,11 +6,13 @@ export interface CreateTemplateInput {
   channelType: Template['channelType'];
   category?: string;
   variables?: string[];
+  status: Template['status'];
 }
 
 export interface UpdateTemplateInput {
   name?: string;
   content?: string;
+  channelType?: Template['channelType'];
   category?: string;
   status?: Template['status'];
   variables?: string[];
