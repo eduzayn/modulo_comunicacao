@@ -10,8 +10,9 @@ interface Params {
 
 const sendMessageSchema = z.object({
   content: z.string().min(1, "Message content is required"),
-  sender_id: z.string(),
-  media_url: z.string().url().optional()
+  senderId: z.string(),
+  mediaUrl: z.string().url().optional(),
+  type: z.enum(['text', 'image', 'file', 'audio']).optional()
 });
 
 export async function GET(request: Request, { params }: Params) {
