@@ -2,6 +2,13 @@
 
 O Módulo de Comunicação é uma solução completa e integrada para gerenciar todas as interações e comunicações dentro da plataforma educacional Edunéxia. Ele combina recursos de mensageria, inteligência artificial e gestão de canais para proporcionar uma experiência de comunicação eficiente e personalizada.
 
+![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15.2.1-black)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Integrado-green)
+![OpenAI](https://img.shields.io/badge/OpenAI-Integrado-green)
+
 ## Estrutura Principal
 
 ### 1. Sistema de Canais (/channels)
@@ -66,8 +73,9 @@ O Módulo de Comunicação é uma solução completa e integrada para gerenciar 
 - Zod (validação)
 - Server Actions
 
-### Banco de Dados
+### Banco de Dados e IA
 - Supabase (PostgreSQL)
+- OpenAI API (GPT-3.5 Turbo)
 
 ## Configuração do Ambiente
 
@@ -96,6 +104,8 @@ Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
 NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
 SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_do_supabase
+SUPABASE_JWT_SECRET=seu_jwt_secret_do_supabase
+OPENAI_API_KEY=sua_chave_api_da_openai
 ```
 
 4. Execute o projeto em modo de desenvolvimento:
