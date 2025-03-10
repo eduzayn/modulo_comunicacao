@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Message } from '@/types';
@@ -18,9 +18,8 @@ interface SentimentData {
   keywords: string[];
 }
 
-// This is a mock implementation - in a real app, this would call an AI service
+// Simple keyword-based sentiment analysis for demo purposes
 const analyzeSentiment = (content: string): SentimentData => {
-  // Simple keyword-based sentiment analysis for demo purposes
   const positiveWords = ['obrigado', 'excelente', 'ótimo', 'bom', 'gostei', 'ajudou'];
   const negativeWords = ['problema', 'ruim', 'péssimo', 'difícil', 'não funciona', 'erro'];
   
@@ -57,13 +56,27 @@ const analyzeSentiment = (content: string): SentimentData => {
   };
 };
 
-export function SentimentAnalysis({ messages, isLoading = false }: SentimentAnalysisProps) {
-  // Analyze sentiment of the last 5 messages
-  const recentMessages = messages.slice(-5);
-  const sentimentData = recentMessages.map(message => ({
-    message,
-    analysis: analyzeSentiment(message.content)
-  }));
+export function SentimentAnalysis({ messages, isLoading: externalLoading = false }: SentimentAnalysisProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [sentimentData, setSentimentData] = useState<Array<{message: Message, analysis: SentimentData}>>([]);
+  
+  useEffect(() => {
+    // Analyze sentiment of the last 5 messages
+    const recentMessages = messages.slice(-5);
+    
+    setInternalLoading(true);
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      const newSentimentData = recentMessages.map(message => ({
+        message,
+        analysis: analyzeSentiment(message.content)
+      }));
+      
+      setSentimentData(newSentimentData);
+      setInternalLoading(false);
+    }, 500);
+  }, [messages]);
   
   // Calculate overall sentiment
   const overallSentiment = sentimentData.reduce((acc, item) => {
@@ -76,13 +89,21 @@ export function SentimentAnalysis({ messages, isLoading = false }: SentimentAnal
   if (overallSentiment > 0) overallSentimentLabel = 'positive';
   else if (overallSentiment < 0) overallSentimentLabel = 'negative';
   
+  const isLoading = externalLoading || internalLoading;
+  
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Análise de Sentimento</CardTitle>
+          <CardTitle>Análise de Sentimento (Local)</CardTitle>
           <CardDescription>Carregando análise...</CardDescription>
         </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            <span className="ml-2">Analisando...</span>
+          </div>
+        </CardContent>
       </Card>
     );
   }
@@ -91,7 +112,7 @@ export function SentimentAnalysis({ messages, isLoading = false }: SentimentAnal
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Análise de Sentimento</CardTitle>
+          <CardTitle>Análise de Sentimento (Local)</CardTitle>
           <CardDescription>Nenhuma mensagem para analisar</CardDescription>
         </CardHeader>
       </Card>
@@ -101,9 +122,9 @@ export function SentimentAnalysis({ messages, isLoading = false }: SentimentAnal
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Análise de Sentimento</CardTitle>
+        <CardTitle>Análise de Sentimento (Local)</CardTitle>
         <CardDescription>
-          Baseado nas últimas {recentMessages.length} mensagens
+          Baseado nas últimas {sentimentData.length} mensagens
         </CardDescription>
       </CardHeader>
       <CardContent>

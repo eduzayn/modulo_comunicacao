@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Message } from '@/types';
@@ -11,13 +11,12 @@ interface ResponseSuggestionsProps {
   isLoading?: boolean;
 }
 
-// This is a mock implementation - in a real app, this would call an AI service
+// Simple rule-based suggestions for demo purposes
 const generateSuggestions = (messages: Message[]): string[] => {
   if (messages.length === 0) return [];
   
   const lastMessage = messages[messages.length - 1];
   
-  // Simple rule-based suggestions for demo purposes
   if (lastMessage.content.toLowerCase().includes('preço') || 
       lastMessage.content.toLowerCase().includes('valor') ||
       lastMessage.content.toLowerCase().includes('custo')) {
@@ -55,16 +54,38 @@ const generateSuggestions = (messages: Message[]): string[] => {
   ];
 };
 
-export function ResponseSuggestions({ messages, onSelectSuggestion, isLoading = false }: ResponseSuggestionsProps) {
-  const suggestions = generateSuggestions(messages);
+export function ResponseSuggestions({ messages, onSelectSuggestion, isLoading: externalLoading = false }: ResponseSuggestionsProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (messages.length === 0) return;
+    
+    setInternalLoading(true);
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      const generatedSuggestions = generateSuggestions(messages);
+      setSuggestions(generatedSuggestions);
+      setInternalLoading(false);
+    }, 500);
+  }, [messages]);
+  
+  const isLoading = externalLoading || internalLoading;
   
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Sugestões de Resposta</CardTitle>
+          <CardTitle>Sugestões de Resposta (Local)</CardTitle>
           <CardDescription>Gerando sugestões...</CardDescription>
         </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+            <span className="ml-2">Gerando sugestões...</span>
+          </div>
+        </CardContent>
       </Card>
     );
   }
@@ -73,7 +94,7 @@ export function ResponseSuggestions({ messages, onSelectSuggestion, isLoading = 
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Sugestões de Resposta</CardTitle>
+          <CardTitle>Sugestões de Resposta (Local)</CardTitle>
           <CardDescription>Nenhuma sugestão disponível</CardDescription>
         </CardHeader>
       </Card>
@@ -83,7 +104,7 @@ export function ResponseSuggestions({ messages, onSelectSuggestion, isLoading = 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sugestões de Resposta</CardTitle>
+        <CardTitle>Sugestões de Resposta (Local)</CardTitle>
         <CardDescription>
           Clique em uma sugestão para usá-la
         </CardDescription>
