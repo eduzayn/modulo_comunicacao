@@ -25,7 +25,7 @@ function mapDbToTemplate(data: Database['public']['Tables']['templates']['Row'])
 }
 
 export async function getTemplates(params?: GetTemplatesInput) {
-  let query = supabase
+  let query = adminClient
     .from('templates')
     .select('*')
     .order('name');
