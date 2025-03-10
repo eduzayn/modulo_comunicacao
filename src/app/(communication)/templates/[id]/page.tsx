@@ -7,6 +7,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -51,6 +52,8 @@ export default function TemplateDetailPage() {
     });
   }
   
+  const { toast } = useToast();
+  
   const onSubmit = async (data: TemplateFormValues) => {
     setSaveStatus('saving');
     
@@ -70,12 +73,26 @@ export default function TemplateDetailPage() {
           variables: Array.from(new Set(variables)), // Remove duplicates
         });
         setSaveStatus('success');
+        toast({
+          title: "Template salvo com sucesso!",
+          description: "O template foi atualizado e está pronto para uso.",
+        });
         setTimeout(() => setSaveStatus('idle'), 3000);
       } catch (error) {
         setSaveStatus('error');
+        toast({
+          title: "Erro ao salvar template",
+          description: "Não foi possível salvar o template. Tente novamente.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       setSaveStatus('error');
+      toast({
+        title: "Erro ao processar template",
+        description: "Ocorreu um erro ao processar o template. Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
     }
   };
   
@@ -241,17 +258,7 @@ export default function TemplateDetailPage() {
                   </Button>
                 </div>
                 
-                {saveStatus === 'success' && (
-                  <div className="p-3 bg-green-100 text-green-800 rounded-md">
-                    Template salvo com sucesso!
-                  </div>
-                )}
-                
-                {saveStatus === 'error' && (
-                  <div className="p-3 bg-red-100 text-red-800 rounded-md">
-                    Erro ao salvar template. Tente novamente.
-                  </div>
-                )}
+              {/* Toast notifications are now handled by the toast component */}
               </form>
             </Form>
           </div>
