@@ -2,15 +2,14 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { SentimentAnalysis } from '@/components/ai/sentiment-analysis';
 import { ResponseSuggestions } from '@/components/ai/response-suggestions';
 import { SentimentAnalysisOpenAI } from '@/components/ai/sentiment-analysis-openai';
 import { ResponseSuggestionsOpenAI } from '@/components/ai/response-suggestions-openai';
-import { Message } from '@/types/index';
+import { MessageClassification } from '@/components/ai/message-classification-updated';
+import { Message } from '@/types/conversations';
 
 export default function AIDemoPage() {
   const [messages, setMessages] = useState<Message[]>([
@@ -44,6 +43,7 @@ export default function AIDemoPage() {
   ]);
   
   const [newMessage, setNewMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'sentiment' | 'suggestions' | 'classification'>('sentiment');
   
   const handleAddMessage = () => {
     if (!newMessage.trim()) return;
@@ -128,18 +128,36 @@ export default function AIDemoPage() {
           </CardContent>
         </Card>
         
-        <Tabs defaultValue="sentiment">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="sentiment">Análise de Sentimento</TabsTrigger>
-            <TabsTrigger value="suggestions">Sugestões de Resposta</TabsTrigger>
-          </TabsList>
-          <TabsContent value="sentiment">
+        <div>
+          <div className="flex border-b mb-4">
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'sentiment' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('sentiment')}
+            >
+              Análise de Sentimento
+            </button>
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'suggestions' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('suggestions')}
+            >
+              Sugestões de Resposta
+            </button>
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'classification' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('classification')}
+            >
+              Classificação
+            </button>
+          </div>
+          
+          {activeTab === 'sentiment' && (
             <div className="grid grid-cols-1 gap-4">
               <SentimentAnalysis messages={messages} />
               <SentimentAnalysisOpenAI messages={messages} />
             </div>
-          </TabsContent>
-          <TabsContent value="suggestions">
+          )}
+          
+          {activeTab === 'suggestions' && (
             <div className="grid grid-cols-1 gap-4">
               <ResponseSuggestions 
                 messages={messages} 
@@ -150,8 +168,20 @@ export default function AIDemoPage() {
                 onSelectSuggestion={handleSelectSuggestion} 
               />
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+          
+          {activeTab === 'classification' && (
+            <div className="grid grid-cols-1 gap-4">
+              <MessageClassification 
+                message={messages[messages.length - 1]} 
+                categories={['Dúvida', 'Reclamação', 'Elogio', 'Solicitação', 'Informação']}
+                onClassify={(category, confidence) => {
+                  console.log(`Mensagem classificada como: ${category} (${confidence * 100}%)`);
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
