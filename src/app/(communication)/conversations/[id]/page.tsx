@@ -7,13 +7,15 @@ import { Card } from '@/components/ui/card';
 import { useParams, useRouter } from 'next/navigation';
 import { MessageList } from '@/components/chat/message-list';
 import { MessageInput } from '@/components/chat/message-input';
+import { SentimentAnalysis } from '@/components/ai/sentiment-analysis';
+import { ResponseSuggestions } from '@/components/ai/response-suggestions';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function ConversationDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { conversation, messages, isLoading, error, sendMessage } = useConversation(params?.id as string);
+  const { conversation, messages = [], isLoading, error, sendMessage } = useConversation(params?.id as string);
   const [isSending, setIsSending] = useState(false);
   
   const handleSendMessage = async (content: string, mediaUrl?: string) => {
@@ -66,38 +68,48 @@ export default function ConversationDetailPage() {
         </Button>
       </div>
       
-      <Card className="overflow-hidden flex flex-col h-[calc(100%-4rem)]">
-        <div className="border-b px-4 py-3">
-          <div className="flex items-center">
-            <div>
-              <h3 className="font-medium">
-                {conversation.participants.length > 0 
-                  ? `${conversation.participants.length} participantes` 
-                  : 'Sem participantes'}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {conversation.status === 'open' ? 'Conversa aberta' : 
-                 conversation.status === 'closed' ? 'Conversa fechada' : 
-                 'Conversa arquivada'}
-                 {' • '}
-                 {conversation.priority === 'high' ? 'Alta prioridade' : 
-                  conversation.priority === 'medium' ? 'Média prioridade' : 
-                  'Baixa prioridade'}
-              </p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[calc(100%-4rem)]">
+        <Card className="overflow-hidden flex flex-col md:col-span-3 h-full">
+          <div className="border-b px-4 py-3">
+            <div className="flex items-center">
+              <div>
+                <h3 className="font-medium">
+                  {conversation.participants.length > 0 
+                    ? `${conversation.participants.length} participantes` 
+                    : 'Sem participantes'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {conversation.status === 'open' ? 'Conversa aberta' : 
+                  conversation.status === 'closed' ? 'Conversa fechada' : 
+                  'Conversa arquivada'}
+                  {' • '}
+                  {conversation.priority === 'high' ? 'Alta prioridade' : 
+                    conversation.priority === 'medium' ? 'Média prioridade' : 
+                    'Baixa prioridade'}
+                </p>
+              </div>
             </div>
           </div>
+          
+          <MessageList 
+            messages={messages} 
+            currentUserId="current-user" // In a real app, this would be the authenticated user's ID
+          />
+          
+          <MessageInput 
+            onSendMessage={handleSendMessage}
+            isLoading={isSending}
+          />
+        </Card>
+        
+        <div className="space-y-4 hidden md:block">
+          <SentimentAnalysis messages={messages} />
+          <ResponseSuggestions 
+            messages={messages} 
+            onSelectSuggestion={(suggestion) => handleSendMessage(suggestion)}
+          />
         </div>
-        
-        <MessageList 
-          messages={messages} 
-          currentUserId="current-user" // In a real app, this would be the authenticated user's ID
-        />
-        
-        <MessageInput 
-          onSendMessage={handleSendMessage}
-          isLoading={isSending}
-        />
-      </Card>
+      </div>
     </div>
   );
 }
