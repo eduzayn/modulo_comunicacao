@@ -30,7 +30,7 @@ export interface Message {
   status?: 'sent' | 'delivered' | 'read';
   mediaUrl?: string;
   metadata?: Record<string, any>;
-  createdAt: Date;
+  createdAt: string | Date; // Accept both string and Date
 }
 
 export interface GetConversationsInput {

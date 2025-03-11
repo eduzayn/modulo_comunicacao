@@ -3,7 +3,8 @@
 import React, { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendIcon, PaperclipIcon, MicIcon, SmileIcon } from 'lucide-react';
+import { SendIcon, PaperclipIcon, MicIcon } from 'lucide-react';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
 
 interface MessageInputProps {
   onSendMessage: (content: string, mediaUrl?: string) => Promise<void>;
@@ -24,6 +25,10 @@ export function MessageInput({ onSendMessage, isLoading = false }: MessageInputP
     } catch (error) {
       console.error('Error sending message:', error);
     }
+  };
+  
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage(prev => prev + emoji);
   };
   
   return (
@@ -52,15 +57,7 @@ export function MessageInput({ onSendMessage, isLoading = false }: MessageInputP
           }}
         />
         
-        <Button 
-          type="button" 
-          size="icon" 
-          variant="ghost"
-          className="rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-        >
-          <SmileIcon className="h-5 w-5" />
-          <span className="sr-only">Emojis</span>
-        </Button>
+        <EmojiPicker onEmojiSelect={handleEmojiSelect} />
         
         <Button 
           type="button" 

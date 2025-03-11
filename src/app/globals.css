@@ -124,3 +124,6 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Import chat styles */
+@import '../styles/chat.css';
