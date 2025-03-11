@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
-import { getChannels, createChannel } from '../../../../services/supabase/channels';
-import type { Channel } from '../../../../types';
-import type { CreateChannelInput } from '../../../../types/channels';
+import { NextRequest, NextResponse } from 'next/server';
+import { getChannels, createChannel } from '@/app/actions/channel-actions';
 import { z } from 'zod';
+import type { Channel } from '@/types/channels';
+import type { CreateChannelInput } from '@/types/channels';
+import { getAuthUser } from '@/lib/auth/get-auth-user';
 
+// Validation schema for channel creation
 const createChannelSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
@@ -11,47 +13,94 @@ const createChannelSchema = z.object({
   config: z.record(z.any()).optional()
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Get user ID from request using auth utility
+    const userId = await getAuthUser(request);
+    
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    // Fetch channels for the user
     const channels = await getChannels();
-    return NextResponse.json(channels);
+    
+    return NextResponse.json({
+      success: true,
+      data: channels
+    });
   } catch (error: any) {
     console.error('Error in channels GET route:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch channels' },
+      { 
+        success: false, 
+        error: error.message || 'Failed to fetch channels' 
+      },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Get user ID from request using auth utility
+    const userId = await getAuthUser(request);
+    
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
     const body = await request.json();
     
     // Validate request body
-    const result = createChannelSchema.safeParse(body);
-    if (!result.success) {
+    const validationResult = createChannelSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid channel data', details: result.error.format() }, 
+        { 
+          success: false, 
+          error: 'Invalid channel data', 
+          details: validationResult.error.format() 
+        },
         { status: 400 }
       );
     }
     
     // Convert Zod validated data to CreateChannelInput type
     const channelInput: CreateChannelInput = {
-      name: result.data.name,
-      type: result.data.type,
+      name: validationResult.data.name,
+      type: validationResult.data.type,
       // Status is optional in CreateChannelInput
-      ...(result.data.status && { status: result.data.status }),
+      ...(validationResult.data.status && { status: validationResult.data.status }),
       // Convert config to appropriate type based on channel type
-      config: result.data.config || {} as any
+      config: validationResult.data.config || {} as any
     };
-    const channel = await createChannel(channelInput);
-    return NextResponse.json(channel, { status: 201 });
+    
+    const result = await createChannel(channelInput);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json({
+      success: true,
+      data: result.data
+    }, { status: 201 });
   } catch (error: any) {
     console.error('Error in channels POST route:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create channel' },
+      { 
+        success: false, 
+        error: error.message || 'Failed to create channel' 
+      },
       { status: 500 }
     );
   }
