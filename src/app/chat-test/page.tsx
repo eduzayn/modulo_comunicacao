@@ -15,7 +15,7 @@ export default function ChatTestPage() {
       conversationId: 'conv-1',
       senderId: 'agent-1',
       content: 'Olá! Como posso ajudar você hoje?',
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(), // Serialize to string
       status: 'read',
       type: 'text'
     },
@@ -24,7 +24,7 @@ export default function ChatTestPage() {
       conversationId: 'conv-1',
       senderId: currentUserId,
       content: 'Estou com uma dúvida sobre o módulo de comunicação.',
-      createdAt: new Date(Date.now() - 5 * 60000),
+      createdAt: new Date(Date.now() - 5 * 60000).toISOString(), // Serialize to string
       status: 'read',
       type: 'text'
     },
@@ -33,7 +33,7 @@ export default function ChatTestPage() {
       conversationId: 'conv-1',
       senderId: 'agent-1',
       content: 'Claro, vou te ajudar com isso. Qual é a sua dúvida específica?',
-      createdAt: new Date(Date.now() - 4 * 60000),
+      createdAt: new Date(Date.now() - 4 * 60000).toISOString(), // Serialize to string
       status: 'read',
       type: 'text'
     }
@@ -58,7 +58,7 @@ export default function ChatTestPage() {
         conversationId: 'conv-1',
         senderId: currentUserId,
         content,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(), // Serialize to string
         status: 'sent',
         type: mediaUrl ? 'image' : 'text',
         mediaUrl
@@ -75,7 +75,7 @@ export default function ChatTestPage() {
         conversationId: 'conv-1',
         senderId: 'agent-1',
         content: 'Recebi sua mensagem. Obrigado pelo contato!',
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(), // Serialize to string
         status: 'sent',
         type: 'text'
       };

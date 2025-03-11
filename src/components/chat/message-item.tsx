@@ -45,7 +45,10 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
                 <img 
                   src={message.mediaUrl || ''} 
                   alt="Image" 
+                  width={300}
+                  height={200}
                   className="max-w-full rounded-md border border-gray-200"
+                  style={{ objectFit: 'contain' }}
                 />
               )}
               {message.type === 'audio' && (
@@ -59,7 +62,7 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
         
         <div className="flex items-center mt-1 text-xs text-gray-500">
           <span>
-            {format(new Date(message.createdAt), 'HH:mm')}
+            {format(typeof message.createdAt === 'string' ? new Date(message.createdAt) : message.createdAt, 'HH:mm')}
           </span>
           {message.status && (
             <span className={cn(
