@@ -15,3 +15,4 @@ export * from './skeleton';
 export * from './badge';
 export * from './slider';
 export * from './form';
+export * from './emoji-picker';
