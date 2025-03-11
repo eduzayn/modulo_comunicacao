@@ -14,11 +14,18 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
   
   return (
     <div className={cn(
-      "flex items-start gap-2 py-2",
+      "flex items-start gap-3 py-2",
       isCurrentUser ? "flex-row-reverse" : "flex-row"
     )}>
-      <Avatar className="h-8 w-8">
-        <AvatarFallback>{initials}</AvatarFallback>
+      <Avatar className={cn(
+        "h-8 w-8 border",
+        isCurrentUser ? "border-blue-100" : "border-gray-200"
+      )}>
+        <AvatarFallback className={cn(
+          isCurrentUser ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
+        )}>
+          {initials}
+        </AvatarFallback>
       </Avatar>
       
       <div className={cn(
@@ -26,23 +33,23 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
         isCurrentUser ? "items-end" : "items-start"
       )}>
         <div className={cn(
-          "px-4 py-2 rounded-lg",
+          "px-4 py-2.5 rounded-lg shadow-sm",
           isCurrentUser 
-            ? "bg-primary text-primary-foreground" 
-            : "bg-muted"
+            ? "bg-blue-50 text-gray-800 border border-blue-100" 
+            : "bg-white text-gray-800 border border-gray-200"
         )}>
-          <p className="text-sm">{message.content}</p>
+          <p className="text-sm leading-relaxed">{message.content}</p>
           {message.type !== 'text' && message.type !== 'document' && (
             <div className="mt-2">
               {message.type === 'image' && (
                 <img 
                   src={message.mediaUrl || ''} 
                   alt="Image" 
-                  className="max-w-full rounded"
+                  className="max-w-full rounded-md border border-gray-200"
                 />
               )}
               {message.type === 'audio' && (
-                <audio controls className="max-w-full">
+                <audio controls className="max-w-full rounded-md border border-gray-200 bg-white p-1">
                   <source src={message.mediaUrl || ''} />
                 </audio>
               )}
@@ -50,12 +57,15 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
           )}
         </div>
         
-        <div className="flex items-center mt-1 text-xs text-muted-foreground">
+        <div className="flex items-center mt-1 text-xs text-gray-500">
           <span>
             {format(new Date(message.createdAt), 'HH:mm')}
           </span>
           {message.status && (
-            <span className="ml-2">
+            <span className={cn(
+              "ml-2",
+              isCurrentUser && message.status === 'read' ? "text-blue-500" : "text-gray-400"
+            )}>
               {message.status === 'sent' && '✓'}
               {message.status === 'delivered' && '✓✓'}
               {message.status === 'read' && '✓✓'}
