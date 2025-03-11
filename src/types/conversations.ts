@@ -14,10 +14,23 @@ export interface UpdateConversationInput {
 }
 
 export interface SendMessageInput {
-  conversationId: string;
+  senderId: string;
   content: string;
+  mediaUrl?: string;
   type?: 'text' | 'image' | 'file' | 'audio';
   metadata?: Record<string, any>;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  type?: 'text' | 'image' | 'file' | 'audio' | 'document';
+  status?: 'sent' | 'delivered' | 'read';
+  mediaUrl?: string;
+  metadata?: Record<string, any>;
+  createdAt: Date;
 }
 
 export interface GetConversationsInput {

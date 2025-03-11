@@ -1,4 +1,15 @@
+'use server';
+
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
+import { 
+  getChannels as getChannelsService, 
+  getChannelById as getChannelByIdService, 
+  createChannel as createChannelService, 
+  updateChannel as updateChannelService, 
+  deleteChannel as deleteChannelService 
+} from '@/services/supabase/channels';
+import type { CreateChannelInput, UpdateChannelInput } from '@/types/channels';
 
 // Define types locally to avoid import errors
 export interface Channel {
@@ -9,13 +20,6 @@ export interface Channel {
   config: any;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface CreateChannelInput {
-  name: string;
-  type: Channel['type'];
-  status?: Channel['status'];
-  config: any;
 }
 
 // Initialize Supabase client with fallback for development/testing
@@ -89,16 +93,8 @@ export async function getChannels() {
       ];
     }
     
-    const { data, error } = await supabase
-      .from('channels')
-      .select('*')
-      .order('createdAt', { ascending: false });
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    return data || [];
+    // Use the service function
+    return await getChannelsService();
   } catch (error) {
     console.error('Error fetching channels:', error);
     return [];
@@ -128,23 +124,11 @@ export async function createChannel(channel: CreateChannelInput) {
       };
     }
     
-    const { data, error } = await supabase
-      .from('channels')
-      .insert({
-        name: channel.name,
-        type: channel.type,
-        status: channel.status || 'active',
-        config: channel.config
-      })
-      .select()
-      .single();
+    // Use the service function
+    const data = await createChannelService(channel);
     
-    if (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    // Revalidate the channels path to update the UI
+    revalidatePath('/channels');
     
     return {
       success: true,
@@ -182,18 +166,8 @@ export async function getChannelById(id: string) {
       };
     }
     
-    const { data, error } = await supabase
-      .from('channels')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    // Use the service function
+    const data = await getChannelByIdService(id);
     
     return {
       success: true,
@@ -228,22 +202,12 @@ export async function updateChannel(id: string, channel: Partial<Channel>) {
       };
     }
     
-    const { data, error } = await supabase
-      .from('channels')
-      .update({
-        ...channel,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    // Use the service function
+    const data = await updateChannelService(id, channel as UpdateChannelInput);
     
-    if (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    // Revalidate the channels path to update the UI
+    revalidatePath(`/channels/${id}`);
+    revalidatePath('/channels');
     
     return {
       success: true,
@@ -272,17 +236,11 @@ export async function deleteChannel(id: string) {
       };
     }
     
-    const { error } = await supabase
-      .from('channels')
-      .delete()
-      .eq('id', id);
+    // Use the service function
+    await deleteChannelService(id);
     
-    if (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    // Revalidate the channels path to update the UI
+    revalidatePath('/channels');
     
     return {
       success: true
@@ -293,5 +251,56 @@ export async function deleteChannel(id: string) {
       success: false,
       error: error.message || 'Failed to delete channel'
     };
+  }
+}
+
+// Server actions with standardized response format
+export async function fetchChannels() {
+  try {
+    return { data: await getChannels(), error: null };
+  } catch (error: any) {
+    return { data: null, error: error.message };
+  }
+}
+
+export async function fetchChannelById(id: string) {
+  try {
+    const result = await getChannelById(id);
+    return { data: result.data, error: result.success ? null : result.error };
+  } catch (error: any) {
+    return { data: null, error: error.message };
+  }
+}
+
+export async function addChannel(data: CreateChannelInput) {
+  try {
+    const result = await createChannel(data);
+    if (!result.success) {
+      return { data: null, error: result.error };
+    }
+    return { data: result.data, error: null };
+  } catch (error: any) {
+    return { data: null, error: error.message };
+  }
+}
+
+export async function editChannel(id: string, data: UpdateChannelInput) {
+  try {
+    const result = await updateChannel(id, data);
+    if (!result.success) {
+      return { data: null, error: result.error };
+    }
+    return { data: result.data, error: null };
+  } catch (error: any) {
+    return { data: null, error: error.message };
+  }
+}
+
+export async function removeChannel(id: string) {
+  try {
+    const result = await deleteChannel(id);
+    return { success: result.success, error: result.success ? null : result.error };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
 }
