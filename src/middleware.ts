@@ -7,7 +7,7 @@ const protectedRoutes = [
   '/api/communication',
   '/api/auth/profile',
   '/api/auth/api-keys',
-  '/(communication)',
+  // '/(communication)', // Removido para permitir acesso às rotas principais
 ];
 
 // Define public routes that don't require authentication
@@ -20,6 +20,12 @@ const publicRoutes = [
   '/api/auth/register',
   '/api/auth/reset-password',
   '/api/auth/session',
+  '/', // Adicionado rota raiz como pública
+  '/chat-test', // Adicionado rota de teste de chat como pública
+  '/contacts', // Adicionado rota de contatos como pública
+  '/stats', // Adicionado rota de estatísticas como pública
+  '/settings', // Adicionado rota de configurações como pública
+  '/help', // Adicionado rota de ajuda como pública
 ];
 
 // Define admin-only routes
