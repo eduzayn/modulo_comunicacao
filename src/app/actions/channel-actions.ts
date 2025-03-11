@@ -1,6 +1,5 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { 
   getChannels as getChannelsService, 
@@ -22,48 +21,9 @@ export interface Channel {
   updatedAt: string;
 }
 
-// Initialize Supabase client with fallback for development/testing
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
-
-// Create a mock client if credentials are missing
-const createSupabaseClient = () => {
-  if (!supabaseUrl || !supabaseKey) {
-    // Return mock client for development/testing
-    return {
-      from: () => ({
-        select: () => ({
-          order: () => ({
-            data: [], 
-            error: null
-          }),
-          eq: () => ({
-            single: async () => ({ data: null, error: null })
-          })
-        }),
-        insert: () => ({
-          select: () => ({
-            single: async () => ({ data: { id: 'mock-id' }, error: null })
-          })
-        }),
-        update: () => ({
-          eq: () => ({
-            select: () => ({
-              single: async () => ({ data: null, error: null })
-            })
-          })
-        }),
-        delete: () => ({
-          eq: async () => ({ error: null })
-        })
-      })
-    };
-  }
-  
-  return createClient(supabaseUrl, supabaseKey);
-};
-
-const supabase = createSupabaseClient();
+// Authentication is now handled by the main site
+// Mock data for development/testing
+const useMockData = process.env.NODE_ENV === 'development';
 
 /**
  * Get all channels
@@ -72,7 +32,7 @@ const supabase = createSupabaseClient();
 export async function getChannels() {
   try {
     // For development without Supabase, return mock data
-    if (process.env.NODE_ENV === 'development' && (!supabaseUrl || !supabaseKey)) {
+    if (useMockData) {
       return [
         {
           id: 'mock-channel-1',
@@ -109,7 +69,7 @@ export async function getChannels() {
 export async function createChannel(channel: CreateChannelInput) {
   try {
     // For development without Supabase, return mock data
-    if (process.env.NODE_ENV === 'development' && (!supabaseUrl || !supabaseKey)) {
+    if (useMockData) {
       return {
         success: true,
         data: {
@@ -151,7 +111,7 @@ export async function createChannel(channel: CreateChannelInput) {
 export async function getChannelById(id: string) {
   try {
     // For development without Supabase, return mock data
-    if (process.env.NODE_ENV === 'development' && (!supabaseUrl || !supabaseKey)) {
+    if (useMockData) {
       return {
         success: true,
         data: {
@@ -191,7 +151,7 @@ export async function getChannelById(id: string) {
 export async function updateChannel(id: string, channel: Partial<Channel>) {
   try {
     // For development without Supabase, return mock data
-    if (process.env.NODE_ENV === 'development' && (!supabaseUrl || !supabaseKey)) {
+    if (useMockData) {
       return {
         success: true,
         data: {
@@ -230,7 +190,7 @@ export async function updateChannel(id: string, channel: Partial<Channel>) {
 export async function deleteChannel(id: string) {
   try {
     // For development without Supabase, return success
-    if (process.env.NODE_ENV === 'development' && (!supabaseUrl || !supabaseKey)) {
+    if (useMockData) {
       return {
         success: true
       };
