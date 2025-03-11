@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { authService } from '@/services/supabase/auth';
+import { authService } from './services/supabase/auth';
 
 // Define protected routes that require authentication
 const protectedRoutes = [
@@ -16,6 +15,7 @@ const publicRoutes = [
   '/auth/register',
   '/auth/reset-password',
   '/auth/error',
+  '/auth/dev-login',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/reset-password',
@@ -33,13 +33,19 @@ const adminRoutes = [
 // Define API routes that can be accessed with API keys
 const apiKeyRoutes = [
   '/api/communication',
+  '/api/integration',
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check if the route is public
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Skip authentication for static assets and public routes
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/public') ||
+    publicRoutes.some(route => pathname.startsWith(route))
+  ) {
     return NextResponse.next();
   }
   
@@ -52,49 +58,56 @@ export async function middleware(request: NextRequest) {
       const validation = await authService.validateApiKey(apiKey);
       
       if (validation.valid) {
-        // Add user ID to request headers for downstream use
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-user-id', validation.userId || '');
-        
-        // Allow the request to proceed
-        return NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        });
+        // Add user ID and role to request headers for downstream use
+        const response = NextResponse.next();
+        response.headers.set('x-user-id', validation.userId || '');
+        response.headers.set('x-user-role', validation.role || 'user');
+        return response;
       }
     }
+    
+    // Check for session cookie as fallback for API routes
+    const sessionResult = await authService.getSession();
+    
+    if (sessionResult.success && sessionResult.session) {
+      const response = NextResponse.next();
+      response.headers.set('x-user-id', sessionResult.session.user.id);
+      response.headers.set('x-user-role', sessionResult.session.user.role || 'user');
+      return response;
+    }
+    
+    // Return unauthorized for API routes
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
   }
   
-  // For protected routes, verify authentication
+  // For non-API routes, redirect to login if not authenticated
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
+    const sessionResult = await authService.getSession();
     
-    // If no token, redirect to login
-    if (!token) {
+    if (!sessionResult.success || !sessionResult.session) {
       const url = new URL('/auth/login', request.url);
-      url.searchParams.set('callbackUrl', encodeURI(request.url));
+      url.searchParams.set('redirect', request.nextUrl.pathname);
       return NextResponse.redirect(url);
     }
     
     // For admin routes, check role
     if (adminRoutes.some(route => pathname.startsWith(route))) {
-      if (token.role !== 'admin') {
+      const userRole = sessionResult.session.user.role;
+      
+      if (userRole !== 'admin') {
         // Redirect non-admins to dashboard
         return NextResponse.redirect(new URL('/(communication)', request.url));
       }
     }
-  }
-  
-  // For API routes without valid authentication, return 401
-  if (pathname.startsWith('/api/') && !publicRoutes.some(route => pathname.startsWith(route))) {
-    return new NextResponse(
-      JSON.stringify({ success: false, error: 'Unauthorized' }),
-      { status: 401, headers: { 'content-type': 'application/json' } }
-    );
+    
+    // User is authenticated, continue
+    const response = NextResponse.next();
+    response.headers.set('x-user-id', sessionResult.session.user.id);
+    response.headers.set('x-user-role', sessionResult.session.user.role || 'user');
+    return response;
   }
   
   return NextResponse.next();
