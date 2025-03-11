@@ -17,8 +17,19 @@ import type {
   GetConversationsInput
 } from '../types/conversations';
 
+// Create a function to get the query client
+const getQueryClient = () => {
+  try {
+    return useQueryClient();
+  } catch (error) {
+    console.error('Error getting QueryClient:', error);
+    return null;
+  }
+};
+
 export function useConversations(params?: GetConversationsInput) {
-  const queryClient = useQueryClient();
+  // Get the query client safely
+  const queryClient = getQueryClient();
   
   const conversationsQuery = useQuery({
     queryKey: ['conversations', params],
@@ -28,7 +39,7 @@ export function useConversations(params?: GetConversationsInput) {
   const createConversationMutation = useMutation({
     mutationFn: (data: CreateConversationInput) => addConversation(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient?.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
   
@@ -75,6 +86,22 @@ export function useConversation(id: string) {
     },
   });
   
+  // Add prefetch function for messages
+  const prefetchMessages = async (conversationId: string = id) => {
+    if (!conversationId || !queryClient) return;
+    
+    await queryClient.prefetchQuery({
+      queryKey: ['messages', conversationId],
+      queryFn: async () => {
+        const response = await fetch(`/api/communication/conversations/${conversationId}/messages`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch messages');
+        }
+        return response.json();
+      },
+    });
+  };
+  
   return {
     conversation: conversationQuery.data?.data,
     messages: messagesQuery.data?.data || [],
@@ -85,5 +112,6 @@ export function useConversation(id: string) {
     isUpdating: updateConversationMutation.isPending,
     sendMessage: sendMessageMutation.mutate,
     isSending: sendMessageMutation.isPending,
+    prefetchMessages,
   };
 }
