@@ -89,10 +89,10 @@ export default function ChatTestPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen p-4 bg-gray-100">
+    <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Teste do Módulo de Chat</h1>
       
-      <div className="flex-1 overflow-hidden border rounded-xl shadow-lg">
+      <div className="h-[calc(100vh-8rem)] overflow-hidden border rounded-xl shadow-lg bg-white">
         <Chat
           messages={messages}
           currentUserId={currentUserId}
