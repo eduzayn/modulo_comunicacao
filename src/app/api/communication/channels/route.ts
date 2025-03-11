@@ -5,6 +5,66 @@ import type { Channel } from '@/types/channels';
 import type { CreateChannelInput } from '@/types/channels';
 import { getAuthUser } from '@/lib/auth/get-auth-user';
 
+/**
+ * @swagger
+ * /api/communication/channels:
+ *   get:
+ *     summary: Get all communication channels
+ *     tags: [Channels]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of communication channels
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Channel'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ *
+ *   post:
+ *     summary: Create a new communication channel
+ *     tags: [Channels]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateChannelInput'
+ *     responses:
+ *       201:
+ *         description: Channel created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Channel'
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
 // Validation schema for channel creation
 const createChannelSchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -2,6 +2,92 @@ import { NextResponse } from 'next/server';
 import { getConversations, createConversation } from '../../../../services/supabase/conversations';
 import { z } from 'zod';
 
+/**
+ * @swagger
+ * /api/communication/conversations:
+ *   get:
+ *     summary: Get all conversations
+ *     tags: [Conversations]
+ *     parameters:
+ *       - in: query
+ *         name: channelId
+ *         schema:
+ *           type: string
+ *         description: Filter by channel ID
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [open, closed, archived]
+ *         description: Filter by conversation status
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [high, medium, low]
+ *         description: Filter by priority level
+ *       - in: query
+ *         name: context
+ *         schema:
+ *           type: string
+ *           enum: [academic, administrative, support]
+ *         description: Filter by conversation context
+ *     responses:
+ *       200:
+ *         description: List of conversations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Conversation'
+ *       500:
+ *         description: Server error
+ *
+ *   post:
+ *     summary: Create a new conversation
+ *     tags: [Conversations]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               channelId:
+ *                 type: string
+ *                 format: uuid
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               status:
+ *                 type: string
+ *                 enum: [open, closed, archived]
+ *                 default: open
+ *               priority:
+ *                 type: string
+ *                 enum: [high, medium, low]
+ *                 default: medium
+ *               context:
+ *                 type: string
+ *                 enum: [academic, administrative, support]
+ *                 default: support
+ *             required:
+ *               - participants
+ *     responses:
+ *       200:
+ *         description: Conversation created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Conversation'
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
+
 const createConversationSchema = z.object({
   channelId: z.string().uuid().optional(),
   participants: z.array(z.string()),
