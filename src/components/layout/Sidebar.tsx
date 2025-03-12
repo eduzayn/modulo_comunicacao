@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { colors } from './colors';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Home, 
   Users, 
@@ -79,6 +80,7 @@ export const Sidebar = ({ module = 'enrollment' }: SidebarProps) => {
   const [isTablet, setIsTablet] = useState(false);
   const pathname = usePathname();
   const config = moduleConfig[module];
+  const { user, logout } = useAuth();
   
   // Handle responsive behavior
   useEffect(() => {
@@ -167,6 +169,29 @@ export const Sidebar = ({ module = 'enrollment' }: SidebarProps) => {
               ))}
             </ul>
           </nav>
+          
+          {/* User Profile */}
+          {user && (
+            <div className="mt-auto p-4 border-t border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-semibold">
+                    {user.name.charAt(0)}
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-neutral-900">{user.name}</p>
+                    <p className="text-xs text-neutral-500">{user.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={logout}
+                  className="text-xs text-neutral-500 hover:text-neutral-700"
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          )}
           
           {/* Footer */}
           <div className="p-4 border-t border-neutral-200">
