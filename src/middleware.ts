@@ -17,6 +17,10 @@ const publicRoutes = [
   '/stats', // Rota de estatísticas como pública
   '/settings', // Rota de configurações como pública
   '/help', // Rota de ajuda como pública
+  '/conversations', // Rota de conversas
+  '/channels', // Rota de canais
+  '/templates', // Rota de templates
+  '/ai', // Rota de inteligência artificial
 ];
 
 // Define admin-only routes
