@@ -11,6 +11,7 @@ const protectedRoutes = [
 // Define public routes that don't require authentication
 const publicRoutes = [
   '/', // Rota raiz como pública
+  '/login', // Adicionar rota de login como pública
   '/chat-test', // Rota de teste de chat como pública
   '/contacts', // Rota de contatos como pública
   '/stats', // Rota de estatísticas como pública
@@ -34,11 +35,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // For protected routes, redirect to main site for authentication
+  // For protected routes, redirect to login page instead of main site
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    const mainSiteLoginUrl = new URL(process.env.MAIN_SITE_URL + '/login', request.url);
-    mainSiteLoginUrl.searchParams.set('callbackUrl', encodeURI(request.url));
-    return NextResponse.redirect(mainSiteLoginUrl);
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('callbackUrl', encodeURI(request.url));
+    return NextResponse.redirect(loginUrl);
   }
   
   // For API routes without valid authentication, return 401
@@ -47,7 +48,7 @@ export async function middleware(request: NextRequest) {
       JSON.stringify({ 
         success: false, 
         error: 'Unauthorized', 
-        message: 'Authentication is now handled by the main site'
+        message: 'Authentication required'
       }),
       { status: 401, headers: { 'content-type': 'application/json' } }
     );
