@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { authService } from '@/services/supabase/auth';
 
 // Define protected routes that require authentication
 const protectedRoutes = [
@@ -12,20 +10,12 @@ const protectedRoutes = [
 
 // Define public routes that don't require authentication
 const publicRoutes = [
-  '/auth/login',
-  '/auth/register',
-  '/auth/reset-password',
-  '/auth/error',
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/reset-password',
-  '/api/auth/session',
-  '/', // Adicionado rota raiz como pública
-  '/chat-test', // Adicionado rota de teste de chat como pública
-  '/contacts', // Adicionado rota de contatos como pública
-  '/stats', // Adicionado rota de estatísticas como pública
-  '/settings', // Adicionado rota de configurações como pública
-  '/help', // Adicionado rota de ajuda como pública
+  '/', // Rota raiz como pública
+  '/chat-test', // Rota de teste de chat como pública
+  '/contacts', // Rota de contatos como pública
+  '/stats', // Rota de estatísticas como pública
+  '/settings', // Rota de configurações como pública
+  '/help', // Rota de ajuda como pública
 ];
 
 // Define admin-only routes
@@ -36,11 +26,6 @@ const adminRoutes = [
   '/(communication)/backups',
 ];
 
-// Define API routes that can be accessed with API keys
-const apiKeyRoutes = [
-  '/api/communication',
-];
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
@@ -49,56 +34,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // Check for API key authentication for API routes
-  if (apiKeyRoutes.some(route => pathname.startsWith(route))) {
-    const apiKey = request.headers.get('x-api-key');
-    
-    if (apiKey) {
-      // Validate API key
-      const validation = await authService.validateApiKey(apiKey);
-      
-      if (validation.valid) {
-        // Add user ID to request headers for downstream use
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-user-id', validation.userId || '');
-        
-        // Allow the request to proceed
-        return NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        });
-      }
-    }
-  }
-  
-  // For protected routes, verify authentication
+  // For protected routes, redirect to main site for authentication
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
-    
-    // If no token, redirect to login
-    if (!token) {
-      const url = new URL('/auth/login', request.url);
-      url.searchParams.set('callbackUrl', encodeURI(request.url));
-      return NextResponse.redirect(url);
-    }
-    
-    // For admin routes, check role
-    if (adminRoutes.some(route => pathname.startsWith(route))) {
-      if (token.role !== 'admin') {
-        // Redirect non-admins to dashboard
-        return NextResponse.redirect(new URL('/(communication)', request.url));
-      }
-    }
+    const mainSiteLoginUrl = new URL(process.env.MAIN_SITE_URL + '/login', request.url);
+    mainSiteLoginUrl.searchParams.set('callbackUrl', encodeURI(request.url));
+    return NextResponse.redirect(mainSiteLoginUrl);
   }
   
   // For API routes without valid authentication, return 401
   if (pathname.startsWith('/api/') && !publicRoutes.some(route => pathname.startsWith(route))) {
     return new NextResponse(
-      JSON.stringify({ success: false, error: 'Unauthorized' }),
+      JSON.stringify({ 
+        success: false, 
+        error: 'Unauthorized', 
+        message: 'Authentication is now handled by the main site'
+      }),
       { status: 401, headers: { 'content-type': 'application/json' } }
     );
   }
