@@ -26,6 +26,13 @@ const MOCK_USERS = [
     name: 'Usuário Teste',
     role: 'user' as const,
   },
+  {
+    id: '3',
+    email: 'teste@edunexia.com.br',
+    password: 'Teste@123',
+    name: 'Usuário Temporário',
+    role: 'admin' as const,
+  },
 ];
 
 type AuthContextType = {

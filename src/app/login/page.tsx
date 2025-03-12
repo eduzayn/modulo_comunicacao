@@ -88,7 +88,8 @@ export default function LoginPage() {
           <p className="w-full">
             Credenciais de teste:<br />
             Admin: admin@edunexia.com / admin123<br />
-            Usuário: user@edunexia.com / user123
+            Usuário: user@edunexia.com / user123<br />
+            Temporário: teste@edunexia.com.br / Teste@123
           </p>
         </CardFooter>
       </Card>
