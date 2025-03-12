@@ -11,80 +11,6 @@ O Módulo de Comunicação é uma solução completa e integrada para gerenciar 
 ![Supabase](https://img.shields.io/badge/Supabase-Integrado-green)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Integrado-green)
 
-<<<<<<< HEAD
-- Next.js 15.2.1 (App Router + RSC)
-- React 18
-- TypeScript
-- Tailwind CSS
-- Shadcn UI + Radix UI
-- TanStack Query
-- Zod (validação)
-- Server Actions
-- Supabase (banco de dados e armazenamento)
-- OpenAI API (inteligência artificial)
-
-## Estrutura Principal
-
-### 1. Sistema de Canais (/channels)
-- Gestão de canais de comunicação (WhatsApp, E-mail, Chat, SMS, Notificações)
-- Configuração de canais por perfil de usuário
-- Integração com APIs externas
-- Monitoramento de status e métricas
-
-### 2. Sistema de Conversas (/conversations)
-- Chat em tempo real
-- Histórico de conversas
-- Organização por contexto
-- Sistema de priorização
-- Suporte a mídia (imagens, documentos, áudio)
-
-### 3. Inteligência Artificial (/ai)
-- Configuração de modelos de IA
-- Análise de sentimento
-- Respostas automáticas inteligentes
-- Classificação de mensagens
-- Sugestões de resposta
-
-### 4. Templates e Automação (/templates)
-- Templates personalizáveis
-- Variáveis dinâmicas
-- Fluxos de comunicação automatizados
-- Gatilhos baseados em eventos
-
-## Melhorias de Performance
-
-### 1. Cache Inteligente para Mensagens
-O módulo utiliza TanStack Query com adaptador de cache persistente para otimizar o carregamento de mensagens e reduzir chamadas à API. As mensagens são armazenadas em cache por 5 minutos por padrão e persistem entre atualizações de página.
-
-### 2. Suporte a Webhooks
-Sistemas externos podem se integrar ao módulo de comunicação através de webhooks. Eventos como criação de mensagens e atualizações de conversas disparam notificações para endpoints registrados.
-
-### 3. Sistema de Filas para Processamento Assíncrono
-Tarefas em segundo plano como processamento de IA e notificações são tratadas através de um sistema de filas assíncrono, melhorando a responsividade da UI e a escalabilidade do sistema.
-
-### 4. Métricas Detalhadas de Desempenho
-O módulo rastreia métricas detalhadas de desempenho para chamadas de API, operações de cache e processamento de filas, fornecendo insights para otimização.
-
-### 5. Backup Automático de Conversas
-As conversas são automaticamente armazenadas em backup para garantir a durabilidade dos dados e permitir recuperação em caso de perda de dados.
-
-## Configuração do Ambiente
-
-```
-NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima_supabase
-SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_supabase
-OPENAI_API_KEY=sua_chave_api_openai
-||||||| c81f4c1
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-=======
 ## Estrutura Principal
 
 ### 1. Sistema de Canais (/channels)
@@ -165,29 +91,15 @@ bun dev
 ```bash
 git clone https://github.com/eduzayn/modulo_comunicacao.git
 cd modulo_comunicacao
->>>>>>> devin/1741591814-communication-module
 ```
 
-<<<<<<< HEAD
-## Instalação e Execução
-||||||| c81f4c1
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-=======
 2. Instale as dependências:
 ```bash
 npm install
 # ou
 pnpm install
 ```
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-```bash
-# Instalar dependências
-npm install
-||||||| c81f4c1
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-=======
 3. Configure as variáveis de ambiente:
 Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
 ```
@@ -197,47 +109,18 @@ SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role_do_supabase
 SUPABASE_JWT_SECRET=seu_jwt_secret_do_supabase
 OPENAI_API_KEY=sua_chave_api_da_openai
 ```
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-# Executar em modo de desenvolvimento
-npm run dev
-||||||| c81f4c1
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-=======
 4. Execute o projeto em modo de desenvolvimento:
 ```bash
 npm run dev
 # ou
 pnpm dev
 ```
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-# Construir para produção
-npm run build
-||||||| c81f4c1
-## Learn More
-=======
 ## Estrutura do Banco de Dados (Supabase)
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-# Iniciar em modo de produção
-npm start
-```
-||||||| c81f4c1
-To learn more about Next.js, take a look at the following resources:
-=======
 ### Tabelas Principais
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-## Documentação Adicional
-||||||| c81f4c1
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-=======
 #### channels
 - id (uuid, primary key)
 - name (text)
@@ -246,13 +129,7 @@ To learn more about Next.js, take a look at the following resources:
 - config (jsonb): configurações específicas do canal
 - created_at (timestamp)
 - updated_at (timestamp)
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-Para mais detalhes sobre cada componente do sistema, consulte a pasta `src/docs/`:
-||||||| c81f4c1
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-=======
 #### conversations
 - id (uuid, primary key)
 - channel_id (uuid, foreign key)
@@ -262,18 +139,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 - context (text): 'academic', 'administrative', 'support'
 - created_at (timestamp)
 - updated_at (timestamp)
->>>>>>> devin/1741591814-communication-module
 
-<<<<<<< HEAD
-- [Melhorias de Performance](./src/docs/performance-improvements.md) - Detalhes sobre as cinco principais melhorias de performance
-- [Sistema de Backup](./src/docs/backup-system.md) - Documentação completa do sistema de backup automático
-||||||| c81f4c1
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
 #### messages
 - id (uuid, primary key)
 - conversation_id (uuid, foreign key)
@@ -347,4 +213,3 @@ Para contribuir com o projeto, siga os passos:
 ## Licença
 
 Este projeto é propriedade da Edunéxia e seu uso é restrito aos termos estabelecidos pela empresa.
->>>>>>> devin/1741591814-communication-module
