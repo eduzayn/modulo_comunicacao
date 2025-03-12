@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 import { StatsCard } from '../../components/dashboard/stats-card';
 import { RecentActivity } from '../../components/dashboard/recent-activity';
 import { ChannelStats } from '../../components/dashboard/channel-stats';

@@ -1,0 +1,91 @@
+{
+  "colors": {
+    "modules": {
+      "communication": {
+        "light": "#4361EE",
+        "main": "#3B82F6",
+        "dark": "#2563EB",
+        "gradient": "linear-gradient(135deg, #4361EE 0%, #3B82F6 100%)"
+      },
+      "student": {
+        "light": "#10B981",
+        "main": "#059669",
+        "dark": "#047857",
+        "gradient": "linear-gradient(135deg, #10B981 0%, #059669 100%)"
+      },
+      "content": {
+        "light": "#8B5CF6",
+        "main": "#7C3AED",
+        "dark": "#6D28D9",
+        "gradient": "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)"
+      },
+      "enrollment": {
+        "light": "#F59E0B",
+        "main": "#D97706",
+        "dark": "#B45309",
+        "gradient": "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)"
+      }
+    },
+    "neutral": {
+      "50": "#F9FAFB",
+      "100": "#F3F4F6",
+      "200": "#E5E7EB",
+      "300": "#D1D5DB",
+      "400": "#9CA3AF",
+      "500": "#6B7280",
+      "600": "#4B5563",
+      "700": "#374151",
+      "800": "#1F2937",
+      "900": "#111827"
+    },
+    "semantic": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#3B82F6"
+    }
+  },
+  "typography": {
+    "fontFamily": "Inter, sans-serif",
+    "headings": {
+      "h1": "text-4xl md:text-5xl font-bold",
+      "h2": "text-3xl md:text-4xl font-bold",
+      "h3": "text-2xl md:text-3xl font-bold",
+      "h4": "text-xl md:text-2xl font-bold"
+    },
+    "body": {
+      "default": "text-base",
+      "small": "text-sm",
+      "large": "text-lg"
+    }
+  },
+  "components": {
+    "sidebar": {
+      "width": {
+        "desktop": "w-64",
+        "tablet": "w-16",
+        "mobile": "w-0"
+      },
+      "transitions": "transition-all duration-300"
+    },
+    "buttons": {
+      "variants": ["default", "secondary", "outline", "ghost", "link", "destructive", "success"],
+      "sizes": ["default", "sm", "lg", "icon"]
+    },
+    "cards": {
+      "variants": ["default", "bordered", "gradient"]
+    },
+    "badges": {
+      "variants": ["default", "primary", "success", "warning", "error", "outline"]
+    }
+  },
+  "responsive": {
+    "breakpoints": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1536px"
+    }
+  }
+}

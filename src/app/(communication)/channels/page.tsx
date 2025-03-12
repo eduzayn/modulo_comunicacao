@@ -1,8 +1,8 @@
 'use client';
 
 import { useChannels } from '@/hooks/use-channels';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 
 export default function ChannelsPage() {
