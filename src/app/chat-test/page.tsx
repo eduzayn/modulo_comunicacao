@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Chat } from '../../components/chat';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { Message } from '../../types/conversations';
 
 export default function ChatTestPage() {
