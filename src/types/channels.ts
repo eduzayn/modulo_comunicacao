@@ -1,5 +1,8 @@
 import { Channel } from './index';
 
+export type ChannelType = Channel['type'];
+export type ChannelStatus = Channel['status'];
+
 export interface WhatsAppConfig {
   apiKey: string;
   phoneNumber: string;

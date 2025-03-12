@@ -2,8 +2,9 @@
  * Service for managing communication channels in Supabase
  */
 
-import { BaseService } from './base-service';
-import { Channel, ChannelType, ChannelStatus } from '@/types/channels';
+import { BaseService, supabase } from './base-service';
+import type { Channel } from '@/types/index';
+import type { ChannelType, ChannelStatus } from '@/types/channels';
 
 /**
  * Service for channel operations
@@ -17,7 +18,7 @@ export class ChannelService extends BaseService {
    * Get all channels
    */
   async getChannels(): Promise<Channel[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from(this.tableName)
       .select('*');
     
@@ -32,7 +33,7 @@ export class ChannelService extends BaseService {
    * Get channels by type
    */
   async getChannelsByType(type: ChannelType): Promise<Channel[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('type', type);
@@ -83,7 +84,7 @@ export class ChannelService extends BaseService {
    * Get active channels
    */
   async getActiveChannels(): Promise<Channel[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('status', 'active');
@@ -139,9 +140,9 @@ export class ChannelService extends BaseService {
     }
   }
   
-  // For TypeScript compatibility with BaseService
-  private get supabase() {
-    return super.supabase;
+  // Access supabase client directly from import
+  private get client() {
+    return supabase;
   }
 }
 
