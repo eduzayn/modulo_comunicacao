@@ -13,7 +13,8 @@ import {
   Settings, 
   CreditCard, 
   Tag, 
-  File 
+  File,
+  MessageSquare
 } from 'lucide-react';
 
 // Module-specific configuration
@@ -22,12 +23,12 @@ const moduleConfig = {
     name: 'Comunicação',
     color: colors.primary.communication,
     routes: [
-      { path: '/comunicacao/dashboard', name: 'Dashboard', icon: <Home size={20} /> },
-      { path: '/comunicacao/mensagens', name: 'Mensagens', icon: <FileText size={20} /> },
-      { path: '/comunicacao/contatos', name: 'Contatos', icon: <Users size={20} /> },
-      { path: '/comunicacao/templates', name: 'Templates', icon: <FileText size={20} /> },
-      { path: '/comunicacao/relatorios', name: 'Relatórios', icon: <BarChart2 size={20} /> },
-      { path: '/comunicacao/configuracoes', name: 'Configurações', icon: <Settings size={20} /> },
+      { path: '/', name: 'Dashboard', icon: <Home size={20} /> },
+      { path: '/conversations', name: 'Conversas', icon: <MessageSquare size={20} /> },
+      { path: '/channels', name: 'Canais', icon: <Users size={20} /> },
+      { path: '/templates', name: 'Templates', icon: <FileText size={20} /> },
+      { path: '/ai', name: 'Inteligência Artificial', icon: <BarChart2 size={20} /> },
+      { path: '/settings', name: 'Configurações', icon: <Settings size={20} /> },
     ],
   },
   student: {
