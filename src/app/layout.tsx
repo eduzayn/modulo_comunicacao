@@ -1,41 +1,29 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { AuthProvider } from "@/contexts/AuthContext";
-import "./globals.css";
+/**
+ * Root layout component for the application
+ * 
+ * This component provides the base HTML structure and global providers
+ * for the entire application.
+ */
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import './globals.css';
+import { Metadata } from 'next';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
-  title: "Eduzayn - Módulo de Comunicação",
-  description: "Sistema de comunicação integrado da Eduzayn",
+  title: 'Edunexia Communication Module',
+  description: 'Communication module for the Edunexia platform',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
-      >
+      <body>
         <AuthProvider>
-          <ThemeProvider module="communication">
-            <MainLayout module="communication">
-              {children}
-            </MainLayout>
-          </ThemeProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

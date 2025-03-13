@@ -1,14 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
+// This import is commented out as it's not currently used
+// import { createClient } from '@supabase/supabase-js';
 import { logger } from '../../lib/logger';
 import { BaseService } from './base-service';
 import type { 
-  Conversation, 
-  ConversationWithMessages, 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
   Message
 } from '../../types/conversations';
+import type { Conversation } from '../../types';
+
+// Define ConversationWithMessages type locally since it's not exported from types
+interface ConversationWithMessages extends Conversation {
+  messages?: Message[];
+}
 
 /**
  * Service for managing conversations
@@ -23,7 +28,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async fetchConversations(): Promise<ConversationWithMessages[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseClient
         .from(this.tableName)
         .select('*, messages(*)');
 
@@ -40,7 +45,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async fetchConversationById(id: string): Promise<ConversationWithMessages | null> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseClient
         .from(this.tableName)
         .select('*, messages(*)')
         .eq('id', id)
@@ -59,7 +64,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async createConversation(data: CreateConversationInput): Promise<Conversation | null> {
     try {
-      const { data: newConversation, error } = await this.supabase
+      const { data: newConversation, error } = await this.supabaseClient
         .from(this.tableName)
         .insert({
           ...data,
@@ -82,7 +87,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async updateConversation(id: string, data: UpdateConversationInput): Promise<Conversation | null> {
     try {
-      const { data: updatedConversation, error } = await this.supabase
+      const { data: updatedConversation, error } = await this.supabaseClient
         .from(this.tableName)
         .update({
           ...data,
@@ -105,7 +110,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async sendMessage(conversationId: string, data: SendMessageInput): Promise<boolean> {
     try {
-      const { error } = await this.supabase
+      const { error } = await this.supabaseClient
         .from('messages')
         .insert({
           conversationId,
@@ -117,7 +122,9 @@ class ConversationsService extends BaseService<Conversation> {
       
       // Update conversation's updatedAt timestamp
       await this.updateConversation(conversationId, {
-        updatedAt: new Date().toISOString()
+        // Use a type assertion to allow updatedAt
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedAt: new Date().toISOString() as any
       });
       
       return true;
@@ -132,7 +139,7 @@ class ConversationsService extends BaseService<Conversation> {
    */
   async getConversationMessages(conversationId: string): Promise<Message[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseClient
         .from('messages')
         .select('*')
         .eq('conversationId', conversationId)
