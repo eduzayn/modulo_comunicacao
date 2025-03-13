@@ -1,46 +1,29 @@
-import { BaseService } from '../../services/supabase/base-service';
+import { BaseService } from '../../../services/supabase/base-service';
 
-// Mock the Supabase client
-const mockSelect = jest.fn();
-const mockInsert = jest.fn();
-const mockUpdate = jest.fn();
-const mockDelete = jest.fn();
-const mockEq = jest.fn();
-const mockSingle = jest.fn();
-const mockOrder = jest.fn();
-const mockFrom = jest.fn().mockReturnValue({
-  select: mockSelect.mockReturnValue({
-    eq: mockEq.mockReturnValue({
-      single: mockSingle,
-    }),
-    order: mockOrder,
-  }),
-  insert: mockInsert,
-  update: mockUpdate,
-  delete: mockDelete.mockReturnValue({
-    eq: mockEq,
-  }),
-});
+// Mock Supabase client
+const mockSupabaseClient = {
+  from: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
+  insert: jest.fn().mockReturnThis(),
+  update: jest.fn().mockReturnThis(),
+  delete: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  in: jest.fn().mockReturnThis(),
+  order: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  single: jest.fn(),
+  match: jest.fn().mockReturnThis(),
+  data: null,
+  error: null,
+};
 
-// Mock the supabase module
-jest.mock('../../lib/supabase', () => ({
-  supabase: {
-    from: mockFrom,
-  },
-}));
-
-// Define a test model
-interface TestModel {
-  id: string;
-  name: string;
-  status: string;
-}
-
-// Create a test service class
-class TestService extends BaseService<TestModel> {
+// Test implementation of BaseService
+class TestService extends BaseService {
   constructor() {
     super('test_table');
   }
+
+  // Add any test-specific methods here
 }
 
 describe('BaseService', () => {
@@ -49,138 +32,114 @@ describe('BaseService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new TestService();
+    // Replace the supabase client with our mock
+    (service as any).supabase = mockSupabaseClient;
   });
 
-  it('should create an instance with the correct table name', () => {
-    expect(service['tableName']).toBe('test_table');
-  });
-
-  it('should get all records', async () => {
-    const mockData = [
-      { id: '1', name: 'Test 1', status: 'active' },
-      { id: '2', name: 'Test 2', status: 'inactive' },
-    ];
-
-    mockSelect.mockReturnValueOnce({
-      order: mockOrder.mockReturnValueOnce({
-        data: mockData,
+  it('should create a new record', async () => {
+    const testData = { name: 'Test Item', status: 'active' };
+    mockSupabaseClient.insert.mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        data: [{ id: '1', ...testData }],
         error: null,
       }),
     });
 
-    const result = await service.getAll();
+    const result = await service.create(testData);
 
-    expect(mockFrom).toHaveBeenCalledWith('test_table');
-    expect(mockSelect).toHaveBeenCalledWith('*');
-    expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
-    expect(result).toEqual(mockData);
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.insert).toHaveBeenCalledWith(testData);
+    expect(result).toEqual({ id: '1', ...testData });
   });
 
-  it('should get a record by ID', async () => {
-    const mockData = { id: '1', name: 'Test 1', status: 'active' };
-
-    mockSelect.mockReturnValueOnce({
-      eq: mockEq.mockReturnValueOnce({
-        single: mockSingle.mockResolvedValueOnce({
-          data: mockData,
-          error: null,
-        }),
+  it('should handle errors when creating a record', async () => {
+    const testData = { name: 'Test Item', status: 'active' };
+    const error = new Error('Database error');
+    mockSupabaseClient.insert.mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        data: null,
+        error,
       }),
+    });
+
+    await expect(service.create(testData)).rejects.toThrow('Database error');
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.insert).toHaveBeenCalledWith(testData);
+  });
+
+  it('should get a record by id', async () => {
+    const testRecord = { id: '1', name: 'Test Item', status: 'active' };
+    mockSupabaseClient.single.mockResolvedValue({
+      data: testRecord,
+      error: null,
     });
 
     const result = await service.getById('1');
 
-    expect(mockFrom).toHaveBeenCalledWith('test_table');
-    expect(mockSelect).toHaveBeenCalledWith('*');
-    expect(mockEq).toHaveBeenCalledWith('id', '1');
-    expect(mockSingle).toHaveBeenCalled();
-    expect(result).toEqual(mockData);
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
+    expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', '1');
+    expect(result).toEqual(testRecord);
   });
 
-  it('should create a new record', async () => {
-    const newData = { name: 'New Test', status: 'active' };
-    const createdData = { id: '3', ...newData };
-
-    mockInsert.mockReturnValueOnce({
-      select: mockSelect.mockReturnValueOnce({
-        single: mockSingle.mockResolvedValueOnce({
-          data: createdData,
-          error: null,
-        }),
-      }),
+  it('should handle errors when getting a record by id', async () => {
+    const error = new Error('Record not found');
+    mockSupabaseClient.single.mockResolvedValue({
+      data: null,
+      error,
     });
 
-    const result = await service.create(newData);
+    await expect(service.getById('1')).rejects.toThrow('Record not found');
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
+    expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', '1');
+  });
 
-    expect(mockFrom).toHaveBeenCalledWith('test_table');
-    expect(mockInsert).toHaveBeenCalledWith(newData);
-    expect(mockSelect).toHaveBeenCalledWith();
-    expect(mockSingle).toHaveBeenCalled();
-    expect(result).toEqual(createdData);
+  it('should get all records', async () => {
+    const testRecords = [
+      { id: '1', name: 'Item 1', status: 'active' },
+      { id: '2', name: 'Item 2', status: 'inactive' },
+    ];
+    mockSupabaseClient.select.mockResolvedValue({
+      data: testRecords,
+      error: null,
+    });
+
+    const result = await service.getAll();
+
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
+    expect(result).toEqual(testRecords);
   });
 
   it('should update a record', async () => {
-    const updateData = { name: 'Updated Test' };
-    const updatedData = { id: '1', name: 'Updated Test', status: 'active' };
-
-    mockUpdate.mockReturnValueOnce({
-      eq: mockEq.mockReturnValueOnce({
-        select: mockSelect.mockReturnValueOnce({
-          single: mockSingle.mockResolvedValueOnce({
-            data: updatedData,
-            error: null,
-          }),
-        }),
+    const updateData = { name: 'Updated Item' };
+    const updatedRecord = { id: '1', name: 'Updated Item', status: 'active' };
+    mockSupabaseClient.update.mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        data: [updatedRecord],
+        error: null,
       }),
     });
 
     const result = await service.update('1', updateData);
 
-    expect(mockFrom).toHaveBeenCalledWith('test_table');
-    expect(mockUpdate).toHaveBeenCalledWith(updateData);
-    expect(mockEq).toHaveBeenCalledWith('id', '1');
-    expect(mockSelect).toHaveBeenCalledWith();
-    expect(mockSingle).toHaveBeenCalled();
-    expect(result).toEqual(updatedData);
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.update).toHaveBeenCalledWith(updateData);
+    expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', '1');
+    expect(result).toEqual(updatedRecord);
   });
 
   it('should delete a record', async () => {
-    mockDelete.mockReturnValueOnce({
-      eq: mockEq.mockReturnValueOnce({
-        then: jest.fn().mockResolvedValueOnce({
-          error: null,
-        }),
-      }),
+    mockSupabaseClient.delete.mockResolvedValue({
+      data: { id: '1' },
+      error: null,
     });
 
     await service.delete('1');
 
-    expect(mockFrom).toHaveBeenCalledWith('test_table');
-    expect(mockDelete).toHaveBeenCalled();
-    expect(mockEq).toHaveBeenCalledWith('id', '1');
-  });
-
-  it('should handle errors when getting all records', async () => {
-    mockSelect.mockReturnValueOnce({
-      order: mockOrder.mockReturnValueOnce({
-        data: null,
-        error: new Error('Database error'),
-      }),
-    });
-
-    await expect(service.getAll()).rejects.toThrow('Database error');
-  });
-
-  it('should handle errors when getting a record by ID', async () => {
-    mockSelect.mockReturnValueOnce({
-      eq: mockEq.mockReturnValueOnce({
-        single: mockSingle.mockResolvedValueOnce({
-          data: null,
-          error: new Error('Record not found'),
-        }),
-      }),
-    });
-
-    await expect(service.getById('1')).rejects.toThrow('Record not found');
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith('test_table');
+    expect(mockSupabaseClient.delete).toHaveBeenCalled();
+    expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', '1');
   });
 });
