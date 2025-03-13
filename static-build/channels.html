@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canais - Módulo de Comunicação Edunexia</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-blue-800 text-white min-h-screen">
+    <div class="p-4 border-b border-blue-700">
+      <h2 class="text-xl font-bold">Edunexia</h2>
+      <p class="text-sm text-blue-300" id="userRole">Carregando...</p>
+    </div>
+    
+    <nav class="mt-4">
+      <ul>
+        <li class="mb-1">
+          <a href="dashboard.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition" data-section="dashboard">
+            Dashboard
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="conversations.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition" data-section="conversations">
+            Conversas
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="templates.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition" data-section="templates">
+            Templates
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="channels.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition bg-blue-700" data-section="channels">
+            Canais
+          </a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="absolute bottom-0 left-0 w-64 p-4 border-t border-blue-700">
+      <button id="logoutBtn" class="w-full py-2 px-4 bg-blue-700 hover:bg-blue-600 rounded transition">
+        Sair
+      </button>
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="flex-grow p-6">
+    <header class="mb-6 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Canais de Comunicação</h1>
+      <button id="newChannelButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        Configurar Novo Canal
+      </button>
+    </header>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="mb-4">
+        <div class="relative">
+          <input type="text" placeholder="Buscar canais..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="p-4 border rounded-md hover:bg-gray-50 cursor-pointer">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium">WhatsApp Business</h4>
+              <p class="text-sm text-gray-600 mt-1">Conectado via API Gupshup</p>
+              <p class="text-xs text-gray-500 mt-2">Número: +55 11 98765-4321</p>
+            </div>
+            <div class="flex items-center">
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Ativo</span>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center text-xs text-gray-500">
+            <span>Configurado em: 05/03/2025</span>
+          </div>
+        </div>
+        
+        <div class="p-4 border rounded-md hover:bg-gray-50 cursor-pointer">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium">Email Marketing</h4>
+              <p class="text-sm text-gray-600 mt-1">Conectado via SMTP</p>
+              <p class="text-xs text-gray-500 mt-2">Email: contato@edunexia.com</p>
+            </div>
+            <div class="flex items-center">
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Ativo</span>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center text-xs text-gray-500">
+            <span>Configurado em: 01/03/2025</span>
+          </div>
+        </div>
+        
+        <div class="p-4 border rounded-md hover:bg-gray-50 cursor-pointer">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium">SMS</h4>
+              <p class="text-sm text-gray-600 mt-1">Conectado via Twilio</p>
+              <p class="text-xs text-gray-500 mt-2">Número: +55 11 91234-5678</p>
+            </div>
+            <div class="flex items-center">
+              <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">Inativo</span>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center text-xs text-gray-500">
+            <span>Configurado em: 20/02/2025</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Novo Canal -->
+  <div id="newChannelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg w-full max-w-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Configurar Novo Canal</h3>
+        <button class="text-gray-500 hover:text-gray-700" id="closeChannelModal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <form id="newChannelForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Canal</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <select id="channelType" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <option value="whatsapp">WhatsApp</option>
+            <option value="email">Email</option>
+            <option value="chat">Chat</option>
+            <option value="sms">SMS</option>
+            <option value="push">Push</option>
+          </select>
+        </div>
+        
+        <div id="whatsappConfig" class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Configuração WhatsApp</label>
+          <input type="text" placeholder="API Key Gupshup" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+          <input type="text" placeholder="Número de telefone" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        </div>
+        
+        <div class="flex justify-end">
+          <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded mr-2" id="cancelChannelBtn">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar Canal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', function() {
+      const userData = JSON.parse(localStorage.getItem('edunexia_user') || '{}');
+      
+      if (!userData.isAuthenticated) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // Update user role display
+      document.getElementById('userRole').textContent = userData.role === 'admin' ? 'Administrador' : 'Usuário';
+      
+      // Channel modal functionality
+      const newChannelButton = document.getElementById('newChannelButton');
+      const closeChannelModal = document.getElementById('closeChannelModal');
+      const cancelChannelBtn = document.getElementById('cancelChannelBtn');
+      const newChannelForm = document.getElementById('newChannelForm');
+      
+      if (newChannelButton) {
+        newChannelButton.addEventListener('click', function() {
+          document.getElementById('newChannelModal').classList.remove('hidden');
+        });
+      }
+      
+      if (closeChannelModal) {
+        closeChannelModal.addEventListener('click', function() {
+          document.getElementById('newChannelModal').classList.add('hidden');
+        });
+      }
+      
+      if (cancelChannelBtn) {
+        cancelChannelBtn.addEventListener('click', function() {
+          document.getElementById('newChannelModal').classList.add('hidden');
+        });
+      }
+      
+      if (newChannelForm) {
+        newChannelForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          alert('Canal configurado com sucesso!');
+          document.getElementById('newChannelModal').classList.add('hidden');
+        });
+      }
+      
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('edunexia_user');
+        window.location.href = '/login.html';
+      });
+    });
+  </script>
+</body>
+</html>
