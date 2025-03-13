@@ -2,32 +2,29 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchAISettings, updateAISettingsAction } from '../app/actions/ai-actions';
-import type { AISettings } from '../types';
 import type { UpdateAISettingsInput } from '../types/ai';
 
 export function useAISettings() {
   const queryClient = useQueryClient();
   
-  const aiSettingsQuery = useQuery({
-    queryKey: ['aiSettings'],
-    queryFn: () => fetchAISettings(),
+  const settingsQuery = useQuery({
+    queryKey: ['ai-settings'],
+    queryFn: fetchAISettings,
   });
   
-  const updateAISettingsMutation = useMutation({
+  const updateSettingsMutation = useMutation({
     mutationFn: (data: UpdateAISettingsInput) => updateAISettingsAction(data),
-    onSuccess: (result) => {
-      if (result.data) {
-        queryClient.setQueryData(['aiSettings'], result.data);
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
     },
   });
   
   return {
-    settings: aiSettingsQuery.data?.data,
-    isLoading: aiSettingsQuery.isLoading,
-    isError: aiSettingsQuery.isError,
-    error: aiSettingsQuery.error || aiSettingsQuery.data?.error,
-    updateSettings: updateAISettingsMutation.mutate,
-    isUpdating: updateAISettingsMutation.isPending,
+    settings: settingsQuery.data?.data,
+    isLoading: settingsQuery.isLoading,
+    isError: settingsQuery.isError,
+    error: settingsQuery.error || settingsQuery.data?.error,
+    updateSettings: updateSettingsMutation.mutate,
+    isUpdating: updateSettingsMutation.isPending,
   };
 }

@@ -7,17 +7,19 @@ import type { UpdateAISettingsInput } from '../../types/ai';
 export async function fetchAISettings() {
   try {
     return { data: await getAISettings(), error: null };
-  } catch (error: any) {
-    return { data: null, error: error.message };
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    return { data: null, error: err.message };
   }
 }
 
-export async function editAISettings(data: UpdateAISettingsInput) {
+export async function updateAISettingsAction(data: UpdateAISettingsInput) {
   try {
     const settings = await updateAISettings(data);
     revalidatePath('/ai');
     return { data: settings, error: null };
-  } catch (error: any) {
-    return { data: null, error: error.message };
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    return { data: null, error: err.message };
   }
 }
