@@ -1,35 +1,28 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from './button';
+import { Button } from './Button';
 import { SmileIcon } from 'lucide-react';
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;
 }
 
-const EMOJI_CATEGORIES = [
-  {
-    name: 'Smileys',
-    emojis: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘']
-  },
-  {
-    name: 'Gestures',
-    emojis: ['👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '✋', '🤚', '🖐️', '🖖']
-  },
-  {
-    name: 'Objects',
-    emojis: ['💻', '📱', '📞', '📠', '📟', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌚', '📷']
-  },
-  {
-    name: 'Symbols',
-    emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟']
-  }
-];
+const EMOJI_CATEGORIES = {
+  'Smileys & Emotion': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘'],
+  'People & Body': ['👋', '🤚', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇'],
+  'Animals & Nature': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'],
+  'Food & Drink': ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝'],
+  'Travel & Places': ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🛴', '🚲'],
+  'Activities': ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍'],
+  'Objects': ['⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '📼'],
+  'Symbols': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖'],
+  'Flags': ['🏁', '🚩', '🎌', '🏴', '🏳️', '🏳️‍🌈', '🏳️‍⚧️', '🏴‍☠️', '🇦🇨', '🇦🇩', '🇦🇪', '🇦🇫', '🇦🇬', '🇦🇮', '🇦🇱']
+};
 
 export function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(0);
+  const [activeCategory, setActiveCategory] = useState(Object.keys(EMOJI_CATEGORIES)[0]);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,46 +45,43 @@ export function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
 
   return (
     <div className="relative" ref={pickerRef}>
-      <Button 
-        type="button" 
-        size="icon" 
+      <Button
+        type="button"
         variant="ghost"
-        className="rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+        size="icon"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Open emoji picker"
       >
         <SmileIcon className="h-5 w-5" />
-        <span className="sr-only">Emojis</span>
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-12 right-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="p-2 border-b border-gray-200">
-            <div className="flex space-x-2">
-              {EMOJI_CATEGORIES.map((category, index) => (
-                <button
-                  key={category.name}
-                  className={`p-1 rounded-md ${activeCategory === index ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
-                  onClick={() => setActiveCategory(index)}
-                >
-                  {category.emojis[0]}
-                </button>
-              ))}
-            </div>
+        <div className="absolute bottom-10 right-0 z-50 w-64 rounded-md border bg-background p-2 shadow-md">
+          <div className="mb-2 flex overflow-x-auto pb-1">
+            {Object.keys(EMOJI_CATEGORIES).map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`mr-1 whitespace-nowrap rounded-md px-2 py-1 text-xs ${
+                  activeCategory === category
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
-          
-          <div className="p-2 h-48 overflow-y-auto">
-            <h3 className="text-xs font-medium text-gray-500 mb-2">{EMOJI_CATEGORIES[activeCategory].name}</h3>
-            <div className="grid grid-cols-7 gap-1">
-              {EMOJI_CATEGORIES[activeCategory].emojis.map((emoji) => (
-                <button
-                  key={emoji}
-                  className="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded"
-                  onClick={() => handleEmojiClick(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
+          <div className="grid max-h-40 grid-cols-7 gap-1 overflow-y-auto">
+            {EMOJI_CATEGORIES[activeCategory as keyof typeof EMOJI_CATEGORIES].map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleEmojiClick(emoji)}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-lg hover:bg-muted"
+              >
+                {emoji}
+              </button>
+            ))}
           </div>
         </div>
       )}

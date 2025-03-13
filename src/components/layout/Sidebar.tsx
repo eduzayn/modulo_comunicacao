@@ -1,224 +1,278 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { colors } from './colors';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Home, 
-  Users, 
-  FileText, 
-  BarChart2, 
-  Settings, 
-  CreditCard, 
-  Tag, 
-  File,
-  MessageSquare
+import {
+  MessageSquare,
+  Settings,
+  LayoutDashboard,
+  Phone,
+  FileText,
+  Brain,
+  Mail,
+  BarChart,
+  HardDrive,
+  Palette,
+  Users
 } from 'lucide-react';
 
-// Module-specific configuration
-const moduleConfig = {
-  communication: {
-    name: 'Comunicação',
-    color: colors.primary.communication,
-    routes: [
-      { path: '/', name: 'Dashboard', icon: <Home size={20} /> },
-      { path: '/conversations', name: 'Conversas', icon: <MessageSquare size={20} /> },
-      { path: '/channels', name: 'Canais', icon: <Users size={20} /> },
-      { path: '/templates', name: 'Templates', icon: <FileText size={20} /> },
-      { path: '/ai', name: 'Inteligência Artificial', icon: <BarChart2 size={20} /> },
-      { path: '/settings', name: 'Configurações', icon: <Settings size={20} /> },
-    ],
-  },
-  student: {
-    name: 'Portal do Aluno',
-    color: colors.primary.student,
-    routes: [
-      { path: '/aluno/dashboard', name: 'Dashboard', icon: <Home size={20} /> },
-      { path: '/aluno/cursos', name: 'Meus Cursos', icon: <File size={20} /> },
-      { path: '/aluno/aulas', name: 'Aulas', icon: <FileText size={20} /> },
-      { path: '/aluno/notas', name: 'Notas', icon: <BarChart2 size={20} /> },
-      { path: '/aluno/financeiro', name: 'Financeiro', icon: <CreditCard size={20} /> },
-      { path: '/aluno/contratos', name: 'Meus Contratos', icon: <FileText size={20} /> },
-      { path: '/aluno/perfil', name: 'Meu Perfil', icon: <Users size={20} /> },
-    ],
-  },
-  content: {
-    name: 'Conteúdo',
-    color: colors.primary.content,
-    routes: [
-      { path: '/conteudo/dashboard', name: 'Dashboard', icon: <Home size={20} /> },
-      { path: '/conteudo/cursos', name: 'Cursos', icon: <File size={20} /> },
-      { path: '/conteudo/aulas', name: 'Aulas', icon: <FileText size={20} /> },
-      { path: '/conteudo/materiais', name: 'Materiais', icon: <File size={20} /> },
-      { path: '/conteudo/avaliacoes', name: 'Avaliações', icon: <BarChart2 size={20} /> },
-      { path: '/conteudo/configuracoes', name: 'Configurações', icon: <Settings size={20} /> },
-    ],
-  },
-  enrollment: {
-    name: 'Matrículas',
-    color: colors.primary.enrollment,
-    routes: [
-      { path: '/matricula/dashboard', name: 'Dashboard', icon: <Home size={20} /> },
-      { path: '/matricula/alunos', name: 'Alunos', icon: <Users size={20} /> },
-      { path: '/matricula/cursos', name: 'Cursos', icon: <File size={20} /> },
-      { path: '/matricula/pagamentos', name: 'Pagamentos', icon: <CreditCard size={20} /> },
-      { path: '/matricula/descontos', name: 'Descontos', icon: <Tag size={20} /> },
-      { path: '/matricula/relatorios', name: 'Relatórios', icon: <BarChart2 size={20} /> },
-      { path: '/matricula/configuracoes', name: 'Configurações', icon: <Settings size={20} /> },
-    ],
-  },
-};
-
 interface SidebarProps {
+  className?: string;
   module?: 'communication' | 'student' | 'content' | 'enrollment';
 }
 
-export const Sidebar = ({ module = 'enrollment' }: SidebarProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
+export function Sidebar({ className, module = 'communication' }: SidebarProps) {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { user } = useAuth();
+
+  // Module-specific configuration
+  const moduleConfig = {
+    communication: {
+      name: 'Comunicação',
+      routes: [
+        {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          href: '/',
+          active: pathname === '/',
+        },
+        {
+          label: 'Channels',
+          icon: Phone,
+          href: '/channels',
+          active: pathname.startsWith('/channels'),
+        },
+        {
+          label: 'Conversations',
+          icon: MessageSquare,
+          href: '/conversations',
+          active: pathname.startsWith('/conversations'),
+        },
+        {
+          label: 'Templates',
+          icon: FileText,
+          href: '/templates',
+          active: pathname.startsWith('/templates'),
+        },
+        {
+          label: 'AI Settings',
+          icon: Brain,
+          href: '/ai',
+          active: pathname.startsWith('/ai'),
+        },
+        {
+          label: 'Email',
+          icon: Mail,
+          href: '/email',
+          active: pathname.startsWith('/email'),
+        },
+        {
+          label: 'Metrics',
+          icon: BarChart,
+          href: '/metrics',
+          active: pathname.startsWith('/metrics'),
+        },
+        {
+          label: 'Backups',
+          icon: HardDrive,
+          href: '/backups',
+          active: pathname.startsWith('/backups'),
+        },
+        {
+          label: 'Design System',
+          icon: Palette,
+          href: '/design-system',
+          active: pathname.startsWith('/design-system'),
+        },
+        {
+          label: 'Settings',
+          icon: Settings,
+          href: '/settings',
+          active: pathname.startsWith('/settings'),
+        },
+      ]
+    },
+    student: {
+      name: 'Portal do Aluno',
+      routes: [
+        {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          href: '/aluno/dashboard',
+          active: pathname === '/aluno/dashboard',
+        },
+        {
+          label: 'Meus Cursos',
+          icon: FileText,
+          href: '/aluno/cursos',
+          active: pathname.startsWith('/aluno/cursos'),
+        },
+        {
+          label: 'Aulas',
+          icon: FileText,
+          href: '/aluno/aulas',
+          active: pathname.startsWith('/aluno/aulas'),
+        },
+        {
+          label: 'Notas',
+          icon: BarChart,
+          href: '/aluno/notas',
+          active: pathname.startsWith('/aluno/notas'),
+        },
+        {
+          label: 'Financeiro',
+          icon: HardDrive,
+          href: '/aluno/financeiro',
+          active: pathname.startsWith('/aluno/financeiro'),
+        },
+        {
+          label: 'Meu Perfil',
+          icon: Users,
+          href: '/aluno/perfil',
+          active: pathname.startsWith('/aluno/perfil'),
+        },
+      ]
+    },
+    content: {
+      name: 'Conteúdo',
+      routes: [
+        {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          href: '/conteudo/dashboard',
+          active: pathname === '/conteudo/dashboard',
+        },
+        {
+          label: 'Cursos',
+          icon: FileText,
+          href: '/conteudo/cursos',
+          active: pathname.startsWith('/conteudo/cursos'),
+        },
+        {
+          label: 'Aulas',
+          icon: FileText,
+          href: '/conteudo/aulas',
+          active: pathname.startsWith('/conteudo/aulas'),
+        },
+        {
+          label: 'Materiais',
+          icon: FileText,
+          href: '/conteudo/materiais',
+          active: pathname.startsWith('/conteudo/materiais'),
+        },
+        {
+          label: 'Avaliações',
+          icon: BarChart,
+          href: '/conteudo/avaliacoes',
+          active: pathname.startsWith('/conteudo/avaliacoes'),
+        },
+        {
+          label: 'Configurações',
+          icon: Settings,
+          href: '/conteudo/configuracoes',
+          active: pathname.startsWith('/conteudo/configuracoes'),
+        },
+      ]
+    },
+    enrollment: {
+      name: 'Matrículas',
+      routes: [
+        {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          href: '/matricula/dashboard',
+          active: pathname === '/matricula/dashboard',
+        },
+        {
+          label: 'Alunos',
+          icon: Users,
+          href: '/matricula/alunos',
+          active: pathname.startsWith('/matricula/alunos'),
+        },
+        {
+          label: 'Cursos',
+          icon: FileText,
+          href: '/matricula/cursos',
+          active: pathname.startsWith('/matricula/cursos'),
+        },
+        {
+          label: 'Pagamentos',
+          icon: HardDrive,
+          href: '/matricula/pagamentos',
+          active: pathname.startsWith('/matricula/pagamentos'),
+        },
+        {
+          label: 'Relatórios',
+          icon: BarChart,
+          href: '/matricula/relatorios',
+          active: pathname.startsWith('/matricula/relatorios'),
+        },
+        {
+          label: 'Configurações',
+          icon: Settings,
+          href: '/matricula/configuracoes',
+          active: pathname.startsWith('/matricula/configuracoes'),
+        },
+      ]
+    }
+  };
+
   const config = moduleConfig[module];
-  const { user, logout } = useAuth();
-  
-  // Handle responsive behavior
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 768);
-      setIsTablet(width >= 768 && width < 1024);
-      
-      if (width >= 1024) {
-        setIsOpen(true);
-      } else if (!isMobile && !isTablet) {
-        setIsOpen(false);
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isMobile, isTablet]);
-  
+
   return (
-    <>
-      {/* Mobile overlay */}
-      {isOpen && isMobile && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-      
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 transition-all duration-300 z-40 ${
-          isOpen 
-            ? 'translate-x-0' 
-            : '-translate-x-full md:translate-x-0'
-        } ${
-          isTablet
-            ? 'w-16 hover:w-64'
-            : 'w-64'
-        }`}
-        style={{ 
-          borderTopColor: config.color.main,
-          borderTopWidth: '3px',
-        }}
-      >
-        {/* Sidebar content */}
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div 
-            className="h-16 flex items-center justify-center border-b border-neutral-200"
-            style={{ background: config.color.gradient }}
-          >
-            <h1 className="text-white font-bold text-xl">
-              {isTablet ? config.name.charAt(0) : config.name}
-            </h1>
+    <div className={cn('pb-12 w-64 bg-background border-r', className)}>
+      <div className="space-y-4 py-4">
+        <div className="px-4 py-2">
+          <h2 className="text-xl font-bold tracking-tight">
+            Edunéxia {config.name}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Módulo de {config.name}
+          </p>
+        </div>
+        <div className="px-4">
+          <div className="space-y-1">
+            {config.routes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className={cn(
+                  'flex items-center py-2 px-3 text-sm font-medium rounded-md transition-colors',
+                  route.active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                )}
+              >
+                <route.icon className="mr-2 h-4 w-4" />
+                {route.label}
+              </Link>
+            ))}
           </div>
-          
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <ul className="space-y-1 px-3">
-              {config.routes.map((route) => (
-                <li key={route.path}>
-                  <Link
-                    href={route.path}
-                    className={`flex items-center px-3 py-2 rounded-md transition-colors ${
-                      pathname === route.path
-                        ? `bg-neutral-100 text-neutral-900 font-medium`
-                        : 'text-neutral-600 hover:bg-neutral-50'
-                    }`}
-                    style={
-                      pathname === route.path
-                        ? { color: config.color.main }
-                        : {}
-                    }
-                  >
-                    <span className="flex-shrink-0" style={pathname === route.path ? { color: config.color.main } : {}}>
-                      {route.icon}
-                    </span>
-                    <span className={`ml-3 ${isTablet ? 'opacity-0 group-hover:opacity-100' : ''}`}>
-                      {route.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          
-          {/* User Profile */}
-          {user && (
-            <div className="mt-auto p-4 border-t border-neutral-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-semibold">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-neutral-900">{user.name}</p>
-                    <p className="text-xs text-neutral-500">{user.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-xs text-neutral-500 hover:text-neutral-700"
-                >
-                  Sair
-                </button>
+        </div>
+      </div>
+      
+      {/* User Profile */}
+      {user && (
+        <div className="mt-auto p-4 border-t border-neutral-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-semibold">
+                {user.name?.charAt(0) || 'U'}
               </div>
-            </div>
-          )}
-          
-          {/* Footer */}
-          <div className="p-4 border-t border-neutral-200">
-            <div className="flex items-center text-sm text-neutral-500">
-              <span className={`${isTablet ? 'hidden' : 'block'}`}>Edunexia © 2025</span>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-neutral-900">{user.name || 'User'}</p>
+                <p className="text-xs text-neutral-500">{user.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
+              </div>
             </div>
           </div>
         </div>
-      </aside>
-      
-      {/* Mobile toggle button */}
-      {isMobile && (
-        <button
-          className="fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
       )}
-    </>
+    </div>
   );
-};
+}
 
 export default Sidebar;

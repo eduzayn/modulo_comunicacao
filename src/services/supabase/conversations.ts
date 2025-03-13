@@ -1,176 +1,162 @@
-import { supabase, supabaseAdmin } from '../../lib/supabase';
-import type { Conversation, Message } from '../../types';
+import { createClient } from '@supabase/supabase-js';
+import { logger } from '../../lib/logger';
+import { BaseService } from './base-service';
 import type { 
+  Conversation, 
+  ConversationWithMessages, 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
-  GetConversationsInput
+  Message
 } from '../../types/conversations';
-import type { Database } from '../../lib/database.types';
 
-// Use admin client for operations that need to bypass RLS
-const adminClient = supabaseAdmin || supabase;
+/**
+ * Service for managing conversations
+ */
+class ConversationsService extends BaseService<Conversation> {
+  constructor() {
+    super('conversations');
+  }
 
-// Helper function to convert database model to application model
-function mapDbToConversation(data: Database['public']['Tables']['conversations']['Row']): Conversation {
-  return {
-    id: data.id,
-    channelId: data.channel_id,
-    participants: data.participants,
-    messages: [], // Messages are loaded separately
-    status: data.status as Conversation['status'],
-    priority: data.priority as Conversation['priority'],
-    context: data.context as Conversation['context'],
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at)
-  };
+  /**
+   * Fetch all conversations
+   */
+  async fetchConversations(): Promise<ConversationWithMessages[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from(this.tableName)
+        .select('*, messages(*)');
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      logger.error(`Failed to fetch conversations: ${(error as Error).message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Fetch a conversation by ID
+   */
+  async fetchConversationById(id: string): Promise<ConversationWithMessages | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from(this.tableName)
+        .select('*, messages(*)')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      logger.error(`Failed to fetch conversation by ID: ${(error as Error).message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Create a new conversation
+   */
+  async createConversation(data: CreateConversationInput): Promise<Conversation | null> {
+    try {
+      const { data: newConversation, error } = await this.supabase
+        .from(this.tableName)
+        .insert({
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return newConversation;
+    } catch (error) {
+      logger.error(`Failed to create conversation: ${(error as Error).message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Update an existing conversation
+   */
+  async updateConversation(id: string, data: UpdateConversationInput): Promise<Conversation | null> {
+    try {
+      const { data: updatedConversation, error } = await this.supabase
+        .from(this.tableName)
+        .update({
+          ...data,
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updatedConversation;
+    } catch (error) {
+      logger.error(`Failed to update conversation: ${(error as Error).message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Send a message to a conversation
+   */
+  async sendMessage(conversationId: string, data: SendMessageInput): Promise<boolean> {
+    try {
+      const { error } = await this.supabase
+        .from('messages')
+        .insert({
+          conversationId,
+          ...data,
+          createdAt: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      
+      // Update conversation's updatedAt timestamp
+      await this.updateConversation(conversationId, {
+        updatedAt: new Date().toISOString()
+      });
+      
+      return true;
+    } catch (error) {
+      logger.error(`Failed to send message: ${(error as Error).message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Get messages for a conversation
+   */
+  async getConversationMessages(conversationId: string): Promise<Message[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('messages')
+        .select('*')
+        .eq('conversationId', conversationId)
+        .order('createdAt', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      logger.error(`Failed to get conversation messages: ${(error as Error).message}`);
+      return [];
+    }
+  }
 }
 
-// Helper function to convert database model to application model
-function mapDbToMessage(data: Database['public']['Tables']['messages']['Row']): Message {
-  return {
-    id: data.id,
-    conversationId: data.conversation_id,
-    senderId: data.sender_id,
-    content: data.content,
-    type: data.media_url ? 'document' : 'text', // Infer type based on media_url
-    status: data.read ? 'read' : 'delivered', // Infer status based on read flag
-    metadata: {}, // Default metadata
-    createdAt: new Date(data.created_at)
-  };
-}
+// Create singleton instance
+const conversationsService = new ConversationsService();
 
-export async function getConversations(params?: GetConversationsInput) {
-  let query = adminClient
-    .from('conversations')
-    .select('*')
-    .order('last_message_at', { ascending: false });
-  
-  if (params?.channelId) {
-    query = query.eq('channel_id', params.channelId);
-  }
-  
-  if (params?.status) {
-    query = query.eq('status', params.status);
-  }
-  
-  if (params?.priority) {
-    query = query.eq('priority', params.priority);
-  }
-  
-  if (params?.context) {
-    query = query.eq('context', params.context);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    throw new Error(`Error fetching conversations: ${error.message}`);
-  }
-  
-  return data.map(mapDbToConversation);
-}
+// Export individual methods for easier imports
+export const fetchConversations = () => conversationsService.fetchConversations();
+export const fetchConversationById = (id: string) => conversationsService.fetchConversationById(id);
+export const createConversation = (data: CreateConversationInput) => conversationsService.createConversation(data);
+export const updateConversation = (id: string, data: UpdateConversationInput) => conversationsService.updateConversation(id, data);
+export const sendMessage = (conversationId: string, data: SendMessageInput) => conversationsService.sendMessage(conversationId, data);
+export const getConversationMessages = (conversationId: string) => conversationsService.getConversationMessages(conversationId);
 
-export async function getConversationById(id: string) {
-  const { data, error } = await adminClient
-    .from('conversations')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    throw new Error(`Error fetching conversation: ${error.message}`);
-  }
-  
-  return mapDbToConversation(data);
-}
-
-export async function createConversation(conversation: CreateConversationInput) {
-  // Convert to database schema
-  const dbConversation = {
-    channel_id: conversation.channelId,
-    participants: conversation.participants,
-    status: 'open', // Default status
-    priority: 'medium', // Default priority
-    context: 'support', // Default context
-    last_message_at: new Date().toISOString()
-  };
-  
-  const { data, error } = await adminClient
-    .from('conversations')
-    .insert(dbConversation)
-    .select()
-    .single();
-  
-  if (error) {
-    throw new Error(`Error creating conversation: ${error.message}`);
-  }
-  
-  return mapDbToConversation(data);
-}
-
-export async function updateConversation(id: string, conversation: UpdateConversationInput) {
-  // Convert to database schema
-  const dbConversation: any = {};
-  if (conversation.status !== undefined) dbConversation.status = conversation.status;
-  if (conversation.priority !== undefined) dbConversation.priority = conversation.priority;
-  if (conversation.context !== undefined) dbConversation.context = conversation.context;
-  
-  const { data, error } = await adminClient
-    .from('conversations')
-    .update(dbConversation)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) {
-    throw new Error(`Error updating conversation: ${error.message}`);
-  }
-  
-  return mapDbToConversation(data);
-}
-
-export async function getConversationMessages(conversationId: string) {
-  const { data, error } = await adminClient
-    .from('messages')
-    .select('*')
-    .eq('conversation_id', conversationId)
-    .order('created_at');
-  
-  if (error) {
-    throw new Error(`Error fetching messages: ${error.message}`);
-  }
-  
-  return data.map(mapDbToMessage);
-}
-
-export async function sendMessage(conversationId: string, message: SendMessageInput) {
-  // First send the message
-  const { data: messageData, error: messageError } = await adminClient
-    .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      sender_id: message.senderId,
-      content: message.content,
-      media_url: message.mediaUrl || null,
-      read: false
-    })
-    .select()
-    .single();
-  
-  if (messageError) {
-    throw new Error(`Error sending message: ${messageError.message}`);
-  }
-  
-  // Then update the conversation's last_message_at
-  const { error: updateError } = await adminClient
-    .from('conversations')
-    .update({ last_message_at: new Date().toISOString() })
-    .eq('id', conversationId);
-  
-  if (updateError) {
-    throw new Error(`Error updating conversation: ${updateError.message}`);
-  }
-  
-  return mapDbToMessage(messageData);
-}
+// Export the service instance for advanced usage
+export default conversationsService;

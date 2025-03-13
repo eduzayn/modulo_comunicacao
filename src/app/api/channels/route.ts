@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getChannels, createChannel } from '@/app/actions/channel-actions';
-import type { Channel } from '@/src/modules/communication/types';
-import type { CreateChannelInput } from '@/src/modules/communication/types/channels';
+import { fetchChannels, addChannel } from '@/app/actions/channel-actions';
+import type { Channel } from '@/types/index';
+import type { CreateChannelInput } from '@/types/channels';
 
 export async function GET() {
   try {
-    const channels = await getChannels();
-    return NextResponse.json(channels);
+    const result = await fetchChannels();
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error('Error in channels GET route:', error);
     return NextResponse.json(
@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data: CreateChannelInput = await request.json();
-    const result = await createChannel(data);
+    const result = await addChannel(data);
     
     if (!result.success) {
       return NextResponse.json(

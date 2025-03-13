@@ -1,3 +1,9 @@
+/**
+ * Database type definitions for Supabase
+ * 
+ * This file contains TypeScript type definitions for the Supabase database schema.
+ */
+
 export type Json =
   | string
   | number
@@ -9,40 +15,7 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      ai_settings: {
-        Row: {
-          id: string
-          model: string
-          temperature: number
-          max_tokens: number
-          auto_respond: boolean
-          sentiment_analysis: boolean
-          suggest_responses: boolean
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          model: string
-          temperature: number
-          max_tokens: number
-          auto_respond: boolean
-          sentiment_analysis: boolean
-          suggest_responses: boolean
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          model?: string
-          temperature?: number
-          max_tokens?: number
-          auto_respond?: boolean
-          sentiment_analysis?: boolean
-          suggest_responses?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      channels: {
+      'communication.channels': {
         Row: {
           id: string
           name: string
@@ -56,7 +29,7 @@ export interface Database {
           id?: string
           name: string
           type: string
-          status: string
+          status?: string
           config?: Json
           created_at?: string
           updated_at?: string
@@ -67,100 +40,17 @@ export interface Database {
           type?: string
           status?: string
           config?: Json
-          created_at?: string
           updated_at?: string
         }
-        Relationships: []
       }
-      conversations: {
-        Row: {
-          id: string
-          channel_id: string
-          participants: string[]
-          status: string
-          priority: string
-          context: string
-          last_message_at: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          channel_id: string
-          participants: string[]
-          status: string
-          priority: string
-          context: string
-          last_message_at?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          channel_id?: string
-          participants?: string[]
-          status?: string
-          priority?: string
-          context?: string
-          last_message_at?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_channel_id_fkey"
-            columns: ["channel_id"]
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      messages: {
-        Row: {
-          id: string
-          conversation_id: string
-          sender_id: string
-          content: string
-          media_url: string | null
-          read: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          conversation_id: string
-          sender_id: string
-          content: string
-          media_url?: string | null
-          read?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          conversation_id?: string
-          sender_id?: string
-          content?: string
-          media_url?: string | null
-          read?: boolean
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      templates: {
+      'communication.templates': {
         Row: {
           id: string
           name: string
           content: string
-          channel_type: string
-          category: string | null
+          type: string
+          status: string
           variables: string[]
-          status: string
           created_at: string
           updated_at: string
         }
@@ -168,10 +58,9 @@ export interface Database {
           id?: string
           name: string
           content: string
-          channel_type: string
-          category?: string | null
+          type: string
+          status?: string
           variables?: string[]
-          status: string
           created_at?: string
           updated_at?: string
         }
@@ -179,14 +68,160 @@ export interface Database {
           id?: string
           name?: string
           content?: string
-          channel_type?: string
-          category?: string | null
-          variables?: string[]
+          type?: string
           status?: string
+          variables?: string[]
+          updated_at?: string
+        }
+      }
+      'communication.conversations': {
+        Row: {
+          id: string
+          title: string
+          status: string
+          channel_id: string
+          contact_id: string
+          last_message: string | null
+          last_message_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          status?: string
+          channel_id: string
+          contact_id: string
+          last_message?: string | null
+          last_message_at?: string | null
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Update: {
+          id?: string
+          title?: string
+          status?: string
+          channel_id?: string
+          contact_id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          updated_at?: string
+        }
+      }
+      'communication.messages': {
+        Row: {
+          id: string
+          conversation_id: string
+          content: string
+          sender_type: string
+          sender_id: string
+          status: string
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          content: string
+          sender_type: string
+          sender_id: string
+          status?: string
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          content?: string
+          sender_type?: string
+          sender_id?: string
+          status?: string
+          metadata?: Json | null
+        }
+      }
+      'communication.contacts': {
+        Row: {
+          id: string
+          name: string
+          email: string | null
+          phone: string | null
+          metadata: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email?: string | null
+          phone?: string | null
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string | null
+          phone?: string | null
+          metadata?: Json | null
+          updated_at?: string
+        }
+      }
+      'communication.ai_settings': {
+        Row: {
+          id: string
+          provider: string
+          model: string
+          api_key: string
+          settings: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider: string
+          model: string
+          api_key: string
+          settings?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider?: string
+          model?: string
+          api_key?: string
+          settings?: Json
+          updated_at?: string
+        }
+      }
+      'api_keys': {
+        Row: {
+          id: string
+          user_id: string
+          key: string
+          name: string
+          role: string
+          expires_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          key?: string
+          name: string
+          role?: string
+          expires_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          key?: string
+          name?: string
+          role?: string
+          expires_at?: string | null
+        }
       }
     }
     Views: {
@@ -196,9 +231,6 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
       [_ in never]: never
     }
   }

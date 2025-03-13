@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getAISettings, updateAISettings } from '@/app/actions/ai-actions';
-import type { AISettings } from '@/src/modules/communication/types';
-import type { UpdateAISettingsInput } from '@/src/modules/communication/types/ai';
+import { fetchAISettings, editAISettings } from '@/app/actions/ai-actions';
+import type { AISettings } from '@/types/index';
+import type { UpdateAISettingsInput } from '@/types/ai';
 
 export async function GET() {
   try {
-    const settings = await getAISettings();
-    return NextResponse.json(settings);
+    const result = await fetchAISettings();
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error('Error in AI settings GET route:', error);
     return NextResponse.json(
@@ -19,7 +19,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const data: UpdateAISettingsInput = await request.json();
-    const result = await updateAISettings(data);
+    const result = await editAISettings(data);
     
     if (!result.success) {
       return NextResponse.json(

@@ -2,11 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { 
-  getChannels as getChannelsService, 
-  getChannelById as getChannelByIdService, 
-  createChannel as createChannelService, 
-  updateChannel as updateChannelService, 
-  deleteChannel as deleteChannelService 
+  getChannels, 
+  getChannelById, 
+  createChannel, 
+  updateChannel, 
+  deleteChannel 
 } from '@/services/supabase/channels';
 import type { CreateChannelInput, UpdateChannelInput } from '@/types/channels';
 
@@ -16,7 +16,7 @@ export interface Channel {
   name: string;
   type: 'whatsapp' | 'email' | 'chat' | 'sms' | 'push';
   status: 'active' | 'inactive' | 'maintenance';
-  config: any;
+  config: Record<string, string | number | boolean | object | null>;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,7 +29,7 @@ const useMockData = process.env.NODE_ENV === 'development';
  * Get all channels
  * @returns Array of channels
  */
-export async function getChannels() {
+export async function getChannelsInternal() {
   try {
     // For development without Supabase, return mock data
     if (useMockData) {
@@ -54,7 +54,7 @@ export async function getChannels() {
     }
     
     // Use the service function
-    return await getChannelsService();
+    return await getChannels();
   } catch (error) {
     console.error('Error fetching channels:', error);
     return [];
@@ -62,58 +62,37 @@ export async function getChannels() {
 }
 
 /**
- * Create a new channel
- * @param channel Channel data to create
- * @returns Object with success status and data or error
+ * Fetch all channels
+ * Server action that retrieves all channels
  */
-export async function createChannel(channel: CreateChannelInput) {
+export async function fetchChannels() {
   try {
-    // For development without Supabase, return mock data
-    if (useMockData) {
-      return {
-        success: true,
-        data: {
-          id: 'mock-channel-id',
-          name: channel.name,
-          type: channel.type,
-          status: channel.status || 'active',
-          config: channel.config,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      };
-    }
-    
-    // Use the service function
-    const data = await createChannelService(channel);
-    
-    // Revalidate the channels path to update the UI
-    revalidatePath('/channels');
-    
-    return {
-      success: true,
-      data
+    const channels = useMockData ? await getChannelsInternal() : await getChannels();
+    return { 
+      success: true, 
+      data: channels, 
+      error: null 
     };
   } catch (error: any) {
-    console.error('Error creating channel:', error);
-    return {
-      success: false,
-      error: error.message || 'Failed to create channel'
+    console.error('Error fetching channels:', error);
+    return { 
+      success: false, 
+      data: null, 
+      error: error.message || 'Failed to fetch channels' 
     };
   }
 }
 
 /**
- * Get a channel by ID
- * @param id Channel ID
- * @returns Channel object or null
+ * Fetch a channel by ID
+ * Server action that retrieves a specific channel
  */
-export async function getChannelById(id: string) {
+export async function fetchChannelById(id: string) {
   try {
     // For development without Supabase, return mock data
     if (useMockData) {
-      return {
-        success: true,
+      return { 
+        success: true, 
         data: {
           id,
           name: 'Mock Channel',
@@ -122,145 +101,132 @@ export async function getChannelById(id: string) {
           config: {},
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        }
+        },
+        error: null
       };
     }
     
-    // Use the service function
-    const data = await getChannelByIdService(id);
-    
-    return {
-      success: true,
-      data
+    const channel = await getChannelById(id);
+    return { 
+      success: true, 
+      data: channel, 
+      error: null 
     };
   } catch (error: any) {
     console.error('Error fetching channel:', error);
-    return {
-      success: false,
-      error: error.message || 'Failed to fetch channel'
+    return { 
+      success: false, 
+      data: null, 
+      error: error.message || 'Failed to fetch channel' 
     };
   }
 }
 
 /**
- * Update a channel
- * @param id Channel ID
- * @param channel Channel data to update
- * @returns Object with success status and data or error
+ * Add a new channel
+ * Server action that creates a channel and revalidates paths
  */
-export async function updateChannel(id: string, channel: Partial<Channel>) {
+export async function addChannel(data: CreateChannelInput) {
   try {
     // For development without Supabase, return mock data
     if (useMockData) {
-      return {
-        success: true,
+      return { 
+        success: true, 
         data: {
-          id,
-          ...channel,
+          id: 'mock-channel-id',
+          name: data.name,
+          type: data.type,
+          status: data.status || 'active',
+          config: data.config,
+          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        }
+        },
+        error: null
       };
     }
     
-    // Use the service function
-    const data = await updateChannelService(id, channel as UpdateChannelInput);
-    
-    // Revalidate the channels path to update the UI
-    revalidatePath(`/channels/${id}`);
+    const channel = await createChannel(data);
+    // Revalidate the channels list page
     revalidatePath('/channels');
-    
-    return {
-      success: true,
-      data
+    return { 
+      success: true, 
+      data: channel, 
+      error: null 
     };
   } catch (error: any) {
-    console.error('Error updating channel:', error);
-    return {
-      success: false,
-      error: error.message || 'Failed to update channel'
+    console.error('Error creating channel:', error);
+    return { 
+      success: false, 
+      data: null, 
+      error: error.message || 'Failed to create channel' 
     };
   }
 }
 
 /**
- * Delete a channel
- * @param id Channel ID
- * @returns Object with success status and error if applicable
+ * Edit an existing channel
+ * Server action that updates a channel and revalidates paths
  */
-export async function deleteChannel(id: string) {
+export async function editChannel(id: string, data: UpdateChannelInput) {
+  try {
+    // For development without Supabase, return mock data
+    if (useMockData) {
+      return { 
+        success: true, 
+        data: {
+          id,
+          ...data,
+          updatedAt: new Date().toISOString()
+        },
+        error: null
+      };
+    }
+    
+    const channel = await updateChannel(id, data);
+    // Revalidate both the channel detail page and the channels list page
+    revalidatePath(`/channels/${id}`);
+    revalidatePath('/channels');
+    return { 
+      success: true, 
+      data: channel, 
+      error: null 
+    };
+  } catch (error: any) {
+    console.error('Error updating channel:', error);
+    return { 
+      success: false, 
+      data: null, 
+      error: error.message || 'Failed to update channel' 
+    };
+  }
+}
+
+/**
+ * Remove a channel
+ * Server action that deletes a channel and revalidates paths
+ */
+export async function removeChannel(id: string) {
   try {
     // For development without Supabase, return success
     if (useMockData) {
       return {
-        success: true
+        success: true,
+        error: null
       };
     }
     
-    // Use the service function
-    await deleteChannelService(id);
-    
-    // Revalidate the channels path to update the UI
+    await deleteChannel(id);
+    // Revalidate the channels list page
     revalidatePath('/channels');
-    
-    return {
-      success: true
+    return { 
+      success: true, 
+      error: null 
     };
   } catch (error: any) {
     console.error('Error deleting channel:', error);
-    return {
-      success: false,
-      error: error.message || 'Failed to delete channel'
+    return { 
+      success: false, 
+      error: error.message || 'Failed to delete channel' 
     };
-  }
-}
-
-// Server actions with standardized response format
-export async function fetchChannels() {
-  try {
-    return { data: await getChannels(), error: null };
-  } catch (error: any) {
-    return { data: null, error: error.message };
-  }
-}
-
-export async function fetchChannelById(id: string) {
-  try {
-    const result = await getChannelById(id);
-    return { data: result.data, error: result.success ? null : result.error };
-  } catch (error: any) {
-    return { data: null, error: error.message };
-  }
-}
-
-export async function addChannel(data: CreateChannelInput) {
-  try {
-    const result = await createChannel(data);
-    if (!result.success) {
-      return { data: null, error: result.error };
-    }
-    return { data: result.data, error: null };
-  } catch (error: any) {
-    return { data: null, error: error.message };
-  }
-}
-
-export async function editChannel(id: string, data: UpdateChannelInput) {
-  try {
-    const result = await updateChannel(id, data);
-    if (!result.success) {
-      return { data: null, error: result.error };
-    }
-    return { data: result.data, error: null };
-  } catch (error: any) {
-    return { data: null, error: error.message };
-  }
-}
-
-export async function removeChannel(id: string) {
-  try {
-    const result = await deleteChannel(id);
-    return { success: result.success, error: result.success ? null : result.error };
-  } catch (error: any) {
-    return { success: false, error: error.message };
   }
 }

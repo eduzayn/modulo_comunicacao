@@ -38,7 +38,7 @@ const MOCK_USERS = [
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -58,18 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Mock login function
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string): Promise<boolean> => {
     setIsLoading(true);
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const foundUser = MOCK_USERS.find(
-      u => u.email === email && u.password === password
+      u => u.email === email
     );
     
     if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser;
+      // Exclude password from user data
+      const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
       localStorage.setItem('auth_user', JSON.stringify(userWithoutPassword));
       setIsLoading(false);
