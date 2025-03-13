@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useConversations } from '@/hooks/use-conversations';
-import * as conversationActions from '@/app/actions/conversation-actions';
+import { fetchConversations, fetchConversationById } from '@/app/actions/conversation-actions';
 
 // Mock the conversation actions
 jest.mock('@/app/actions/conversation-actions', () => ({
@@ -9,7 +9,6 @@ jest.mock('@/app/actions/conversation-actions', () => ({
   createConversation: jest.fn(),
   updateConversation: jest.fn(),
   deleteConversation: jest.fn(),
-  sendMessage: jest.fn(),
 }));
 
 describe('useConversations hook', () => {
@@ -19,11 +18,11 @@ describe('useConversations hook', () => {
 
   it('should fetch conversations on mount', async () => {
     const mockConversations = [
-      { id: '1', title: 'Conversation 1', channelId: '1', status: 'active' },
-      { id: '2', title: 'Conversation 2', channelId: '2', status: 'closed' },
+      { id: '1', title: 'Conversation 1', messages: [] },
+      { id: '2', title: 'Conversation 2', messages: [] },
     ];
 
-    (conversationActions.fetchConversations as jest.Mock).mockResolvedValue({
+    (fetchConversations as jest.Mock).mockResolvedValue({
       data: mockConversations,
       error: null,
     });
@@ -31,7 +30,7 @@ describe('useConversations hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useConversations());
 
     expect(result.current.isLoading).toBe(true);
-    expect(conversationActions.fetchConversations).toHaveBeenCalledTimes(1);
+    expect(fetchConversations).toHaveBeenCalledTimes(1);
 
     await waitForNextUpdate();
 
@@ -44,14 +43,13 @@ describe('useConversations hook', () => {
     const mockConversation = {
       id: '1',
       title: 'Conversation 1',
-      channelId: '1',
-      status: 'active',
       messages: [
-        { id: '1', content: 'Hello', sender: 'user', timestamp: '2023-01-01T00:00:00Z' },
+        { id: 'm1', content: 'Hello', sender: 'user' },
+        { id: 'm2', content: 'Hi there', sender: 'system' },
       ],
     };
 
-    (conversationActions.fetchConversationById as jest.Mock).mockResolvedValue({
+    (fetchConversationById as jest.Mock).mockResolvedValue({
       data: mockConversation,
       error: null,
     });
@@ -59,62 +57,33 @@ describe('useConversations hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useConversations());
 
     act(() => {
-      // Assuming getConversationById exists in the hook
-      if (typeof result.current.getConversationById === 'function') {
-        result.current.getConversationById('1');
-      }
+      result.current.getConversationById('1');
     });
 
-    if (typeof result.current.getConversationById === 'function') {
-      expect(result.current.isLoading).toBe(true);
-      expect(conversationActions.fetchConversationById).toHaveBeenCalledWith('1');
+    expect(result.current.isLoading).toBe(true);
+    expect(fetchConversationById).toHaveBeenCalledWith('1');
 
-      await waitForNextUpdate();
+    await waitForNextUpdate();
 
-      expect(result.current.isLoading).toBe(false);
-      // This assumes the hook stores the selected conversation
-      if ('selectedConversation' in result.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect((result.current as any).selectedConversation).toEqual(mockConversation);
-      }
-      expect(result.current.error).toBeNull();
-    }
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.selectedConversation).toEqual(mockConversation);
+    expect(result.current.error).toBeNull();
   });
 
-  it('should create a new conversation', async () => {
-    const newConversationData = {
-      title: 'New Conversation',
-      channelId: '1',
-      status: 'active',
-    };
-
-    const createdConversation = {
-      id: '3',
-      ...newConversationData,
-    };
-
-    (conversationActions.createConversation as jest.Mock).mockResolvedValue({
-      data: createdConversation,
-      error: null,
+  it('should handle fetch errors', async () => {
+    const errorMessage = 'Failed to fetch conversations';
+    
+    (fetchConversations as jest.Mock).mockResolvedValue({
+      data: null,
+      error: errorMessage,
     });
 
     const { result, waitForNextUpdate } = renderHook(() => useConversations());
 
-    act(() => {
-      // Assuming createConversation exists in the hook
-      if (typeof result.current.createConversation === 'function') {
-        result.current.createConversation(newConversationData);
-      }
-    });
+    await waitForNextUpdate();
 
-    if (typeof result.current.createConversation === 'function') {
-      expect(result.current.isLoading).toBe(true);
-      expect(conversationActions.createConversation).toHaveBeenCalledWith(newConversationData);
-
-      await waitForNextUpdate();
-
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error).toBeNull();
-    }
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.conversations).toEqual([]);
+    expect(result.current.error).toBe(errorMessage);
   });
 });
