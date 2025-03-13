@@ -17,9 +17,6 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-// Define action types for toast reducer
-type ActionType = "ADD_TOAST" | "UPDATE_TOAST" | "DISMISS_TOAST" | "REMOVE_TOAST";
-
 let count = 0
 
 function genId() {
