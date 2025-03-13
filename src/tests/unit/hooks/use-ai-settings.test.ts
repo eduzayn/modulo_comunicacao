@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAISettings } from '@/hooks/use-ai-settings';
-// Import only the functions we're actually mocking to avoid type errors
 import * as aiActions from '@/app/actions/ai-actions';
 
 // Mock the AI actions
@@ -85,6 +84,8 @@ describe('useAISettings hook', () => {
 
     await waitForNextUpdate();
 
+    const mockUpdateAISettings = aiActions.updateAISettings as jest.Mock;
+
     act(() => {
       result.current.updateSettings({
         model: 'gpt-4',
@@ -93,8 +94,7 @@ describe('useAISettings hook', () => {
     });
 
     expect(result.current.isLoading).toBe(true);
-    // Test that the hook calls the update function with correct parameters
-    expect(aiActions.updateAISettings).toHaveBeenCalledWith({
+    expect(mockUpdateAISettings).toHaveBeenCalledWith({
       model: 'gpt-4',
       temperature: 0.8,
     });
