@@ -58,10 +58,8 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 }
 
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, ...props }, ref) => {
     // Module color is not used in this component
-    // const moduleColor = colors.primary[module];
-    
     return (
       <h3
         ref={ref}
@@ -86,7 +84,8 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
 );
 CardDescription.displayName = 'CardDescription';
 
-interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+// Using type instead of empty interface
+type CardContentProps = React.HTMLAttributes<HTMLDivElement>;
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => {
