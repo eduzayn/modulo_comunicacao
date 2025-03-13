@@ -1,51 +1,50 @@
-import { NextResponse } from 'next/server';
-import { getConversationMessages, sendMessage } from '../../../../../../services/supabase/conversations';
-import { z } from 'zod';
+import { NextRequest } from 'next/server';
+import { withApiResponse } from '../../../../../../lib/api-middleware';
+import { withAuth } from '../../../../../../lib/auth/authenticate';
+import { 
+  fetchConversationById, 
+  sendMessage,
+  getConversationMessages
+} from '../../../../../../services/supabase/conversations';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
+/**
+ * GET /api/communication/conversations/[id]/messages
+ * Fetch messages for a conversation
+ */
+export const GET = withApiResponse(
+  withAuth(async (req: NextRequest, context, userId: string) => {
+    const conversationId = context.params.id as string;
+    const messages = await getConversationMessages(conversationId);
+    return messages;
+  })
+);
 
-const sendMessageSchema = z.object({
-  content: z.string().min(1, "Message content is required"),
-  senderId: z.string(),
-  mediaUrl: z.string().url().optional(),
-  type: z.enum(['text', 'image', 'file', 'audio']).optional()
-});
-
-export async function GET(request: Request, { params }: Params) {
-  try {
-    const messages = await getConversationMessages(params.id);
-    return NextResponse.json(messages);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch messages' }, 
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: Request, { params }: Params) {
-  try {
-    const body = await request.json();
+/**
+ * POST /api/communication/conversations/[id]/messages
+ * Send a message to a conversation
+ */
+export const POST = withApiResponse(
+  withAuth(async (req: NextRequest, context, userId: string) => {
+    const conversationId = context.params.id as string;
+    const data = await req.json();
     
-    // Validate request body
-    const result = sendMessageSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid message data', details: result.error.format() }, 
-        { status: 400 }
-      );
+    // Validate required fields
+    if (!data.content) {
+      throw new Error('Message content is required');
     }
     
-    const message = await sendMessage(params.id, result.data);
-    return NextResponse.json(message);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to send message' }, 
-      { status: 500 }
-    );
-  }
-}
+    // Send message
+    const success = await sendMessage(conversationId, {
+      ...data,
+      senderId: userId,
+    });
+    
+    if (!success) {
+      throw new Error('Failed to send message');
+    }
+    
+    // Return updated conversation
+    const updatedConversation = await fetchConversationById(conversationId);
+    return updatedConversation;
+  })
+);

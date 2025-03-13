@@ -14,7 +14,7 @@ interface Channel {
   name: string;
   type: 'whatsapp' | 'email' | 'chat' | 'sms' | 'push';
   status: 'active' | 'inactive' | 'maintenance';
-  config: Record<string, any>;
+  config: Record<string, string | number | boolean | object | null>;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,7 +36,7 @@ interface Message {
   content: string;
   senderId: string;
   type: 'text' | 'image' | 'file' | 'audio';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | object | null>;
   createdAt: string;
 }
 

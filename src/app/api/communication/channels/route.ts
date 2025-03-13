@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannels, createChannel } from '@/app/actions/channel-actions';
+import { fetchChannels, addChannel } from '@/app/actions/channel-actions';
 import { z } from 'zod';
-import type { Channel } from '@/types/channels';
-import type { CreateChannelInput } from '@/types/channels';
+import type { Channel } from '@/types/index';
+import type { CreateChannelInput, ChannelConfig } from '@/types/channels';
 import { getAuthUser } from '@/lib/auth/get-auth-user';
 
 /**
@@ -70,13 +70,13 @@ const createChannelSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
   status: z.enum(['active', 'inactive', 'maintenance']),
-  config: z.record(z.any()).optional()
+  config: z.record(z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.any())])).optional()
 });
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get user ID from request using auth utility
-    const userId = await getAuthUser(request);
+    const userId = await getAuthUser();
     
     if (!userId) {
       return NextResponse.json(
@@ -86,18 +86,19 @@ export async function GET(request: NextRequest) {
     }
     
     // Fetch channels for the user
-    const channels = await getChannels();
+    const result = await fetchChannels();
     
     return NextResponse.json({
       success: true,
-      data: channels
+      data: result.data || []
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in channels GET route:', error);
+    const err = error as Error;
     return NextResponse.json(
       { 
         success: false, 
-        error: error.message || 'Failed to fetch channels' 
+        error: err.message || 'Failed to fetch channels' 
       },
       { status: 500 }
     );
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get user ID from request using auth utility
-    const userId = await getAuthUser(request);
+    const userId = await getAuthUser();
     
     if (!userId) {
       return NextResponse.json(
@@ -138,10 +139,10 @@ export async function POST(request: NextRequest) {
       // Status is optional in CreateChannelInput
       ...(validationResult.data.status && { status: validationResult.data.status }),
       // Convert config to appropriate type based on channel type
-      config: validationResult.data.config || {} as any
+      config: validationResult.data.config || {} as ChannelConfig
     };
     
-    const result = await createChannel(channelInput);
+    const result = await addChannel(channelInput);
     
     if (!result.success) {
       return NextResponse.json(
@@ -154,12 +155,13 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result.data
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in channels POST route:', error);
+    const err = error as Error;
     return NextResponse.json(
       { 
         success: false, 
-        error: error.message || 'Failed to create channel' 
+        error: err.message || 'Failed to create channel' 
       },
       { status: 500 }
     );

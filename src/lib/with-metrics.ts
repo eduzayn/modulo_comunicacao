@@ -4,8 +4,8 @@ import { recordMetric } from '../services/metrics';
 /**
  * Middleware para registrar métricas de API
  */
-export function withMetrics(handler: Function) {
-  return async (request: NextRequest, ...args: any[]) => {
+export function withMetrics(handler: (request: NextRequest, ...args: unknown[]) => Promise<Response> | Response) {
+  return async (request: NextRequest, ...args: unknown[]) => {
     const startTime = Date.now();
     const requestId = crypto.randomUUID();
     

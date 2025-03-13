@@ -5,11 +5,150 @@
  * It includes colors, typography, gradients, navigation styles, and animations.
  */
 
-@import './colors.ts';
-@import './theme.css';
-@import './gradients.css';
-@import './navigation.css';
-@import './animations.css';
+/* Base colors */
+:root {
+  --primary: 221 83% 53%;
+  --primary-light: 217 91% 78%;
+  --primary-dark: 224 76% 48%;
+  
+  --secondary: 162 47% 50%;
+  --secondary-light: 156 64% 67%;
+  --secondary-dark: 161 54% 38%;
+  
+  --accent: 262 83% 58%;
+  --accent-light: 263 85% 85%;
+  --accent-dark: 263 70% 50%;
+  
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  
+  --ring: 221 83% 53%;
+  
+  --radius: 0.5rem;
+  
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+  
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 0%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --info: 221 83% 53%;
+  --info-foreground: 0 0% 100%;
+
+  /* Legacy color variables */
+  --color-primary-500: hsl(var(--primary));
+  --color-primary-600: hsl(var(--primary-dark));
+  --color-primary-50: hsl(var(--primary-light));
+  --color-secondary-500: hsl(var(--secondary));
+  --color-secondary-600: hsl(var(--secondary-dark));
+  --color-neutral-900: hsl(var(--foreground));
+  --color-neutral-800: hsl(222, 47%, 20%);
+  --color-neutral-700: hsl(222, 47%, 30%);
+  --color-neutral-600: hsl(222, 47%, 40%);
+  --color-neutral-500: hsl(222, 47%, 50%);
+  --color-neutral-400: hsl(222, 47%, 60%);
+  --color-neutral-300: hsl(222, 47%, 70%);
+  --color-neutral-200: hsl(222, 47%, 80%);
+  --color-neutral-100: hsl(222, 47%, 90%);
+  --color-neutral-50: hsl(222, 47%, 95%);
+  --color-semantic-success: hsl(var(--success));
+  --color-semantic-warning: hsl(var(--warning));
+  --color-semantic-error: hsl(var(--destructive));
+  --color-semantic-info: hsl(var(--info));
+}
+
+/* Dark mode colors */
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 162 47% 50%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 100%;
+  
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+  
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 0%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --info: 221 83% 53%;
+  --info-foreground: 0 0% 100%;
+}
+
+/* Typography */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.25rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.125rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
 
 /* Card styles */
 .card {
@@ -89,82 +228,79 @@
   background-color: var(--color-neutral-800);
 }
 
-/* Typography styles */
-.heading-1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-}
-
-.heading-2 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 0.75rem;
-}
-
-.heading-3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.3;
-  margin-bottom: 0.5rem;
-}
-
-.heading-4 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
-}
-
-.body-large {
-  font-size: 1.125rem;
-  line-height: 1.5;
-}
-
-.body {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.body-small {
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.caption {
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--color-neutral-500);
-}
-
-/* Form styles */
-.input {
+/* Spacing */
+.container {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--color-neutral-300);
-  background-color: white;
-  color: var(--color-neutral-900);
-  transition: all 0.2s ease;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px rgba(0, 114, 255, 0.2);
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
 }
 
-.dark .input {
-  background-color: var(--color-neutral-800);
-  border-color: var(--color-neutral-700);
-  color: var(--color-neutral-100);
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
 }
 
-.dark .input:focus {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px rgba(0, 114, 255, 0.2);
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Gradients */
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-dark)) 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary-dark)) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent-dark)) 100%);
 }
 
 /* Badge styles */
@@ -220,98 +356,51 @@
   color: var(--color-neutral-300);
 }
 
-/* Layout utilities */
-.container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+/* Shadows */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-@media (min-width: 640px) {
-  .container {
-    max-width: 640px;
-  }
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-@media (min-width: 768px) {
-  .container {
-    max-width: 768px;
-  }
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-@media (min-width: 1024px) {
-  .container {
-    max-width: 1024px;
-  }
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-@media (min-width: 1280px) {
-  .container {
-    max-width: 1280px;
-  }
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-@media (min-width: 1536px) {
-  .container {
-    max-width: 1536px;
-  }
+/* Edunexia specific styles */
+.edunexia-card {
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Spacing utilities */
-.section {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+.edunexia-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-@media (min-width: 768px) {
-  .section {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-  }
+.edunexia-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
-/* Animation utilities */
-.animate-fade-in {
-  animation: fade-in 0.3s ease-in-out;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-in-out;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.3s ease-in-out;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-up {
-  from {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-down {
-  from {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.edunexia-footer {
+  background-color: hsl(var(--muted));
+  padding: 1rem;
+  border-radius: 0 0 var(--radius) var(--radius);
 }

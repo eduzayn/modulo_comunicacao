@@ -1,8 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+// // // // import { createClient } from '@supabase/supabase-js';
 
 // Mock implementation for testing purposes
-export function createServerClient(cookieStore: any) {
+export function createServerClient() {
   // During testing, we return a mock client
   return {
     auth: {
@@ -16,9 +15,9 @@ export function createServerClient(cookieStore: any) {
         error: null
       })
     },
-    from: (table: string) => ({
-      select: (columns: string) => ({
-        eq: (column: string, value: any) => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
           single: async () => ({
             data: {
               name: 'Administrador',

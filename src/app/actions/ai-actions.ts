@@ -12,7 +12,7 @@ export async function fetchAISettings() {
   }
 }
 
-export async function updateAISettingsAction(data: UpdateAISettingsInput) {
+export async function editAISettings(data: UpdateAISettingsInput) {
   try {
     const settings = await updateAISettings(data);
     revalidatePath('/ai');

@@ -14,11 +14,11 @@ export const getAccessibilityTranslation = async (
 ): Promise<string> => {
   try {
     // Dynamic import of locale file
-    const module = await import(`../app/messages/accessibility/${locale}.json`);
+    const translationModule = await import(`../app/messages/accessibility/${locale}.json`);
     
     // Split the key path and traverse the object
     const keys = key.split('.');
-    let value: any = module;
+    let value: unknown = module;
     
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
@@ -277,7 +277,7 @@ export const filterAriaAttributes = (
 export const getValidationErrorMessage = async (
   errorType: 'required' | 'email' | 'minLength' | 'maxLength' | 'pattern' | 'validate' | string,
   locale: string = 'pt-BR',
-  params?: Record<string, any>
+  params?: Record<string, string | number | boolean>
 ): Promise<string> => {
   let key = '';
   

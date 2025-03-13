@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getChannel, updateChannel } from '@/app/actions/channel-actions';
-import type { Channel } from '@/src/modules/communication/types';
-import type { UpdateChannelInput } from '@/src/modules/communication/types/channels';
+import { fetchChannelById, editChannel } from '@/app/actions/channel-actions';
+import type { Channel } from '@/types/index';
+import type { UpdateChannelInput } from '@/types/channels';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const channel = await getChannel(params.id);
-    if (!channel) {
+    const result = await fetchChannelById(params.id);
+    if (!result.success || !result.data) {
       return NextResponse.json(
         { error: 'Canal não encontrado' },
         { status: 404 }
       );
     }
-    return NextResponse.json(channel);
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error('Error in channel GET route:', error);
     return NextResponse.json(
@@ -31,7 +31,7 @@ export async function PUT(
 ) {
   try {
     const data: UpdateChannelInput = await request.json();
-    const result = await updateChannel(params.id, data);
+    const result = await editChannel(params.id, data);
     
     if (!result.success) {
       return NextResponse.json(

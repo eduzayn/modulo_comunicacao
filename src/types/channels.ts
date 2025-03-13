@@ -1,5 +1,8 @@
 import { Channel } from './index';
 
+export type ChannelType = Channel['type'];
+export type ChannelStatus = Channel['status'];
+
 /**
  * @swagger
  * components:
@@ -131,7 +134,7 @@ export interface PushConfig {
 
 // Define as Json compatible type for database storage
 export type ChannelConfig = WhatsAppConfig | EmailConfig | SMSConfig | ChatConfig | PushConfig;
-export type ChannelConfigJson = Record<string, any>;
+export type ChannelConfigJson = Record<string, string | number | boolean | object | null>;
 
 /**
  * @swagger

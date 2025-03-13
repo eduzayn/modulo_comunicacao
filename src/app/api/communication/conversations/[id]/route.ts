@@ -1,54 +1,47 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { withApiResponse } from '../../../../../lib/api-middleware';
+import { withAuth } from '../../../../../lib/auth/authenticate';
 import { 
-  getConversationById, 
+  fetchConversationById, 
   updateConversation, 
-  getConversationMessages 
+  sendMessage 
 } from '../../../../../services/supabase/conversations';
-import { z } from 'zod';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
-const updateConversationSchema = z.object({
-  status: z.enum(['open', 'closed', 'archived']).optional(),
-  priority: z.enum(['high', 'medium', 'low']).optional(),
-  context: z.enum(['academic', 'administrative', 'support']).optional()
-});
-
-export async function GET(request: Request, { params }: Params) {
-  try {
-    const conversation = await getConversationById(params.id);
-    return NextResponse.json(conversation);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch conversation' }, 
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: Request, { params }: Params) {
-  try {
-    const body = await request.json();
+/**
+ * GET /api/communication/conversations/[id]
+ * Fetch a conversation by ID
+ */
+export const GET = withApiResponse(
+  withAuth(async (req: NextRequest, context, userId: string) => {
+    const id = context.params.id as string;
+    const conversation = await fetchConversationById(id);
     
-    // Validate request body
-    const result = updateConversationSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid conversation data', details: result.error.format() }, 
-        { status: 400 }
-      );
+    if (!conversation) {
+      throw new Error('Conversation not found');
     }
     
-    const conversation = await updateConversation(params.id, result.data);
-    return NextResponse.json(conversation);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to update conversation' }, 
-      { status: 500 }
-    );
-  }
-}
+    return conversation;
+  })
+);
+
+/**
+ * PUT /api/communication/conversations/[id]
+ * Update a conversation
+ */
+export const PUT = withApiResponse(
+  withAuth(async (req: NextRequest, context, userId: string) => {
+    const id = context.params.id as string;
+    const data = await req.json();
+    
+    const result = await updateConversation(id, {
+      ...data,
+      updatedBy: userId,
+    });
+    
+    if (!result) {
+      throw new Error('Failed to update conversation');
+    }
+    
+    return result;
+  })
+);

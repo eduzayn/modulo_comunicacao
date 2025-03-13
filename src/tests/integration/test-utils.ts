@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+// import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -6,11 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 dotenv.config({ path: '.env.test' });
 
 // Test environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uasnyifizdjxogowijip.supabase.co';
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uasnyifizdjxogowijip.supabase.co';
 
 // Define response types for better type safety
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -37,10 +37,10 @@ export async function generateTestApiKey(userId: string): Promise<string> {
 }
 
 // Make authenticated API request
-export async function makeAuthenticatedRequest<T = any>(
+export async function makeAuthenticatedRequest<T = unknown>(
   endpoint: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-  body?: any,
+  body?: Record<string, unknown>,
   apiKey?: string
 ): Promise<{ status: number; data: ApiResponse<T> }> {
   // For testing purposes, we'll mock the API responses
@@ -56,7 +56,7 @@ export async function makeAuthenticatedRequest<T = any>(
 function getMockResponse<T>(
   endpoint: string, 
   method: string, 
-  body?: any, 
+  body?: Record<string, unknown>, 
   apiKey?: string
 ): { status: number; data: ApiResponse<T> } {
   // Handle authentication errors
@@ -141,7 +141,7 @@ function getMockResponse<T>(
 }
 
 // Helper function to generate mock response data based on the endpoint and method
-function getMockResponseData<T>(endpoint: string, method: string, body?: any): any {
+function getMockResponseData<T>(endpoint: string, method: string, body?: Record<string, unknown>): T | Record<string, unknown> {
   // Auth endpoints
   if (endpoint === '/auth/test') {
     return {

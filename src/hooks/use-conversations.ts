@@ -4,114 +4,118 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   fetchConversations, 
   fetchConversationById, 
-  fetchConversationMessages,
-  addConversation, 
+  createConversation, 
   editConversation,
   sendMessageToConversation
 } from '../app/actions/conversation-actions';
-import type { Conversation } from '../types';
 import type { 
   CreateConversationInput, 
   UpdateConversationInput,
   SendMessageInput,
-  GetConversationsInput
+  ConversationWithMessages
 } from '../types/conversations';
 
-// Create a function to get the query client
-const getQueryClient = () => {
-  try {
-    return useQueryClient();
-  } catch (error) {
-    console.error('Error getting QueryClient:', error);
-    return null;
-  }
-};
+/**
+ * Custom hook for managing conversations
+ */
+export function useConversations() {
+  const queryClient = useQueryClient();
 
-export function useConversations(params?: GetConversationsInput) {
-  // Get the query client safely
-  const queryClient = getQueryClient();
-  
-  const conversationsQuery = useQuery({
-    queryKey: ['conversations', params],
-    queryFn: () => fetchConversations(params),
+  // Fetch all conversations
+  const { 
+    data: conversations = [], 
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => fetchConversations(),
   });
-  
-  const createConversationMutation = useMutation({
-    mutationFn: (data: CreateConversationInput) => addConversation(data),
+
+  // Create a new conversation
+  const createMutation = useMutation({
+    mutationFn: (data: CreateConversationInput) => createConversation(data),
     onSuccess: () => {
-      queryClient?.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
-  
+
+  // Update an existing conversation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateConversationInput }) => 
+      editConversation(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['conversation', variables.id] });
+    },
+  });
+
+  // Send a message to a conversation
+  const sendMessageMutation = useMutation({
+    mutationFn: ({ conversationId, data }: { conversationId: string; data: SendMessageInput }) => 
+      sendMessageToConversation(conversationId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', variables.conversationId] });
+    },
+  });
+
   return {
-    conversations: conversationsQuery.data?.data || [],
-    isLoading: conversationsQuery.isLoading,
-    isError: conversationsQuery.isError,
-    error: conversationsQuery.error || conversationsQuery.data?.error,
-    createConversation: createConversationMutation.mutate,
-    isCreating: createConversationMutation.isPending,
+    conversations,
+    isLoading,
+    error,
+    refetch,
+    createConversation: createMutation.mutate,
+    isCreating: createMutation.isPending,
+    updateConversation: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
+    sendMessage: sendMessageMutation.mutate,
+    isSending: sendMessageMutation.isPending,
   };
 }
 
+/**
+ * Custom hook for managing a single conversation
+ */
 export function useConversation(id: string) {
   const queryClient = useQueryClient();
-  
-  const conversationQuery = useQuery({
+
+  // Fetch a single conversation with messages
+  const { 
+    data: conversation,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ['conversation', id],
     queryFn: () => fetchConversationById(id),
     enabled: !!id,
   });
-  
-  const messagesQuery = useQuery({
-    queryKey: ['conversation', id, 'messages'],
-    queryFn: () => fetchConversationMessages(id),
-    enabled: !!id,
-  });
-  
-  const updateConversationMutation = useMutation({
+
+  // Update the conversation
+  const updateMutation = useMutation({
     mutationFn: (data: UpdateConversationInput) => editConversation(id, data),
-    onSuccess: (result) => {
-      if (result.data) {
-        queryClient.setQueryData(['conversation', id], result.data);
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
-  
+
+  // Send a message to the conversation
   const sendMessageMutation = useMutation({
-    mutationFn: (message: SendMessageInput) => sendMessageToConversation(id, message),
+    mutationFn: (data: SendMessageInput) => sendMessageToConversation(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversation', id, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
     },
   });
-  
-  // Add prefetch function for messages
-  const prefetchMessages = async (conversationId: string = id) => {
-    if (!conversationId || !queryClient) return;
-    
-    await queryClient.prefetchQuery({
-      queryKey: ['messages', conversationId],
-      queryFn: async () => {
-        const response = await fetch(`/api/communication/conversations/${conversationId}/messages`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch messages');
-        }
-        return response.json();
-      },
-    });
-  };
-  
+
   return {
-    conversation: conversationQuery.data?.data,
-    messages: messagesQuery.data?.data || [],
-    isLoading: conversationQuery.isLoading || messagesQuery.isLoading,
-    isError: conversationQuery.isError || messagesQuery.isError,
-    error: conversationQuery.error || conversationQuery.data?.error || messagesQuery.error || messagesQuery.data?.error,
-    updateConversation: updateConversationMutation.mutate,
-    isUpdating: updateConversationMutation.isPending,
+    conversation,
+    isLoading,
+    error,
+    refetch,
+    updateConversation: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
     sendMessage: sendMessageMutation.mutate,
     isSending: sendMessageMutation.isPending,
-    prefetchMessages,
   };
 }
