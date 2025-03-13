@@ -3,6 +3,8 @@ module.exports = {
   plugins: [
     '@babel/plugin-transform-modules-commonjs',
     '@babel/plugin-transform-private-methods',
+    '@babel/plugin-transform-private-properties',
+    '@babel/plugin-transform-class-properties',
     // Add a plugin to handle process.browser assignment
     function () {
       return {

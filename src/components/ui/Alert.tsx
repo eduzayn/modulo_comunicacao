@@ -1,13 +1,6 @@
 /**
- * Alert.tsx
- * 
- * Description: A customizable alert component with different variants.
- * 
- * @module components/ui
- * @author Devin AI
- * @created 2025-03-13
+ * Alert component for displaying notifications and messages
  */
-
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
@@ -38,11 +31,9 @@ const alertVariants = cva(
       variant: "default",
     },
   }
-)
+);
 
-export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
+export interface AlertProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
   moduleColor?: { light: string; dark: string };
 }
 
@@ -72,33 +63,10 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         style={style}
         {...props}
       />
-    )
+    );
   }
-)
-Alert.displayName = "Alert"
+);
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-AlertTitle.displayName = "AlertTitle"
+Alert.displayName = "Alert";
 
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-))
-AlertDescription.displayName = "AlertDescription"
-
-export { Alert, AlertTitle, AlertDescription }
+export { Alert, alertVariants };
