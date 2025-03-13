@@ -1,21 +1,13 @@
-import { withErrorHandling, withAuthentication, withLogging } from '@/lib/api-middleware';
-import { createErrorResponse } from '@/lib/api-response';
 import { NextRequest, NextResponse } from 'next/server';
+import { withApiMiddleware } from '../../lib/api-middleware';
+import { logger } from '../../lib/logger';
 
-// Mock dependencies
-jest.mock('@/lib/api-response', () => ({
-  createErrorResponse: jest.fn(),
-  createSuccessResponse: jest.fn(),
-}));
-
-jest.mock('@/lib/auth/authenticate', () => ({
-  authenticate: jest.fn(),
-}));
-
-jest.mock('@/lib/logger', () => ({
+// Mock the logger
+jest.mock('../../lib/logger', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
@@ -24,144 +16,119 @@ describe('API Middleware', () => {
     jest.clearAllMocks();
   });
 
-  describe('withErrorHandling', () => {
-    it('should handle successful requests', async () => {
-      // Setup
-      const mockHandler = jest.fn().mockResolvedValue(NextResponse.json({ success: true }));
-      const wrappedHandler = withErrorHandling(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com'));
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
-      expect(response.status).toBe(200);
-    });
-    
-    it('should handle errors thrown by the handler', async () => {
-      // Setup
-      const mockError = new Error('Test error');
-      const mockHandler = jest.fn().mockRejectedValue(mockError);
-      const wrappedHandler = withErrorHandling(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com'));
-      
-      createErrorResponse.mockReturnValue({
-        response: { success: false, error: 'Test error' },
-        status: 500,
-      });
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
-      expect(createErrorResponse).toHaveBeenCalledWith(mockError);
-      expect(response.status).toBe(500);
-    });
-    
-    it('should handle errors with custom status codes', async () => {
-      // Setup
-      const mockError = new Error('Not found');
-      mockError.status = 404;
-      
-      const mockHandler = jest.fn().mockRejectedValue(mockError);
-      const wrappedHandler = withErrorHandling(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com'));
-      
-      createErrorResponse.mockReturnValue({
-        response: { success: false, error: 'Not found' },
-        status: 404,
-      });
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
-      expect(createErrorResponse).toHaveBeenCalledWith(mockError);
-      expect(response.status).toBe(404);
-    });
+  it('should pass through requests when handler succeeds', async () => {
+    // Create a mock handler that returns a successful response
+    const mockHandler = jest.fn().mockResolvedValue(
+      NextResponse.json({ success: true })
+    );
+
+    // Create a mock request
+    const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
+
+    // Apply the middleware
+    const wrappedHandler = withApiMiddleware(mockHandler);
+    const response = await wrappedHandler(mockRequest);
+
+    // Check that the handler was called
+    expect(mockHandler).toHaveBeenCalledWith(mockRequest);
+
+    // Check that the response is correct
+    const responseData = await response.json();
+    expect(responseData).toEqual({ success: true });
+
+    // Check that the logger was called
+    expect(logger.info).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
-  
-  describe('withAuthentication', () => {
-    it('should pass authenticated requests to the handler', async () => {
-      // Setup
-      const mockHandler = jest.fn().mockResolvedValue(NextResponse.json({ success: true }));
-      const wrappedHandler = withAuthentication(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com'));
-      
-      const { authenticate } = require('@/lib/auth/authenticate');
-      authenticate.mockResolvedValue({ userId: 'user-1', role: 'admin' });
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(authenticate).toHaveBeenCalledWith(mockRequest);
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest, { userId: 'user-1', role: 'admin' });
-      expect(response.status).toBe(200);
+
+  it('should handle errors and return error response', async () => {
+    // Create a mock handler that throws an error
+    const mockError = new Error('Test error');
+    const mockHandler = jest.fn().mockRejectedValue(mockError);
+
+    // Create a mock request
+    const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
+
+    // Apply the middleware
+    const wrappedHandler = withApiMiddleware(mockHandler);
+    const response = await wrappedHandler(mockRequest);
+
+    // Check that the handler was called
+    expect(mockHandler).toHaveBeenCalledWith(mockRequest);
+
+    // Check that the response is an error response
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      error: 'Test error',
     });
-    
-    it('should reject unauthenticated requests', async () => {
-      // Setup
-      const mockHandler = jest.fn();
-      const wrappedHandler = withAuthentication(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com'));
-      
-      const { authenticate } = require('@/lib/auth/authenticate');
-      authenticate.mockRejectedValue(new Error('Unauthorized'));
-      
-      createErrorResponse.mockReturnValue({
-        response: { success: false, error: 'Unauthorized' },
-        status: 401,
-      });
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(authenticate).toHaveBeenCalledWith(mockRequest);
-      expect(mockHandler).not.toHaveBeenCalled();
-      expect(response.status).toBe(401);
-    });
+    expect(response.status).toBe(500);
+
+    // Check that the logger was called with the error
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('API error'),
+      expect.objectContaining({
+        error: mockError,
+        url: 'https://example.com/api/test',
+      })
+    );
   });
-  
-  describe('withLogging', () => {
-    it('should log successful requests', async () => {
-      // Setup
-      const mockHandler = jest.fn().mockResolvedValue(NextResponse.json({ success: true }));
-      const wrappedHandler = withLogging(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
-      
-      const { logger } = require('@/lib/logger');
-      
-      // Execute
-      const response = await wrappedHandler(mockRequest);
-      
-      // Verify
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Request to /api/test'));
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Response from /api/test'));
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
-      expect(response.status).toBe(200);
+
+  it('should handle validation errors', async () => {
+    // Create a validation error
+    const validationError = new Error('Validation failed');
+    // Add a status property to simulate a validation error
+    Object.defineProperty(validationError, 'status', {
+      value: 400,
     });
-    
-    it('should log failed requests', async () => {
-      // Setup
-      const mockError = new Error('Test error');
-      const mockHandler = jest.fn().mockRejectedValue(mockError);
-      const wrappedHandler = withLogging(mockHandler);
-      const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
-      
-      const { logger } = require('@/lib/logger');
-      
-      // Execute
-      await expect(wrappedHandler(mockRequest)).rejects.toThrow('Test error');
-      
-      // Verify
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Request to /api/test'));
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error in /api/test'), mockError);
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
+
+    // Create a mock handler that throws the validation error
+    const mockHandler = jest.fn().mockRejectedValue(validationError);
+
+    // Create a mock request
+    const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
+
+    // Apply the middleware
+    const wrappedHandler = withApiMiddleware(mockHandler);
+    const response = await wrappedHandler(mockRequest);
+
+    // Check that the response has the correct status
+    expect(response.status).toBe(400);
+
+    // Check that the response contains the error message
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      error: 'Validation failed',
     });
+
+    // Check that the logger was called
+    expect(logger.info).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('should add CORS headers to the response', async () => {
+    // Create a mock handler that returns a successful response
+    const mockHandler = jest.fn().mockResolvedValue(
+      NextResponse.json({ success: true })
+    );
+
+    // Create a mock request with origin header
+    const mockRequest = new NextRequest(new Request('https://example.com/api/test', {
+      headers: {
+        origin: 'https://client-app.com',
+      },
+    }));
+
+    // Apply the middleware
+    const wrappedHandler = withApiMiddleware(mockHandler);
+    const response = await wrappedHandler(mockRequest);
+
+    // Check that CORS headers are added
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+    expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
+      'GET, POST, PUT, DELETE, OPTIONS'
+    );
+    expect(response.headers.get('Access-Control-Allow-Headers')).toBe(
+      'Content-Type, Authorization'
+    );
   });
 });
