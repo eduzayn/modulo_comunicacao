@@ -4,10 +4,8 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
-// Import colors with semantic properties
-import { colors } from './colors';
 
-// Define semantic colors if they don't exist in the imported colors
+// Define semantic colors
 const semanticColors = {
   success: '#22c55e',
   warning: '#f59e0b',
