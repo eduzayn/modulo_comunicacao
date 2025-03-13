@@ -41,7 +41,7 @@ export function trackPerformance<T>(name: string, callback: () => T): T {
  * @param fn Function to wrap with performance tracking
  * @returns Wrapped function with performance tracking
  */
-export function withPerformanceTracking<T extends (...args: any[]) => any>(
+export function withPerformanceTracking<T extends (...args: unknown[]) => any>(
   name: string,
   fn: T
 ): T {

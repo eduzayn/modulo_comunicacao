@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         timestamp: new Date().toISOString()
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in auth test endpoint:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Authentication test failed" },

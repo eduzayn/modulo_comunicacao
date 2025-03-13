@@ -17,7 +17,7 @@ export interface SendMessageInput {
   conversationId: string;
   content: string;
   type?: 'text' | 'image' | 'file' | 'audio';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface GetConversationsInput {

@@ -58,7 +58,7 @@ export function useConversation(id: string) {
   });
   
   const addMessageMutation = useMutation({
-    mutationFn: (data: any) => addMessage(id, data),
+    mutationFn: (data: unknown) => addMessage(id, data),
     onSuccess: (data) => {
       if (data.success && data.data) {
         const currentConversation = queryClient.getQueryData<Conversation>(['conversations', id]);

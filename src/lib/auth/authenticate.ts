@@ -27,9 +27,9 @@ export async function authenticate(req: NextRequest) {
  * Middleware to require authentication for API routes
  */
 export function withAuth(
-  handler: (req: NextRequest, context: any, userId: string) => Promise<NextResponse>
+  handler: (req: NextRequest, context: unknown, userId: string) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, context: any) => {
+  return async (req: NextRequest, context: unknown) => {
     const { authenticated, userId, response } = await authenticate(req);
     
     if (!authenticated) {
@@ -44,9 +44,9 @@ export function withAuth(
  * Middleware to require admin role for API routes
  */
 export function withAdminAuth(
-  handler: (req: NextRequest, context: any, userId: string) => Promise<NextResponse>
+  handler: (req: NextRequest, context: unknown, userId: string) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, context: any) => {
+  return async (req: NextRequest, context: unknown) => {
     const { authenticated, userId, response } = await authenticate(req);
     
     if (!authenticated) {

@@ -32,7 +32,7 @@ export async function DELETE(
       success: true,
       message: "API key deleted successfully"
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API key deletion error:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to delete API key" },

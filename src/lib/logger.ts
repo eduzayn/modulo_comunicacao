@@ -8,14 +8,14 @@ interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
  * Logger class for structured logging with context support
  */
 class Logger {
-  private context: Record<string, any> = {};
+  private context: Record<string, unknown> = {};
   private static instance: Logger;
 
   /**
@@ -31,7 +31,7 @@ class Logger {
   /**
    * Set context data that will be included with all log entries
    */
-  setContext(context: Record<string, any>): Logger {
+  setContext(context: Record<string, unknown>): Logger {
     this.context = { ...this.context, ...context };
     return this;
   }
@@ -47,7 +47,7 @@ class Logger {
   /**
    * Internal method to create and process a log entry
    */
-  private log(level: LogLevel, message: string, additionalContext?: Record<string, any>): LogEntry {
+  private log(level: LogLevel, message: string, additionalContext?: Record<string, unknown>): LogEntry {
     const entry: LogEntry = {
       level,
       message,
@@ -84,28 +84,28 @@ class Logger {
   /**
    * Log a debug message
    */
-  debug(message: string, context?: Record<string, any>): LogEntry {
+  debug(message: string, context?: Record<string, unknown>): LogEntry {
     return this.log('debug', message, context);
   }
 
   /**
    * Log an info message
    */
-  info(message: string, context?: Record<string, any>): LogEntry {
+  info(message: string, context?: Record<string, unknown>): LogEntry {
     return this.log('info', message, context);
   }
 
   /**
    * Log a warning message
    */
-  warn(message: string, context?: Record<string, any>): LogEntry {
+  warn(message: string, context?: Record<string, unknown>): LogEntry {
     return this.log('warn', message, context);
   }
 
   /**
    * Log an error message with optional Error object
    */
-  error(message: string, error?: Error, context?: Record<string, any>): LogEntry {
+  error(message: string, error?: Error, context?: Record<string, unknown>): LogEntry {
     return this.log('error', message, {
       ...context,
       error: error ? {
@@ -119,7 +119,7 @@ class Logger {
   /**
    * Create a child logger with additional context
    */
-  child(childContext: Record<string, any>): Logger {
+  child(childContext: Record<string, unknown>): Logger {
     const childLogger = new Logger();
     childLogger.setContext({
       ...this.context,
@@ -131,7 +131,7 @@ class Logger {
   /**
    * Log a performance measurement
    */
-  performance(label: string, durationMs: number, context?: Record<string, any>): LogEntry {
+  performance(label: string, durationMs: number, context?: Record<string, unknown>): LogEntry {
     return this.log('info', `Performance: ${label}`, {
       ...context,
       performance: {
@@ -162,7 +162,7 @@ class Logger {
     url: string, 
     statusCode?: number, 
     durationMs?: number, 
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): LogEntry {
     return this.log('info', `API ${method} ${url}`, {
       ...context,
@@ -182,7 +182,7 @@ class Logger {
     operation: string, 
     table: string, 
     durationMs?: number, 
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): LogEntry {
     return this.log('info', `DB ${operation} ${table}`, {
       ...context,
@@ -223,7 +223,7 @@ export function loggerMiddleware(req: Request, res: Response, next: () => void) 
 }
 
 // Export a higher-order function for measuring performance
-export function withPerformanceLogging<T extends (...args: any[]) => any>(
+export function withPerformanceLogging<T extends (...args: unknown[]) => any>(
   fn: T,
   label: string
 ): (...args: Parameters<T>) => ReturnType<T> {

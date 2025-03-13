@@ -26,7 +26,7 @@ interface ApiKeyValidation {
 
 interface SessionResult {
   success: boolean;
-  session: any | null;
+  session: unknown | null;
   error?: string;
 }
 

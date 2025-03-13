@@ -22,7 +22,7 @@ export async function fetchChannels() {
       data: channels, 
       error: null 
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching channels:', error);
     return { 
       success: false, 
@@ -44,7 +44,7 @@ export async function fetchChannelById(id: string) {
       data: channel, 
       error: null 
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching channel:', error);
     return { 
       success: false, 
@@ -68,7 +68,7 @@ export async function addChannel(data: CreateChannelInput) {
       data: channel, 
       error: null 
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating channel:', error);
     return { 
       success: false, 
@@ -93,7 +93,7 @@ export async function editChannel(id: string, data: UpdateChannelInput) {
       data: channel, 
       error: null 
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating channel:', error);
     return { 
       success: false, 
@@ -116,7 +116,7 @@ export async function removeChannel(id: string) {
       success: true, 
       error: null 
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting channel:', error);
     return { 
       success: false, 

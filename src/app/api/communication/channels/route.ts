@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: result.data
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in channels GET route:', error);
     return NextResponse.json(
       { 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result.data
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in channels POST route:', error);
     return NextResponse.json(
       { 

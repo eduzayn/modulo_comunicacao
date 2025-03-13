@@ -9,9 +9,9 @@ import { logger } from './logger';
  * Wrap an API route handler with logging
  */
 export function withLogging(
-  handler: (req: NextRequest, context: any) => Promise<NextResponse>
+  handler: (req: NextRequest, context: unknown) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, context: any) => {
+  return async (req: NextRequest, context: unknown) => {
     const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
     const url = req.nextUrl.pathname;
     const method = req.method;
