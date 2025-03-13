@@ -1,121 +1,79 @@
-import React from 'react';
-import { cn } from './utils';
-import { colors } from './colors';
+import * as React from "react"
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  gradient?: boolean;
-  module?: 'communication' | 'student' | 'content' | 'enrollment';
-  variant?: 'default' | 'bordered' | 'gradient';
-}
+import { cn } from "@/components/ui/utils"
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, gradient = false, module = 'enrollment', variant = 'default', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
-    const style: React.CSSProperties = {};
-    
-    if (gradient || variant === 'gradient') {
-      style.borderTop = `4px solid ${moduleColor.main}`;
-    } else if (variant === 'bordered') {
-      style.border = `1px solid ${moduleColor.light}`;
-    }
-    
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'rounded-lg shadow-md overflow-hidden bg-white',
-          variant === 'default' && 'border border-neutral-200',
-          className
-        )}
-        style={style}
-        {...props}
-      />
-    );
-  }
-);
-Card.displayName = 'Card';
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
 
-interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  module?: 'communication' | 'student' | 'content' | 'enrollment';
-}
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
 
-const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ className, ...props }, ref) => {
-    // Module is not used in this component
-    return (
-      <div
-        ref={ref}
-        className={cn('px-6 py-4 border-b border-neutral-200', className)}
-        {...props}
-      />
-    );
-  }
-);
-CardHeader.displayName = 'CardHeader';
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn(
+      "text-2xl font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
 
-interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  module?: 'communication' | 'student' | 'content' | 'enrollment';
-}
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
 
-const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
-  ({ className, ...props }, ref) => {
-    // Module color is not used in this component
-    return (
-      <h3
-        ref={ref}
-        className={cn('text-xl font-semibold text-neutral-900', className)}
-        {...props}
-      />
-    );
-  }
-);
-CardTitle.displayName = 'CardTitle';
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
 
-const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => {
-    return (
-      <p
-        ref={ref}
-        className={cn('text-sm text-neutral-500', className)}
-        {...props}
-      />
-    );
-  }
-);
-CardDescription.displayName = 'CardDescription';
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
 
-// Using type instead of empty interface
-type CardContentProps = React.HTMLAttributes<HTMLDivElement>;
-
-const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn('p-6', className)}
-        {...props}
-      />
-    );
-  }
-);
-CardContent.displayName = 'CardContent';
-
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  module?: 'communication' | 'student' | 'content' | 'enrollment';
-}
-
-const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
-  ({ className, ...props }, ref) => {
-    // Module is not used in this component
-    return (
-      <div
-        ref={ref}
-        className={cn('px-6 py-4 bg-neutral-50 border-t border-neutral-200', className)}
-        {...props}
-      />
-    );
-  }
-);
-CardFooter.displayName = 'CardFooter';
-
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
