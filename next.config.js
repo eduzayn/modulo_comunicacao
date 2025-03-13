@@ -4,7 +4,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
   },
-  transpilePackages: ['lucide-react'],
+  transpilePackages: ['@tanstack/query-core', '@tanstack/react-query', 'lucide-react'],
   webpack: (config) => {
     // Ignore specific modules that cause issues
     config.resolve.fallback = { 
