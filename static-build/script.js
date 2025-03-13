@@ -222,5 +222,26 @@ function initModals() {
 // Inicializar quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
   initPage();
+  
+  // Remover scripts inline e usar apenas o script.js para inicialização
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  
+  // Atualizar o display do papel do usuário
+  const userData = JSON.parse(localStorage.getItem('edunexia_user') || '{}');
+  const userRoleElement = document.getElementById('userRole');
+  if (userRoleElement) {
+    userRoleElement.textContent = userData.role === 'admin' ? 'Administrador' : 'Usuário';
+  }
+  
+  // Configurar botão de logout em todas as páginas
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function() {
+      localStorage.removeItem('edunexia_user');
+      window.location.href = '/login.html';
+    });
+  }
+  
+  // Inicializar modais em todas as páginas
   initModals();
 });
