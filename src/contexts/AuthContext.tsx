@@ -42,6 +42,15 @@ type AuthContextType = {
   logout: () => void;
 };
 
+/**
+ * AuthContext
+ * 
+ * Provides authentication state and methods throughout the application.
+ * Handles user authentication, session persistence, and logout functionality.
+ * Uses localStorage for session persistence in this implementation.
+ * 
+ * In a production environment, this would connect to a real authentication service.
+ */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

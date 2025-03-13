@@ -43,6 +43,15 @@ export interface ButtonProps
   module?: 'communication' | 'student' | 'content' | 'enrollment';
 }
 
+/**
+ * Button Component
+ * 
+ * A customizable button component that supports various styles and sizes.
+ * Implements the design system's button specifications with proper accessibility attributes.
+ * 
+ * @param {ButtonProps} props - The component props
+ * @returns {JSX.Element} The rendered button
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, fullWidth, // // module = "enrollment", // asChild = false, ...props }, ref) => {
     // Apply module-specific colors

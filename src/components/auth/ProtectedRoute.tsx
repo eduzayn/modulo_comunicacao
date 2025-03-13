@@ -4,6 +4,16 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
+/**
+ * ProtectedRoute Component
+ * 
+ * A wrapper component that protects routes requiring authentication.
+ * Redirects unauthenticated users to the login page.
+ * Shows a loading state while checking authentication status.
+ * 
+ * @param {ReactNode} children - The components to render when authenticated
+ * @returns {JSX.Element} The protected content or loading/redirect state
+ */
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
