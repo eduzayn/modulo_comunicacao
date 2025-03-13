@@ -1,8 +1,21 @@
+/**
+ * AuthContext.tsx
+ * 
+ * Description: This module provides authentication context for the application.
+ * It manages user authentication state, login/logout functionality, and session persistence.
+ * 
+ * @module auth
+ * @author Devin AI
+ * @created 2025-03-13
+ */
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Simple user type for testing
+/**
+ * User type definition
+ */
 type User = {
   id: string;
   name: string;
@@ -10,7 +23,9 @@ type User = {
   role: 'admin' | 'user';
 };
 
-// Mock users for testing
+/**
+ * Mock users for testing authentication
+ */
 const MOCK_USERS = [
   {
     id: '1',
@@ -35,6 +50,9 @@ const MOCK_USERS = [
   },
 ];
 
+/**
+ * Authentication context type definition
+ */
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
@@ -42,8 +60,20 @@ type AuthContextType = {
   logout: () => void;
 };
 
+/**
+ * Create the authentication context
+ */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * AuthProvider - Provides authentication context to the application
+ * 
+ * This component manages authentication state, handles login/logout operations,
+ * and persists user sessions using localStorage.
+ * 
+ * @param props - Component props including children
+ * @returns Authentication context provider with the provided children
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +87,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  // Mock login function
+  /**
+   * Login function - Authenticates a user by email
+   * 
+   * @param email - User's email address
+   * @returns Promise resolving to boolean indicating success/failure
+   */
   const login = async (email: string): Promise<boolean> => {
     setIsLoading(true);
     
@@ -69,8 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
     
     if (foundUser) {
-      // Exclude password from user data
-      const { password: _, ...userWithoutPassword } = foundUser;
+      const { password, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
       localStorage.setItem('auth_user', JSON.stringify(userWithoutPassword));
       setIsLoading(false);
@@ -81,7 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
-  // Logout function
+  /**
+   * Logout function - Signs out the current user
+   */
   const logout = () => {
     setUser(null);
     localStorage.removeItem('auth_user');
@@ -94,6 +130,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * useAuth - Custom hook to access the authentication context
+ * 
+ * @returns Authentication context with user state and auth functions
+ * @throws Error if used outside of an AuthProvider
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
