@@ -46,7 +46,13 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, fullWidth, module = 'enrollment', asChild = false, ...props }, ref) => {
     // Apply module-specific colors
-    const moduleColor = colors.primary[module];
+    const moduleColor = colors.primary[module] || { 
+      main: '#3b82f6', 
+      light: '#60a5fa',
+      dark: '#2563eb',
+      gradient: 'linear-gradient(to right, #3b82f6, #2563eb)'
+    };
+    
     const style: React.CSSProperties = {};
     
     if (variant === 'default') {

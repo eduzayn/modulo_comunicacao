@@ -11,7 +11,7 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, module = 'enrollment', type, ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+    const moduleColor = colors.primary[module] || { light: '#3b82f6' };
     
     return (
       <input

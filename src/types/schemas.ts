@@ -5,7 +5,7 @@ export const channelSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   type: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
   status: z.enum(['active', 'inactive']),
-  config: z.record(z.any()),
+  config: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
 });
 
 export const conversationSchema = z.object({
@@ -27,7 +27,7 @@ export const messageSchema = z.object({
   content: z.string(),
   type: z.enum(['text', 'image', 'file', 'audio']),
   status: z.enum(['sent', 'delivered', 'read']),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
   createdAt: z.string(),
 });
 

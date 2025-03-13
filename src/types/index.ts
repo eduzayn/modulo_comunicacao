@@ -3,7 +3,7 @@ export interface Channel {
   name: string;
   type: "whatsapp" | "email" | "chat" | "sms" | "push";
   status: "active" | "inactive";
-  config: Record<string, any>;
+  config: Record<string, string | number | boolean | object | null>;
 }
 
 export interface Conversation {
@@ -25,7 +25,7 @@ export interface Message {
   content: string;
   type: "text" | "image" | "document" | "audio";
   status: "sent" | "delivered" | "read";
-  metadata: Record<string, any>;
+  metadata: Record<string, string | number | boolean | object | null>;
   createdAt: Date;
 }
 
@@ -54,11 +54,11 @@ export interface Automation {
   name: string;
   trigger: {
     type: string;
-    conditions: Record<string, any>[];
+    conditions: Record<string, string | number | boolean | object | null>[];
   };
   actions: {
     type: string;
-    params: Record<string, any>;
+    params: Record<string, string | number | boolean | object | null>;
   }[];
   status: "active" | "inactive";
 }
