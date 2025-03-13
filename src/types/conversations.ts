@@ -18,7 +18,7 @@ export interface SendMessageInput {
   content: string;
   mediaUrl?: string;
   type?: 'text' | 'image' | 'file' | 'audio';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | object | null>;
 }
 
 export interface Message {
@@ -29,7 +29,7 @@ export interface Message {
   type?: 'text' | 'image' | 'file' | 'audio' | 'document';
   status?: 'sent' | 'delivered' | 'read';
   mediaUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | object | null>;
   createdAt: string | Date; // Accept both string and Date
 }
 

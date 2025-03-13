@@ -13,12 +13,12 @@ export interface AIAnalysisResult {
   sentiment: 'positive' | 'neutral' | 'negative';
   confidence: number;
   suggestedResponses?: string[];
-  entities?: Record<string, any>;
+  entities?: Record<string, string | number | boolean | null>;
   intent?: string;
 }
 
 export interface AIProcessingOptions {
   settings: AISettings;
-  context?: Record<string, any>;
+  context?: Record<string, string | number | boolean | object | null>;
   history?: string[];
 }
