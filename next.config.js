@@ -15,16 +15,10 @@ const nextConfig = {
       process: require.resolve('process/browser'),
     };
     
-    // Add a rule to handle process in browser
+    // Exclude swagger-ui from the build
     config.module.rules.push({
-      test: /node_modules\/process\/browser\.js$/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env'],
-          plugins: ['@babel/plugin-transform-modules-commonjs'],
-        },
-      },
+      test: /swagger-ui/,
+      use: 'null-loader',
     });
     
     return config;
