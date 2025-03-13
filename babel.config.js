@@ -2,6 +2,7 @@ module.exports = {
   presets: ['next/babel'],
   plugins: [
     '@babel/plugin-transform-modules-commonjs',
+    '@babel/plugin-transform-private-methods',
     // Add a plugin to handle process.browser assignment
     function () {
       return {
