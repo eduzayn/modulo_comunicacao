@@ -5,6 +5,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
 import { colors } from './colors';
 
+// Define semantic colors if they don't exist in the imported colors
+const semanticColors = {
+  success: '#22c55e',
+  warning: '#f59e0b',
+  error: '#ef4444'
+};
+
 const alertVariants = cva(
   "relative w-full rounded-lg border p-4",
   {
@@ -38,14 +45,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       style.backgroundColor = `${moduleColor.light}10`; // 10% opacity
       style.borderColor = moduleColor.light;
     } else if (variant === 'success') {
-      style.backgroundColor = `${colors.semantic.success}10`; // 10% opacity
-      style.borderColor = colors.semantic.success;
+      style.backgroundColor = `${semanticColors.success}10`; // 10% opacity
+      style.borderColor = semanticColors.success;
     } else if (variant === 'warning') {
-      style.backgroundColor = `${colors.semantic.warning}10`; // 10% opacity
-      style.borderColor = colors.semantic.warning;
+      style.backgroundColor = `${semanticColors.warning}10`; // 10% opacity
+      style.borderColor = semanticColors.warning;
     } else if (variant === 'error') {
-      style.backgroundColor = `${colors.semantic.error}10`; // 10% opacity
-      style.borderColor = colors.semantic.error;
+      style.backgroundColor = `${semanticColors.error}10`; // 10% opacity
+      style.borderColor = semanticColors.error;
     }
     
     return (

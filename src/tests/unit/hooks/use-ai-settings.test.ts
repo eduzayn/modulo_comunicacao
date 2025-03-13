@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAISettings } from '@/hooks/use-ai-settings';
-import * as aiActions from '@/app/actions/ai-actions';
+import { fetchAISettings, updateAISettings } from '@/app/actions/ai-actions';
 
 // Mock the AI actions
 jest.mock('@/app/actions/ai-actions', () => ({
@@ -22,7 +22,7 @@ describe('useAISettings hook', () => {
       maxTokens: 1000,
     };
 
-    (aiActions.fetchAISettings as jest.Mock).mockResolvedValue({
+    (fetchAISettings as jest.Mock).mockResolvedValue({
       data: mockSettings,
       error: null,
     });
@@ -30,7 +30,7 @@ describe('useAISettings hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useAISettings());
 
     expect(result.current.isLoading).toBe(true);
-    expect(aiActions.fetchAISettings).toHaveBeenCalledTimes(1);
+    expect(fetchAISettings).toHaveBeenCalledTimes(1);
 
     await waitForNextUpdate();
 
@@ -41,7 +41,7 @@ describe('useAISettings hook', () => {
 
   it('should handle fetch errors', async () => {
     const errorMessage = 'Failed to fetch AI settings';
-    (aiActions.fetchAISettings as jest.Mock).mockResolvedValue({
+    (fetchAISettings as jest.Mock).mockResolvedValue({
       data: null,
       error: errorMessage,
     });
@@ -70,12 +70,12 @@ describe('useAISettings hook', () => {
       temperature: 0.8,
     };
 
-    (aiActions.fetchAISettings as jest.Mock).mockResolvedValue({
+    (fetchAISettings as jest.Mock).mockResolvedValue({
       data: mockSettings,
       error: null,
     });
 
-    (aiActions.updateAISettings as jest.Mock).mockResolvedValue({
+    (updateAISettings as jest.Mock).mockResolvedValue({
       data: updatedSettings,
       error: null,
     });
@@ -92,7 +92,7 @@ describe('useAISettings hook', () => {
     });
 
     expect(result.current.isLoading).toBe(true);
-    expect(aiActions.updateAISettings).toHaveBeenCalledWith({
+    expect(updateAISettings).toHaveBeenCalledWith({
       model: 'gpt-4',
       temperature: 0.8,
     });
@@ -115,12 +115,12 @@ describe('useAISettings hook', () => {
 
     const errorMessage = 'Failed to update AI settings';
 
-    (aiActions.fetchAISettings as jest.Mock).mockResolvedValue({
+    (fetchAISettings as jest.Mock).mockResolvedValue({
       data: mockSettings,
       error: null,
     });
 
-    (aiActions.updateAISettings as jest.Mock).mockResolvedValue({
+    (updateAISettings as jest.Mock).mockResolvedValue({
       data: null,
       error: errorMessage,
     });
