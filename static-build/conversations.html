@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversas - Módulo de Comunicação Edunexia</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .conversation-item:hover {
+      background-color: #f3f4f6;
+    }
+    .conversation-active {
+      border-left: 4px solid #2563eb;
+    }
+    .message-bubble-sent {
+      background-color: #dbeafe;
+      border-radius: 1rem 1rem 0 1rem;
+    }
+    .message-bubble-received {
+      background-color: #f3f4f6;
+      border-radius: 1rem 1rem 1rem 0;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-blue-800 text-white min-h-screen">
+    <div class="p-4 border-b border-blue-700">
+      <h2 class="text-xl font-bold">Edunexia</h2>
+      <p class="text-sm text-blue-300" id="userRole">Carregando...</p>
+    </div>
+    
+    <nav class="mt-4">
+      <ul>
+        <li class="mb-1">
+          <a href="dashboard.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition">
+            Dashboard
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="conversations.html" class="block py-2 px-4 bg-blue-700 rounded transition">
+            Conversas
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="#" class="block py-2 px-4 hover:bg-blue-700 rounded transition">
+            Templates
+          </a>
+        </li>
+        <li class="mb-1">
+          <a href="#" class="block py-2 px-4 hover:bg-blue-700 rounded transition">
+            Canais
+          </a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="absolute bottom-0 left-0 w-64 p-4 border-t border-blue-700">
+      <button id="logoutBtn" class="w-full py-2 px-4 bg-blue-700 hover:bg-blue-600 rounded transition">
+        Sair
+      </button>
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="flex-grow flex">
+    <!-- Conversation List -->
+    <div class="w-1/3 border-r border-gray-200 bg-white">
+      <div class="p-4 border-b border-gray-200">
+        <h1 class="text-xl font-bold">Conversas</h1>
+        <div class="mt-2">
+          <div class="relative">
+            <input type="text" placeholder="Buscar conversas..." class="w-full px-4 py-2 border border-gray-300 rounded-md pr-10">
+            <svg class="w-5 h-5 absolute right-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <div class="overflow-y-auto h-[calc(100vh-9rem)]">
+        <!-- Conversation Item - Active -->
+        <div class="conversation-item conversation-active p-4 border-b border-gray-200 cursor-pointer" data-conversation-id="1">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-medium">João Silva</h3>
+              <p class="text-sm text-gray-600 truncate">Olá, gostaria de informações sobre o curso...</p>
+            </div>
+            <span class="text-xs text-gray-500">10:45</span>
+          </div>
+          <div class="mt-2 flex items-center">
+            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">WhatsApp</span>
+            <span class="ml-2 text-xs text-gray-500">2 novas mensagens</span>
+          </div>
+        </div>
+        
+        <!-- Conversation Item -->
+        <div class="conversation-item p-4 border-b border-gray-200 cursor-pointer" data-conversation-id="2">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-medium">Maria Oliveira</h3>
+              <p class="text-sm text-gray-600 truncate">Preciso de ajuda com minha matrícula no curso de...</p>
+            </div>
+            <span class="text-xs text-gray-500">09:30</span>
+          </div>
+          <div class="mt-2 flex items-center">
+            <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">Email</span>
+          </div>
+        </div>
+        
+        <!-- Conversation Item -->
+        <div class="conversation-item p-4 border-b border-gray-200 cursor-pointer" data-conversation-id="3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-medium">Pedro Santos</h3>
+              <p class="text-sm text-gray-600 truncate">Quando começa o próximo módulo do curso?</p>
+            </div>
+            <span class="text-xs text-gray-500">Ontem</span>
+          </div>
+          <div class="mt-2 flex items-center">
+            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">WhatsApp</span>
+          </div>
+        </div>
+        
+        <!-- Conversation Item -->
+        <div class="conversation-item p-4 border-b border-gray-200 cursor-pointer" data-conversation-id="4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-medium">Ana Ferreira</h3>
+              <p class="text-sm text-gray-600 truncate">Obrigada pelo suporte! Consegui resolver meu problema.</p>
+            </div>
+            <span class="text-xs text-gray-500">22/02</span>
+          </div>
+          <div class="mt-2 flex items-center">
+            <span class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">Chat</span>
+          </div>
+        </div>
+        
+        <!-- Conversation Item -->
+        <div class="conversation-item p-4 border-b border-gray-200 cursor-pointer" data-conversation-id="5">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-medium">Carlos Mendes</h3>
+              <p class="text-sm text-gray-600 truncate">Não consigo acessar o material do curso. Podem me ajudar?</p>
+            </div>
+            <span class="text-xs text-gray-500">20/02</span>
+          </div>
+          <div class="mt-2 flex items-center">
+            <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">SMS</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 border-t border-gray-200">
+        <button class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center justify-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Nova Conversa
+        </button>
+      </div>
+    </div>
+    
+    <!-- Conversation Detail -->
+    <div class="w-2/3 flex flex-col">
+      <!-- Conversation Header -->
+      <div class="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+            JS
+          </div>
+          <div class="ml-3">
+            <h2 class="font-medium">João Silva</h2>
+            <div class="flex items-center">
+              <span class="text-xs text-gray-500">WhatsApp</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-xs text-gray-500">+55 11 98765-4321</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-xs text-green-500">Online</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center">
+          <button class="p-2 text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Messages -->
+      <div class="flex-grow p-4 overflow-y-auto bg-gray-50">
+        <!-- Date Separator -->
+        <div class="flex justify-center mb-4">
+          <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Hoje</span>
+        </div>
+        
+        <!-- Received Message -->
+        <div class="flex mb-4">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-received p-3">
+              <p class="text-sm">Olá, gostaria de informações sobre o curso de Desenvolvimento Web. Vocês têm turmas abertas para o próximo mês?</p>
+            </div>
+            <span class="text-xs text-gray-500 ml-1">09:30</span>
+          </div>
+        </div>
+        
+        <!-- Sent Message -->
+        <div class="flex mb-4 justify-end">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-sent p-3">
+              <p class="text-sm">Olá João, tudo bem? Sim, temos turmas abertas para o curso de Desenvolvimento Web começando no dia 15 do próximo mês. As aulas serão às terças e quintas, das 19h às 22h.</p>
+            </div>
+            <div class="flex justify-end">
+              <span class="text-xs text-gray-500 mr-1">09:45</span>
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Received Message -->
+        <div class="flex mb-4">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-received p-3">
+              <p class="text-sm">Perfeito! E qual é o valor do investimento? Vocês têm algum material que posso consultar sobre o conteúdo programático?</p>
+            </div>
+            <span class="text-xs text-gray-500 ml-1">10:15</span>
+          </div>
+        </div>
+        
+        <!-- Sent Message -->
+        <div class="flex mb-4 justify-end">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-sent p-3">
+              <p class="text-sm">O investimento é de R$ 1.200,00, podendo ser parcelado em até 6x sem juros. Vou te enviar agora o PDF com todo o conteúdo programático e informações adicionais.</p>
+            </div>
+            <div class="flex justify-end">
+              <span class="text-xs text-gray-500 mr-1">10:20</span>
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sent Message with Attachment -->
+        <div class="flex mb-4 justify-end">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-sent p-3">
+              <div class="flex items-center mb-2">
+                <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
+                </svg>
+                <div class="ml-2">
+                  <p class="text-sm font-medium">Curso_Dev_Web_2025.pdf</p>
+                  <p class="text-xs text-gray-500">2.4 MB</p>
+                </div>
+              </div>
+              <p class="text-sm">Aqui está o material. Qualquer dúvida, estou à disposição!</p>
+            </div>
+            <div class="flex justify-end">
+              <span class="text-xs text-gray-500 mr-1">10:25</span>
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Received Message -->
+        <div class="flex mb-4">
+          <div class="max-w-[75%]">
+            <div class="message-bubble-received p-3">
+              <p class="text-sm">Muito obrigado! Vou analisar o material e retorno em breve.</p>
+            </div>
+            <span class="text-xs text-gray-500 ml-1">10:45</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Message Input -->
+      <div class="p-4 border-t border-gray-200 bg-white">
+        <div class="flex items-center">
+          <button class="p-2 text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+            </svg>
+          </button>
+          <button class="p-2 text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </button>
+          <input type="text" placeholder="Digite sua mensagem..." class="flex-grow mx-2 px-4 py-2 border border-gray-300 rounded-md">
+          <button class="p-2 text-gray-500 hover:text-gray-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+            </svg>
+          </button>
+          <button class="ml-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', function() {
+      const userData = JSON.parse(localStorage.getItem('edunexia_user') || '{}');
+      
+      if (!userData.isAuthenticated) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // Update user role display
+      document.getElementById('userRole').textContent = userData.role === 'admin' ? 'Administrador' : 'Usuário';
+      
+      // Conversation item click handler
+      const conversationItems = document.querySelectorAll('.conversation-item');
+      conversationItems.forEach(item => {
+        item.addEventListener('click', function() {
+          // Remove active class from all items
+          conversationItems.forEach(i => i.classList.remove('conversation-active'));
+          
+          // Add active class to clicked item
+          this.classList.add('conversation-active');
+          
+          // In a real app, this would load the conversation data
+          // For this demo, we'll just keep the existing conversation
+        });
+      });
+      
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('edunexia_user');
+        window.location.href = '/login.html';
+      });
+    });
+  </script>
+</body>
+</html>
