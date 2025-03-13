@@ -11,14 +11,15 @@ import type { Database } from '../../lib/database.types';
 const adminClient = supabaseAdmin || supabase;
 
 // Helper function to convert database model to application model
-function mapDbToTemplate(data: Database['public']['Tables']['templates']['Row']): Template {
+// Using a more specific type for the database row
+function mapDbToTemplate(data: Record<string, unknown>): Template {
   return {
-    id: data.id,
-    name: data.name,
-    content: data.content,
+    id: data.id as string,
+    name: data.name as string,
+    content: data.content as string,
     channelType: data.channel_type as Template['channelType'],
-    category: data.category || '',
-    variables: data.variables,
+    category: (data.category as string) || '',
+    variables: data.variables as string[],
     version: 1, // Default version since not in DB schema
     status: data.status as Template['status']
   };
@@ -91,7 +92,8 @@ export async function createTemplate(template: CreateTemplateInput) {
 
 export async function updateTemplate(id: string, template: UpdateTemplateInput) {
   // Convert to database schema
-  const dbTemplate: any = {};
+  // Using Record<string, unknown> instead of any
+  const dbTemplate: Record<string, unknown> = {};
   if (template.name !== undefined) dbTemplate.name = template.name;
   if (template.content !== undefined) dbTemplate.content = template.content;
   if (template.channelType !== undefined) dbTemplate.channel_type = template.channelType;
@@ -124,4 +126,14 @@ export async function deleteTemplate(id: string) {
   }
   
   return true;
+}
+
+export async function getTemplateVariables(templateId: string): Promise<Record<string, unknown>> {
+  try {
+    const template = await getTemplateById(templateId);
+    return { variables: template.variables || [] };
+  } catch (error) {
+    console.error('Error getting template variables:', error);
+    return { variables: [] };
+  }
 }
