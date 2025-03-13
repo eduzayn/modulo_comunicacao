@@ -1,4 +1,4 @@
-import { LogLevel, logger } from '../../lib/logger';
+import { logger } from '../../lib/logger';
 
 describe('Logger', () => {
   let originalConsole: Console;
