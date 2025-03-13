@@ -2,14 +2,31 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    appDir: true,
     serverComponentsExternalPackages: ['@prisma/client'],
   },
   transpilePackages: ['lucide-react'],
   // Disable SWC for font loading to work with Babel
   swcMinify: false,
   webpack: (config) => {
-    config.resolve.fallback = { fs: false, path: false };
+    // Ignore specific modules that cause issues
+    config.resolve.fallback = { 
+      fs: false, 
+      path: false,
+      process: require.resolve('process/browser'),
+    };
+    
+    // Add a rule to handle process in browser
+    config.module.rules.push({
+      test: /node_modules\/process\/browser\.js$/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+          plugins: ['@babel/plugin-transform-modules-commonjs'],
+        },
+      },
+    });
+    
     return config;
   },
   // Disable font optimization to avoid conflicts with Babel
