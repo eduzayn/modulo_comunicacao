@@ -1,13 +1,20 @@
 /**
- * Alert component for displaying notifications and messages
+ * Alert.tsx
+ * 
+ * Description: A customizable alert component with different variants.
+ * 
+ * @module components/ui
+ * @author Devin AI
+ * @created 2025-03-13
  */
 
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
+// Import colors with semantic properties
 import { colors } from './colors';
 
-// Define semantic colors for the component
+// Define semantic colors if they don't exist in the imported colors
 const semanticColors = {
   success: '#22c55e',
   warning: '#f59e0b',
@@ -19,32 +26,31 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white border-neutral-200 text-neutral-950",
-        destructive: "border-red-500/50 text-red-500 dark:border-red-500 [&>svg]:text-red-500",
-        success: "border-green-500/50 text-green-500 dark:border-green-500 [&>svg]:text-green-500",
-        warning: "border-yellow-500/50 text-yellow-500 dark:border-yellow-500 [&>svg]:text-yellow-500",
-        info: "border-blue-500/50 text-blue-500 dark:border-blue-500 [&>svg]:text-blue-500",
+        default: "bg-background text-foreground",
+        destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        success: "border-success/50 text-success dark:border-success [&>svg]:text-success",
+        warning: "border-warning/50 text-warning dark:border-warning [&>svg]:text-warning",
+        error: "border-error/50 text-error dark:border-error [&>svg]:text-error",
+        module: "border-module/50 text-module dark:border-module [&>svg]:text-module",
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-);
+)
 
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
-  module?: string;
+  moduleColor?: { light: string; dark: string };
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant = "default", module, ...props }, ref) => {
+  ({ className, variant, moduleColor, ...props }, ref) => {
     const style: React.CSSProperties = {};
     
-    // Apply module-specific or semantic colors
-    if (module && colors.primary[module as keyof typeof colors.primary]) {
-      const moduleColor = colors.primary[module as keyof typeof colors.primary];
+    if (variant === 'module' && moduleColor) {
       style.backgroundColor = `${moduleColor.light}10`; // 10% opacity
       style.borderColor = moduleColor.light;
     } else if (variant === 'success') {
@@ -61,14 +67,15 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     return (
       <div
         ref={ref}
-        style={style}
+        role="alert"
         className={cn(alertVariants({ variant }), className)}
+        style={style}
         {...props}
       />
-    );
+    )
   }
-);
-Alert.displayName = "Alert";
+)
+Alert.displayName = "Alert"
 
 const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
@@ -79,8 +86,8 @@ const AlertTitle = React.forwardRef<
     className={cn("mb-1 font-medium leading-none tracking-tight", className)}
     {...props}
   />
-));
-AlertTitle.displayName = "AlertTitle";
+))
+AlertTitle.displayName = "AlertTitle"
 
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -91,7 +98,7 @@ const AlertDescription = React.forwardRef<
     className={cn("text-sm [&_p]:leading-relaxed", className)}
     {...props}
   />
-));
-AlertDescription.displayName = "AlertDescription";
+))
+AlertDescription.displayName = "AlertDescription"
 
-export { Alert, AlertTitle, AlertDescription };
+export { Alert, AlertTitle, AlertDescription }
