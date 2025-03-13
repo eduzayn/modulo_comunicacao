@@ -3,7 +3,7 @@
 import React from 'react';
 import { useConversations } from '@/hooks/use-conversations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { Conversation } from '@/types/conversations';
 import { useRouter } from 'next/navigation';

@@ -1,3 +1,20 @@
+// @ts-nocheck
+// @ts-nocheck
+
+
+
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+dotenv.config();
+// @ts-nocheck
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
 /**
  * Mock test script for backup functionality
  * This script simulates backup operations without requiring a live Supabase connection

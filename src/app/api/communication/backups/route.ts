@@ -19,7 +19,7 @@ const backupRequestSchema = z.object({
  * GET /api/communication/backups
  * List all backups with pagination
  */
-async function handleGetBackups(request: NextRequest) {
+async function handleGetBackups(// request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -41,7 +41,7 @@ async function handleGetBackups(request: NextRequest) {
  * POST /api/communication/backups
  * Create a new backup
  */
-async function handleCreateBackup(request: NextRequest) {
+async function handleCreateBackup(// request: NextRequest) {
   try {
     const body = await request.json();
     
@@ -73,7 +73,7 @@ async function handleCreateBackup(request: NextRequest) {
  * DELETE /api/communication/backups?id=123
  * Delete a backup by ID
  */
-async function handleDeleteBackup(request: NextRequest) {
+async function handleDeleteBackup(// request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

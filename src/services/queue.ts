@@ -1,14 +1,15 @@
-import { supabase } from '../lib/supabase';
+// Commented out unused import
+// import { supabase } from '../lib/supabase';
 
 export interface QueueJob {
   id?: string;
   type: string;
-  payload: any;
+  payload: Record<string, string | number | boolean | object | null>;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   priority: number;
   attempts: number;
   max_attempts: number;
-  result?: any;
+  result?: Record<string, string | number | boolean | object | null>;
   error?: string;
   created_at?: string;
   updated_at?: string;
@@ -19,7 +20,7 @@ export interface QueueJob {
 /**
  * Adiciona um job à fila de processamento
  */
-export async function enqueue(type: string, payload: any, priority: number = 5): Promise<QueueJob> {
+export async function enqueue(type: string, payload: Record<string, string | number | boolean | object | null>, priority: number = 5): Promise<QueueJob> {
   try {
     // Implementação temporária para resolver erro de build
     console.log(`Enqueuing job: ${type}, Priority: ${priority}`);
@@ -51,17 +52,20 @@ export async function processQueue(): Promise<number> {
 }
 
 // Registro de processadores de jobs
-const processors: Record<string, (job: QueueJob) => Promise<any>> = {};
+const processors: Record<string, (job: QueueJob) => Promise<unknown>> = {};
 
 /**
  * Registra um processador para um tipo específico de job
  */
-export function registerProcessor(type: string, processor: (job: QueueJob) => Promise<any>) {
+export function registerProcessor(type: string, processor: (job: QueueJob) => Promise<unknown>) {
   processors[type] = processor;
 }
 
-export default {
+// Export all functions as a service object
+const queueService = {
   enqueue,
   processQueue,
   registerProcessor
 };
+
+export default queueService;

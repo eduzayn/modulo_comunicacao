@@ -18,7 +18,7 @@ export function SentimentAnalysisOpenAI({ messages }: SentimentAnalysisProps) {
   const [sentimentResults, setSentimentResults] = useState<Record<string, SentimentResult>>({});
   const [isLoading, setIsLoading] = useState(false);
   
-  useEffect(() => {
+  useEffect(() => { // Include sentimentResults in dependencies  // Include sentimentResults in dependencies
     // Only analyze the last 5 messages to avoid excessive API calls
     const messagesToAnalyze = messages.slice(-5);
     

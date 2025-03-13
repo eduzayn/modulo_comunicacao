@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     
     const templates = await getTemplates(params);
     return NextResponse.json(templates);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to fetch templates' }, 
       { status: 500 }
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       status: result.data.status
     });
     return NextResponse.json(template);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to create template' }, 
       { status: 500 }

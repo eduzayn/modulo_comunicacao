@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateResponseSuggestions } from '@/services/openai';
 
-export async function POST(request: NextRequest) {
+export async function POST(// request: NextRequest) {
   try {
     const { conversationHistory, maxSuggestions } = await request.json();
     

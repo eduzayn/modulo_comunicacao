@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { colors } from "../../../styles/colors";
+// import { colors } from "../../../styles/colors";
 
 interface ColorSwatchProps {
   color: string;

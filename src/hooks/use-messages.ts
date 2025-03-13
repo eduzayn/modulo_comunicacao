@@ -12,7 +12,7 @@ export interface Message {
   type: 'text' | 'image' | 'file' | 'audio' | 'document';
   status: 'sending' | 'sent' | 'delivered' | 'read';
   mediaUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 

@@ -17,7 +17,7 @@ import type {
 export async function fetchTemplates(params?: GetTemplatesInput) {
   try {
     return { data: await getTemplates(params), error: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { data: null, error: error.message };
   }
 }
@@ -25,7 +25,7 @@ export async function fetchTemplates(params?: GetTemplatesInput) {
 export async function fetchTemplateById(id: string) {
   try {
     return { data: await getTemplateById(id), error: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { data: null, error: error.message };
   }
 }
@@ -45,7 +45,7 @@ export async function addTemplate(data: CreateTemplateInput) {
     const template = await createTemplate(templateData as any);
     revalidatePath('/templates');
     return { data: template, error: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { data: null, error: error.message };
   }
 }
@@ -53,7 +53,7 @@ export async function addTemplate(data: CreateTemplateInput) {
 export async function editTemplate(id: string, data: UpdateTemplateInput) {
   try {
     // Transform the data to match the database schema
-    const templateData: any = {};
+    const templateData: unknown = {};
     if (data.name) templateData.name = data.name;
     if (data.content) templateData.content = data.content;
     if (data.channelType) templateData.channel_type = data.channelType;
@@ -65,7 +65,7 @@ export async function editTemplate(id: string, data: UpdateTemplateInput) {
     revalidatePath(`/templates/${id}`);
     revalidatePath('/templates');
     return { data: template, error: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { data: null, error: error.message };
   }
 }
@@ -75,7 +75,7 @@ export async function removeTemplate(id: string) {
     await deleteTemplate(id);
     revalidatePath('/templates');
     return { success: true, error: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { success: false, error: error.message };
   }
 }

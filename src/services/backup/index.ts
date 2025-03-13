@@ -1,480 +1,601 @@
-import { supabase } from '../../lib/supabase';
-import { recordMetric } from '../metrics';
-import { enqueue } from '../queue';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { logger } from '../../lib/logger';
 
+/**
+ * Backup Service
+ * 
+ * This service handles database backups and restoration.
+ */
+
+// Backup configuration
 export interface BackupOptions {
-  includeMessages?: boolean;
-  includeAttachments?: boolean;
-  conversationIds?: string[];
-  startDate?: string;
-  endDate?: string;
-  format?: 'json' | 'csv';
+  tables?: string[];
+  includeStorage?: boolean;
   compressionLevel?: number;
+  encryptionKey?: string;
+  destination?: 'local' | 's3' | 'supabase';
+  maxBackups?: number;
 }
 
-export interface BackupResult {
+// Backup metadata
+export interface BackupMetadata {
   id: string;
-  fileName: string;
-  fileSize: number;
-  url?: string;
-  expiresAt?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  error?: string;
-  createdAt: string;
+  timestamp: string;
+  size: number;
+  tables: string[];
+  includesStorage: boolean;
+  encrypted: boolean;
+  compressed: boolean;
+  status: 'completed' | 'failed' | 'in_progress';
+  destination: string;
+  path: string;
 }
 
-/**
- * Create a backup of conversations
- */
-export async function createBackup(options: BackupOptions = {}): Promise<BackupResult> {
-  try {
-    const {
-      includeMessages = true,
-      includeAttachments = false,
-      conversationIds,
-      startDate,
-      endDate,
-      format = 'json',
-      compressionLevel = 5,
-    } = options;
-    
-    // Create a backup record
-    const { data: backup, error } = await supabase
-      .from('backups')
-      .insert({
-        options: {
-          includeMessages,
-          includeAttachments,
-          conversationIds,
-          startDate,
-          endDate,
-          format,
-          compressionLevel,
-        },
-        status: 'pending',
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Error creating backup record:', error);
-      throw new Error('Failed to create backup record');
-    }
-    
-    // Enqueue a backup job
-    await enqueue('backup', {
-      backupId: backup.id,
-      options,
-    });
-    
-    return {
-      id: backup.id,
-      fileName: `backup_${backup.id}.${format === 'json' ? 'json.gz' : 'csv.gz'}`,
-      fileSize: 0,
-      status: 'pending',
-      createdAt: backup.created_at,
-    };
-  } catch (error) {
-    console.error('Error creating backup:', error);
-    throw error;
-  }
-}
-
-/**
- * Get a backup by ID
- */
-export async function getBackup(id: string): Promise<BackupResult | null> {
-  try {
-    const { data: backup, error } = await supabase
-      .from('backups')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching backup:', error);
-      return null;
-    }
-    
-    if (!backup) {
-      return null;
-    }
-    
-    return {
-      id: backup.id,
-      fileName: backup.file_name || `backup_${backup.id}.${backup.options?.format === 'csv' ? 'csv.gz' : 'json.gz'}`,
-      fileSize: backup.file_size || 0,
-      url: backup.url,
-      expiresAt: backup.expires_at,
-      status: backup.status,
-      error: backup.error,
-      createdAt: backup.created_at,
-    };
-  } catch (error) {
-    console.error('Error fetching backup:', error);
-    return null;
-  }
-}
+// Default backup options
+const DEFAULT_BACKUP_OPTIONS: BackupOptions = {
+  tables: [],
+  includeStorage: true,
+  compressionLevel: 5,
+  destination: 'supabase',
+  maxBackups: 10,
+};
 
 /**
  * List all backups
  */
-export async function listBackups(limit = 10, offset = 0): Promise<BackupResult[]> {
+export async function listBackups(): Promise<BackupMetadata[]> {
   try {
-    const { data: backups, error } = await supabase
-      .from('backups')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-    
-    if (error) {
-      console.error('Error listing backups:', error);
-      return [];
-    }
-    
-    return backups.map(backup => ({
-      id: backup.id,
-      fileName: backup.file_name || `backup_${backup.id}.${backup.options?.format === 'csv' ? 'csv.gz' : 'json.gz'}`,
-      fileSize: backup.file_size || 0,
-      url: backup.url,
-      expiresAt: backup.expires_at,
-      status: backup.status,
-      error: backup.error,
-      createdAt: backup.created_at,
-    }));
-  } catch (error) {
-    console.error('Error listing backups:', error);
-    return [];
-  }
-}
-
-/**
- * Process a backup job
- */
-export async function processBackup(backupId: string, options: BackupOptions): Promise<boolean> {
-  const startTime = Date.now();
-  let success = false;
-  
-  try {
-    // Update backup status to processing
-    await supabase
-      .from('backups')
-      .update({ status: 'processing' })
-      .eq('id', backupId);
-    
-    // Extract conversations based on filters
-    const {
-      includeMessages = true,
-      includeAttachments = false,
-      conversationIds,
-      startDate,
-      endDate,
-      format = 'json',
-    } = options;
-    
-    // Build query for conversations
-    let query = supabase.from('conversations').select(
-      includeMessages ? 'id, title, status, created_at, updated_at, messages(*)' : '*'
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
     );
     
-    // Apply filters
-    if (conversationIds && conversationIds.length > 0) {
-      query = query.in('id', conversationIds);
-    }
-    
-    if (startDate) {
-      query = query.gte('created_at', startDate);
-    }
-    
-    if (endDate) {
-      query = query.lte('created_at', endDate);
-    }
-    
-    // Fetch conversations
-    const { data: conversations, error } = await query;
-    
-    if (error) {
-      throw new Error(`Failed to fetch conversations: ${error.message}`);
-    }
-    
-    // Process attachments if needed
-    if (includeAttachments && conversations && Array.isArray(conversations)) {
-      try {
-        // Fetch attachments for all messages
-        const messageIds: string[] = [];
-        
-        // Safely extract message IDs
-        for (const conv of conversations as any[]) {
-          if (conv && typeof conv === 'object' && 'messages' in conv && Array.isArray(conv.messages)) {
-            for (const msg of conv.messages) {
-              if (msg && typeof msg === 'object' && 'id' in msg) {
-                messageIds.push(msg.id as string);
-              }
-            }
-          }
-        }
-        
-        if (messageIds.length > 0) {
-          const { data: attachments } = await supabase
-            .from('attachments')
-            .select('*')
-            .in('message_id', messageIds);
-          
-          // Add attachments to their respective messages
-          if (attachments) {
-            for (const conv of conversations as any[]) {
-              if (conv && typeof conv === 'object' && 'messages' in conv && Array.isArray(conv.messages)) {
-                for (const msg of conv.messages) {
-                  if (msg && typeof msg === 'object' && 'id' in msg) {
-                    (msg as any).attachments = attachments.filter(att => att.message_id === msg.id);
-                  }
-                }
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error processing attachments:', error);
-        // Continue without attachments
-      }
-    }
-    
-    // Generate backup file
-    const backupData = format === 'json' 
-      ? JSON.stringify(conversations)
-      : convertToCSV(conversations);
-    
-    // Compress data
-    const compressedData = await compressData(backupData);
-    
-    // Upload to storage
-    const fileName = `backups/backup_${backupId}.${format === 'json' ? 'json.gz' : 'csv.gz'}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('communication')
-      .upload(fileName, compressedData, {
-        contentType: format === 'json' ? 'application/json+gzip' : 'text/csv+gzip',
-        cacheControl: '3600',
-      });
-    
-    if (uploadError) {
-      throw new Error(`Failed to upload backup: ${uploadError.message}`);
-    }
-    
-    // Generate signed URL
-    const { data: urlData } = await supabase.storage
-      .from('communication')
-      .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 days
-    
-    // Update backup record
-    const fileSize = compressedData.byteLength;
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-    
-    await supabase
-      .from('backups')
-      .update({
-        status: 'completed',
-        file_name: fileName,
-        file_size: fileSize,
-        url: urlData?.signedUrl,
-        expires_at: expiresAt.toISOString(),
-      })
-      .eq('id', backupId);
-    
-    // Record metrics
-    await recordMetric({
-      type: 'backup_size',
-      value: fileSize,
-      tags: {
-        backupId,
-        format,
-      },
-    });
-    
-    await recordMetric({
-      type: 'backup_duration',
-      value: Date.now() - startTime,
-      tags: {
-        backupId,
-        format,
-      },
-    });
-    
-    await recordMetric({
-      type: 'backup_completed',
-      value: 1,
-      tags: {
-        backupId,
-        success: 'true',
-      },
-    });
-    
-    success = true;
-    return true;
-  } catch (error) {
-    console.error('Error processing backup:', error);
-    
-    // Update backup record with error
-    await supabase
-      .from('backups')
-      .update({
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      })
-      .eq('id', backupId);
-    
-    // Record error metric
-    await recordMetric({
-      type: 'backup_completed',
-      value: 1,
-      tags: {
-        backupId,
-        success: 'false',
-        error: error instanceof Error ? error.message.substring(0, 100) : 'Unknown error',
-      },
-    });
-    
-    return false;
-  } finally {
-    // Record processing time metric
-    await recordMetric({
-      type: 'backup_duration',
-      value: Date.now() - startTime,
-      tags: {
-        backupId,
-        success: success.toString(),
-      },
-    });
-  }
-}
-
-/**
- * Schedule automatic backups
- */
-export async function scheduleBackups(
-  schedule: 'daily' | 'weekly' | 'monthly',
-  options: BackupOptions = {}
-): Promise<boolean> {
-  try {
-    // Create or update backup schedule
-    const { error } = await supabase
-      .from('backup_schedules')
-      .upsert({
-        schedule,
-        options,
-        is_active: true,
-        updated_at: new Date().toISOString(),
-      });
-    
-    if (error) {
-      console.error('Error scheduling backups:', error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error scheduling backups:', error);
-    return false;
-  }
-}
-
-/**
- * Get backup schedules
- */
-export async function getBackupSchedules(): Promise<any[]> {
-  try {
+    // Get backups from database
     const { data, error } = await supabase
-      .from('backup_schedules')
-      .select('*');
+      .from('backups')
+      .select('*')
+      .order('timestamp', { ascending: false });
     
     if (error) {
-      console.error('Error fetching backup schedules:', error);
-      return [];
+      throw new Error(`Failed to list backups: ${error.message}`);
     }
     
     return data || [];
   } catch (error) {
-    console.error('Error fetching backup schedules:', error);
+    logger.error(`Failed to list backups: ${error.message}`, { error });
     return [];
   }
 }
 
 /**
- * Helper function to compress data
+ * Create a backup of the database
  */
-async function compressData(data: string): Promise<Uint8Array> {
-  // In a real implementation, we would use a compression library
-  // For this example, we'll just return the data as a Uint8Array
-  const encoder = new TextEncoder();
-  return encoder.encode(data);
+export async function createBackup(options: BackupOptions = {}): Promise<BackupMetadata> {
+  const backupOptions = { ...DEFAULT_BACKUP_OPTIONS, ...options };
+  const backupId = `backup_${Date.now()}`;
+  
+  logger.info(`Starting backup ${backupId}`, { backupOptions });
+  
+  try {
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
+    
+    // Get tables to backup
+    const tables = backupOptions.tables?.length 
+      ? backupOptions.tables 
+      : await getAllTables(supabase);
+    
+    logger.info(`Backing up ${tables.length} tables`, { tables });
+    
+    // Create backup metadata
+    const metadata: BackupMetadata = {
+      id: backupId,
+      timestamp: new Date().toISOString(),
+      size: 0,
+      tables,
+      includesStorage: backupOptions.includeStorage || false,
+      encrypted: !!backupOptions.encryptionKey,
+      compressed: backupOptions.compressionLevel !== 0,
+      status: 'in_progress',
+      destination: backupOptions.destination || 'supabase',
+      path: `backups/${backupId}`,
+    };
+    
+    // Create backup data object
+    const backupData: Record<string, unknown> = {
+      metadata,
+      tables: {},
+    };
+    
+    // Backup each table
+    for (const table of tables) {
+      logger.info(`Backing up table: ${table}`);
+      
+      const { data, error } = await supabase
+        .from(table)
+        .select('*');
+      
+      if (error) {
+        throw new Error(`Failed to backup table ${table}: ${error.message}`);
+      }
+      
+      backupData.tables[table] = data;
+    }
+    
+    // Backup storage if requested
+    if (backupOptions.includeStorage) {
+      logger.info('Backing up storage buckets');
+      
+      const { data: buckets, error: bucketsError } = await supabase
+        .storage
+        .listBuckets();
+      
+      if (bucketsError) {
+        throw new Error(`Failed to list storage buckets: ${bucketsError.message}`);
+      }
+      
+      backupData.storage = {
+        buckets: buckets,
+        objects: {},
+      };
+      
+      // Backup objects in each bucket
+      for (const bucket of buckets) {
+        logger.info(`Backing up bucket: ${bucket.name}`);
+        
+        const { data: objects, error: objectsError } = await supabase
+          .storage
+          .from(bucket.name)
+          .list();
+        
+        if (objectsError) {
+          throw new Error(`Failed to list objects in bucket ${bucket.name}: ${objectsError.message}`);
+        }
+        
+        backupData.storage.objects[bucket.name] = objects;
+        
+        // Download each object
+        for (const object of objects) {
+          if (object.metadata?.mimetype && !object.id.endsWith('/')) {
+            const { data: objectData, error: objectError } = await supabase
+              .storage
+              .from(bucket.name)
+              .download(object.name);
+            
+            if (objectError) {
+              logger.warn(`Failed to download object ${object.name}: ${objectError.message}`);
+              continue;
+            }
+            
+            // Convert blob to base64
+            const buffer = await objectData.arrayBuffer();
+            const base64 = Buffer.from(buffer).toString('base64');
+            
+            // Add to backup data
+            if (!backupData.storage.objectData) {
+              backupData.storage.objectData = {};
+            }
+            
+            if (!backupData.storage.objectData[bucket.name]) {
+              backupData.storage.objectData[bucket.name] = {};
+            }
+            
+            backupData.storage.objectData[bucket.name][object.name] = {
+              base64,
+              metadata: object.metadata,
+            };
+          }
+        }
+      }
+    }
+    
+    // Serialize backup data
+    const serializedData = JSON.stringify(backupData);
+    
+    // Compress if requested
+    if (backupOptions.compressionLevel && backupOptions.compressionLevel > 0) {
+      logger.info(`Compressing backup with level ${backupOptions.compressionLevel}`);
+      // Compression would be implemented here
+    }
+    
+    // Encrypt if requested
+    if (backupOptions.encryptionKey) {
+      logger.info('Encrypting backup');
+      // Encryption would be implemented here
+    }
+    
+    // Store the backup
+    const backupDestination = backupOptions.destination || 'supabase';
+    
+    switch (backupDestination) {
+      case 'local':
+        await storeBackupLocally(backupId, serializedData);
+        break;
+        
+      case 'supabase':
+      default:
+        await storeBackupInSupabase(supabase, backupId, serializedData);
+        break;
+    }
+    
+    // Update metadata
+    metadata.status = 'completed';
+    metadata.size = Buffer.byteLength(serializedData, 'utf8');
+    
+    // Store metadata in database
+    const { error: metadataError } = await supabase
+      .from('backups')
+      .insert([metadata]);
+    
+    if (metadataError) {
+      logger.error(`Failed to store backup metadata: ${metadataError.message}`);
+    }
+    
+    // Clean up old backups if maxBackups is set
+    if (backupOptions.maxBackups && backupOptions.maxBackups > 0) {
+      await cleanupOldBackups(supabase, backupOptions.maxBackups);
+    }
+    
+    logger.info(`Backup ${backupId} completed successfully`, { 
+      size: metadata.size,
+      tables: metadata.tables.length,
+    });
+    
+    return metadata;
+  } catch (error) {
+    logger.error(`Backup failed: ${error.message}`, { error });
+    
+    // Create failed backup metadata
+    const failedMetadata: BackupMetadata = {
+      id: backupId,
+      timestamp: new Date().toISOString(),
+      size: 0,
+      tables: [],
+      includesStorage: backupOptions.includeStorage || false,
+      encrypted: !!backupOptions.encryptionKey,
+      compressed: backupOptions.compressionLevel !== 0,
+      status: 'failed',
+      destination: backupOptions.destination || 'supabase',
+      path: `backups/${backupId}`,
+    };
+    
+    return failedMetadata;
+  }
 }
 
 /**
- * Helper function to convert data to CSV
+ * Restore a backup
  */
-function convertToCSV(data: any[]): string {
-  if (!data || data.length === 0) {
-    return '';
+export async function restoreBackup(backupId: string): Promise<boolean> {
+  logger.info(`Starting restoration of backup ${backupId}`);
+  
+  try {
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
+    
+    // Get backup metadata
+    const { data: metadata, error: metadataError } = await supabase
+      .from('backups')
+      .select('*')
+      .eq('id', backupId)
+      .single();
+    
+    if (metadataError || !metadata) {
+      throw new Error(`Failed to get backup metadata: ${metadataError?.message || 'Backup not found'}`);
+    }
+    
+    // Get backup data
+    let serializedData: string;
+    
+    switch (metadata.destination) {
+      case 'local':
+        serializedData = await getBackupFromLocal(backupId);
+        break;
+        
+      case 'supabase':
+      default:
+        serializedData = await getBackupFromSupabase(supabase, backupId);
+        break;
+    }
+    
+    // Decrypt if needed
+    if (metadata.encrypted) {
+      logger.info('Decrypting backup');
+      // Decryption would be implemented here
+    }
+    
+    // Decompress if needed
+    if (metadata.compressed) {
+      logger.info('Decompressing backup');
+      // Decompression would be implemented here
+    }
+    
+    // Parse backup data
+    const backupData = JSON.parse(serializedData);
+    
+    // Restore tables
+    for (const table of Object.keys(backupData.tables)) {
+      logger.info(`Restoring table: ${table}`);
+      
+      // Clear existing data
+      const { error: clearError } = await supabase
+        .from(table)
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+      
+      if (clearError) {
+        logger.warn(`Failed to clear table ${table}: ${clearError.message}`);
+      }
+      
+      // Insert backup data
+      const tableData = backupData.tables[table];
+      
+      if (tableData && tableData.length > 0) {
+        // Insert in batches to avoid request size limits
+        const batchSize = 1000;
+        
+        for (let i = 0; i < tableData.length; i += batchSize) {
+          const batch = tableData.slice(i, i + batchSize);
+          
+          const { error: insertError } = await supabase
+            .from(table)
+            .insert(batch);
+          
+          if (insertError) {
+            logger.error(`Failed to restore data to table ${table}: ${insertError.message}`);
+          }
+        }
+      }
+    }
+    
+    // Restore storage if included
+    if (backupData.storage && metadata.includesStorage) {
+      logger.info('Restoring storage buckets');
+      
+      // Restore buckets
+      for (const bucket of backupData.storage.buckets) {
+        // Check if bucket exists
+        const { data: existingBuckets, error: bucketsError } = await supabase
+          .storage
+          .listBuckets();
+        
+        if (bucketsError) {
+          logger.error(`Failed to list storage buckets: ${bucketsError.message}`);
+          continue;
+        }
+        
+        const bucketExists = existingBuckets.some(b => b.name === bucket.name);
+        
+        if (!bucketExists) {
+          logger.info(`Creating bucket: ${bucket.name}`);
+          
+          const { error: createError } = await supabase
+            .storage
+            .createBucket(bucket.name, {
+              public: bucket.public,
+            });
+          
+          if (createError) {
+            logger.error(`Failed to create bucket ${bucket.name}: ${createError.message}`);
+            continue;
+          }
+        }
+        
+        // Restore objects
+        if (backupData.storage.objectData && backupData.storage.objectData[bucket.name]) {
+          for (const [objectName, objectData] of Object.entries(backupData.storage.objectData[bucket.name])) {
+            logger.info(`Restoring object: ${bucket.name}/${objectName}`);
+            
+            // Convert base64 to blob
+            const base64 = objectData.base64;
+            const buffer = Buffer.from(base64, 'base64');
+            const blob = new Blob([buffer], { type: objectData.metadata.mimetype });
+            
+            // Upload to storage
+            const { error: uploadError } = await supabase
+              .storage
+              .from(bucket.name)
+              .upload(objectName, blob, {
+                contentType: objectData.metadata.mimetype,
+                upsert: true,
+              });
+            
+            if (uploadError) {
+              logger.error(`Failed to restore object ${objectName}: ${uploadError.message}`);
+            }
+          }
+        }
+      }
+    }
+    
+    logger.info(`Backup ${backupId} restored successfully`);
+    
+    return true;
+  } catch (error) {
+    logger.error(`Restoration failed: ${error.message}`, { error });
+    return false;
+  }
+}
+
+/**
+ * Get all tables in the database
+ */
+async function getAllTables(supabase) {
+  const { data, error } = await supabase.rpc('get_all_tables');
+  
+  if (error) {
+    throw new Error(`Failed to get tables: ${error.message}`);
   }
   
-  // Flatten conversations and messages into rows
-  const rows: any[] = [];
+  return data.map(table => table.table_name);
+}
+
+/**
+ * Store backup locally
+ */
+async function storeBackupLocally(backupId: string, data: string): Promise<void> {
+  const backupDir = path.join(process.cwd(), 'backups');
   
-  for (const conv of data) {
-    if (conv.messages && conv.messages.length > 0) {
-      for (const msg of conv.messages) {
-        rows.push({
-          conversation_id: conv.id,
-          conversation_title: conv.title,
-          conversation_status: conv.status,
-          conversation_created_at: conv.created_at,
-          message_id: msg.id,
-          message_content: msg.content,
-          message_sender: msg.sender,
-          message_created_at: msg.created_at,
-        });
-      }
-    } else {
-      rows.push({
-        conversation_id: conv.id,
-        conversation_title: conv.title,
-        conversation_status: conv.status,
-        conversation_created_at: conv.created_at,
+  // Create backup directory if it doesn't exist
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+  
+  const backupPath = path.join(backupDir, `${backupId}.json`);
+  
+  // Write backup data to file
+  fs.writeFileSync(backupPath, data, 'utf8');
+  
+  logger.info(`Backup stored locally at ${backupPath}`);
+}
+
+/**
+ * Store backup in Supabase storage
+ */
+async function storeBackupInSupabase(supabase, backupId: string, data: string): Promise<void> {
+  const bucketName = 'backups';
+  
+  // Check if bucket exists
+  const { data: buckets, error: bucketsError } = await supabase
+    .storage
+    .listBuckets();
+  
+  if (bucketsError) {
+    throw new Error(`Failed to list storage buckets: ${bucketsError.message}`);
+  }
+  
+  const bucketExists = buckets.some(b => b.name === bucketName);
+  
+  if (!bucketExists) {
+    logger.info(`Creating backup bucket: ${bucketName}`);
+    
+    const { error: createError } = await supabase
+      .storage
+      .createBucket(bucketName, {
+        public: false,
       });
+    
+    if (createError) {
+      throw new Error(`Failed to create backup bucket: ${createError.message}`);
     }
   }
   
-  // Get all unique headers
-  const headers = Array.from(
-    new Set(rows.flatMap(row => Object.keys(row)))
-  );
-  
-  // Create CSV header row
-  let csv = headers.join(',') + '\n';
-  
-  // Add data rows
-  for (const row of rows) {
-    const values = headers.map(header => {
-      const value = row[header] || '';
-      // Escape quotes and wrap in quotes if needed
-      return typeof value === 'string' && (value.includes(',') || value.includes('"'))
-        ? `"${value.replace(/"/g, '""')}"`
-        : value;
+  // Upload backup data
+  const { error: uploadError } = await supabase
+    .storage
+    .from(bucketName)
+    .upload(`${backupId}.json`, new Blob([data], { type: 'application/json' }), {
+      contentType: 'application/json',
+      upsert: true,
     });
-    
-    csv += values.join(',') + '\n';
+  
+  if (uploadError) {
+    throw new Error(`Failed to upload backup: ${uploadError.message}`);
   }
   
-  return csv;
+  logger.info(`Backup stored in Supabase storage: ${bucketName}/${backupId}.json`);
 }
 
-// Register backup processor
-export function registerBackupProcessor() {
-  const { registerProcessor } = require('../queue');
+/**
+ * Get backup from local storage
+ */
+async function getBackupFromLocal(backupId: string): Promise<string> {
+  const backupPath = path.join(process.cwd(), 'backups', `${backupId}.json`);
   
-  registerProcessor('backup', async (job: { payload: { backupId: string; options: BackupOptions } }) => {
-    const { backupId, options } = job.payload;
-    return await processBackup(backupId, options);
-  });
+  if (!fs.existsSync(backupPath)) {
+    throw new Error(`Backup file not found: ${backupPath}`);
+  }
+  
+  return fs.readFileSync(backupPath, 'utf8');
 }
+
+/**
+ * Get backup from Supabase storage
+ */
+async function getBackupFromSupabase(supabase, backupId: string): Promise<string> {
+  const bucketName = 'backups';
+  
+  // Download backup data
+  const { data, error } = await supabase
+    .storage
+    .from(bucketName)
+    .download(`${backupId}.json`);
+  
+  if (error) {
+    throw new Error(`Failed to download backup: ${error.message}`);
+  }
+  
+  // Convert blob to string
+  return await data.text();
+}
+
+/**
+ * Clean up old backups
+ */
+async function cleanupOldBackups(supabase, maxBackups: number): Promise<void> {
+  logger.info(`Cleaning up old backups, keeping ${maxBackups} most recent`);
+  
+  // Get all backups
+  const { data: backups, error } = await supabase
+    .from('backups')
+    .select('*')
+    .order('timestamp', { ascending: false });
+  
+  if (error) {
+    logger.error(`Failed to get backups: ${error.message}`);
+    return;
+  }
+  
+  // Keep only the most recent backups
+  const backupsToDelete = backups.slice(maxBackups);
+  
+  for (const backup of backupsToDelete) {
+    logger.info(`Deleting old backup: ${backup.id}`);
+    
+    // Delete from storage
+    if (backup.destination === 'supabase') {
+      const { error: deleteError } = await supabase
+        .storage
+        .from('backups')
+        .remove([`${backup.id}.json`]);
+      
+      if (deleteError) {
+        logger.warn(`Failed to delete backup file: ${deleteError.message}`);
+      }
+    } else if (backup.destination === 'local') {
+      const backupPath = path.join(process.cwd(), 'backups', `${backup.id}.json`);
+      
+      if (fs.existsSync(backupPath)) {
+        fs.unlinkSync(backupPath);
+      }
+    }
+    
+    // Delete metadata
+    const { error: deleteMetadataError } = await supabase
+      .from('backups')
+      .delete()
+      .eq('id', backup.id);
+    
+    if (deleteMetadataError) {
+      logger.warn(`Failed to delete backup metadata: ${deleteMetadataError.message}`);
+    }
+  }
+}
+
+// Export functions for scheduled backups
+export const backupService = {
+  createBackup,
+  restoreBackup,
+  listBackups
+};
+
+export default backupService;

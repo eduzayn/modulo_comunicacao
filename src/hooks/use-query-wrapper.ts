@@ -44,7 +44,7 @@ export function useApiMutation<TData, TVariables, TError = unknown>(
   method: 'POST' | 'PUT' | 'DELETE' = 'POST',
   options?: UseMutationOptions<TData, TError, TVariables>
 ) {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const { getAuthHeaders } = useDevAuth();
   
   return useMutation<TData, TError, TVariables>({
@@ -66,7 +66,7 @@ export function useApiMutation<TData, TVariables, TError = unknown>(
  * Hook for invalidating queries by key pattern
  */
 export function useQueryInvalidation() {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   
   return {
     invalidateQueries: (queryKey: string[]) => {
@@ -91,7 +91,7 @@ export function useOptimisticMutation<TData, TVariables, TError = unknown>(
   updateFn: (oldData: TData | undefined, variables: TVariables) => TData,
   options?: UseMutationOptions<TData, TError, TVariables>
 ) {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const { getAuthHeaders } = useDevAuth();
   
   return useMutation<TData, TError, TVariables>({

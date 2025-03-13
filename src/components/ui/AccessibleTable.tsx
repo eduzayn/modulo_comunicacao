@@ -36,7 +36,7 @@ export interface TableProps<T> {
   responsive?: boolean;
 }
 
-const AccessibleTable = <T extends Record<string, any>>(
+const AccessibleTable = <T extends Record<string, unknown>>(
   { 
     data, 
     columns, 
@@ -366,6 +366,6 @@ const AccessibleTable = <T extends Record<string, any>>(
   );
 };
 
-export default forwardRef(AccessibleTable) as <T extends Record<string, any>>(
+export default forwardRef(AccessibleTable) as <T extends Record<string, unknown>>(
   props: TableProps<T> & { ref?: React.ForwardedRef<HTMLTableElement> }
 ) => React.ReactElement;

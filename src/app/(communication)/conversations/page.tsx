@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 
 export default function ConversationsPage() {
-  const { conversations, isLoading, error, updateStatus } = useConversations();
+  const { conversations, isLoading, error } = useConversations();
   
   if (isLoading) {
     return <div className="text-center py-10">Carregando conversas...</div>;

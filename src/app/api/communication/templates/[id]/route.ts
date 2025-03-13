@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: Params) {
   try {
     const template = await getTemplateById(params.id);
     return NextResponse.json(template);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to fetch template' }, 
       { status: 500 }
@@ -53,7 +53,7 @@ export async function PUT(request: Request, { params }: Params) {
     
     const template = await updateTemplate(params.id, templateData);
     return NextResponse.json(template);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to update template' }, 
       { status: 500 }
@@ -65,7 +65,7 @@ export async function DELETE(request: Request, { params }: Params) {
   try {
     await deleteTemplate(params.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: error.message || 'Failed to delete template' }, 
       { status: 500 }

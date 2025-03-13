@@ -20,7 +20,7 @@ export function useChannels() {
   });
   
   const updateChannelMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => updateChannel(id, data),
+    mutationFn: ({ id, data }: { id: string; data: unknown }) => updateChannel(id, data),
     onSuccess: (data) => {
       if (data.success && data.data) {
         queryClient.setQueryData(['channels', data.data.id], data.data);
@@ -51,7 +51,7 @@ export function useChannel(id: string) {
   });
   
   const updateChannelMutation = useMutation({
-    mutationFn: (data: any) => updateChannel(id, data),
+    mutationFn: (data: unknown) => updateChannel(id, data),
     onSuccess: (data) => {
       if (data.success && data.data) {
         queryClient.setQueryData(['channels', id], data.data);

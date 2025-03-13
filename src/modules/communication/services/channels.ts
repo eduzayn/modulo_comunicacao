@@ -58,7 +58,7 @@ export const updateChannel = async (channel: Channel): Promise<Channel> => {
   return channel;
 };
 
-export const deleteChannel = async (channelId: string): Promise<boolean> => {
+export const deleteChannel = async (// channelId: string): Promise<boolean> => {
   // This would be replaced with an actual API call
   return true;
 };

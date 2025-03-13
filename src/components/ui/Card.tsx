@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from './utils';
-import { colors } from './colors';
+// import { colors } from './colors';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   gradient?: boolean;
@@ -9,8 +9,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, gradient = false, module = 'enrollment', variant = 'default', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, gradient = false, // // // module = "enrollment", variant = 'default', ...props }, ref) => {
+    // // // const moduleColor = colors.primary[module];
     const style: React.CSSProperties = {};
     
     if (gradient || variant === 'gradient') {
@@ -40,7 +40,7 @@ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -57,8 +57,8 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 }
 
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
+    // // // const moduleColor = colors.primary[module];
     
     return (
       <h3
@@ -106,7 +106,7 @@ interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <div
         ref={ref}

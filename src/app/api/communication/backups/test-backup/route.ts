@@ -6,7 +6,7 @@ import withMetrics from '../../../../../lib/with-metrics';
  * POST /api/communication/backups/test-backup
  * Test endpoint to create a backup and verify it works
  */
-async function handleTestBackup(request: NextRequest) {
+async function handleTestBackup(// // request: NextRequest) {
   try {
     // Create a test backup with minimal options
     const backup = await createBackup({

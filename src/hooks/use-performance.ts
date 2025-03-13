@@ -45,7 +45,7 @@ export function useComponentPerformance(componentName: string) {
  */
 export function usePerformanceEffect(
   effectName: string,
-  dependencies: any[],
+  dependencies: unknown[],
   effectCallback: () => void | (() => void)
 ) {
   useEffect(() => {

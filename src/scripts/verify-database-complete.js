@@ -1,4 +1,20 @@
-#!/usr/bin/env node
+// @ts-nocheck
+// @ts-nocheck
+
+
+
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+dotenv.config();
+// @ts-nocheck
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
 
 /**
  * Complete Database Verification Script
@@ -10,8 +26,7 @@
  *   node src/scripts/verify-database-complete.js
  */
 
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration from environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

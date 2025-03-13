@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAISettings } from '@/hooks/use-ai-settings';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,10 +52,10 @@ export function AISettingsForm() {
   React.useEffect(() => {
     if (settings) {
       form.reset({
-        provider: settings.provider as any,
+        provider: settings.provider as unknown,
         model: settings.model,
         api_key: settings.api_key,
-        settings: settings.settings as any,
+        settings: settings.settings as unknown,
       });
     }
   }, [settings, form]);

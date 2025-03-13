@@ -14,7 +14,7 @@ export const getAccessibilityTranslation = async (
 ): Promise<string> => {
   try {
     // Dynamic import of locale file
-    const translationModule = await import(`../app/messages/accessibility/${locale}.json`);
+    // const translationModule = await import(`../app/messages/accessibility/${locale}.json`);
     
     // Split the key path and traverse the object
     const keys = key.split('.');
@@ -42,7 +42,7 @@ export const getAccessibilityTranslation = async (
     }
     
     return key; // Last resort fallback
-  } catch (error) {
+  } catch (_error) {
     // If file not found or error, try fallback to en-US
     if (locale !== 'en-US') {
       return getAccessibilityTranslation('en-US', key);
@@ -61,7 +61,7 @@ export const useAccessibilityTranslations = (locale: string = 'pt-BR') => {
     async (key: string, fallback?: string): Promise<string> => {
       try {
         return await getAccessibilityTranslation(locale, key);
-      } catch (error) {
+      } catch (_error) {
         return fallback || key;
       }
     },

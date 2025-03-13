@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js';
 import { logger } from '../../lib/logger';
 import { BaseService } from './base-service';
 import type { 

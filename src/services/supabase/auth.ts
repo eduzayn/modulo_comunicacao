@@ -1,8 +1,8 @@
 /**
  * Authentication service for Supabase
  */
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+// import { createClient } from '@supabase/supabase-js';
+// import { cookies } from 'next/headers';
 import { BaseService, supabase } from './base-service';
 
 // Types
@@ -26,7 +26,7 @@ interface ApiKeyValidation {
 
 interface SessionResult {
   success: boolean;
-  session: any | null;
+  session: { user: { id: string; role?: string; email: string } } | null;
   error?: string;
 }
 
@@ -198,7 +198,7 @@ export class AuthService extends BaseService {
   /**
    * Get user by ID
    */
-  async getUserById(id: string): Promise<any | null> {
+  async getUserById(id: string): Promise<{ id: string; role?: string; email: string } | null> {
     try {
       const { data, error } = await supabase
         .from('auth.users')

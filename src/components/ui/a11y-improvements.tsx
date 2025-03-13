@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button as BaseButton } from '@/components/ui/button';
+import { Button as BaseButton } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 /**

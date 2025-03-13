@@ -4,8 +4,8 @@ import { useAISettings } from '@/hooks/use-ai-settings';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/Input';
+// import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -26,7 +26,7 @@ const aiSettingsSchema = z.object({
 type AISettingsFormValues = z.infer<typeof aiSettingsSchema>;
 
 export default function AISettingsPage() {
-  const { settings, isLoading, error, updateSettings } = useAISettings();
+  const { settings, isLoading, // error, updateSettings } = useAISettings();
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   
   const form = useForm<AISettingsFormValues>({

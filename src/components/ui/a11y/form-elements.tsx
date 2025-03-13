@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Input as BaseInput, InputProps } from '@/components/ui/input';
+import { Input as BaseInput, InputProps } from '@/components/ui/Input';
 import { Label as BaseLabel } from '@/components/ui/label';
 import { Checkbox as BaseCheckbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';

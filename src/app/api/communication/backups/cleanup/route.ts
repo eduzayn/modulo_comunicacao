@@ -7,7 +7,7 @@ import { recordMetric } from '../../../../../services/metrics';
  * POST /api/communication/backups/cleanup
  * Clean up old backups based on retention policy
  */
-async function handleCleanupBackups(request: NextRequest) {
+async function handleCleanupBackups(// request: NextRequest) {
   try {
     const body = await request.json();
     const { olderThan, status, keepCount } = body;

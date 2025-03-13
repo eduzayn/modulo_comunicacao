@@ -3,7 +3,7 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
-import { colors } from './colors';
+// import { colors } from './colors';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
@@ -44,7 +44,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, module = 'enrollment', asChild = false, ...props }, ref) => {
+  ({ className, variant, size, fullWidth, // // module = "enrollment", // asChild = false, ...props }, ref) => {
     // Apply module-specific colors
     const moduleColor = colors.primary[module] || { 
       main: '#3b82f6', 

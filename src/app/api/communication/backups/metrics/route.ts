@@ -6,7 +6,7 @@ import withMetrics from '../../../../../lib/with-metrics';
  * GET /api/communication/backups/metrics
  * Get backup metrics and statistics
  */
-async function handleGetBackupMetrics(request: NextRequest) {
+async function handleGetBackupMetrics(// // request: NextRequest) {
   try {
     // Get backup counts by status
     // Query for status counts manually
@@ -30,7 +30,7 @@ async function handleGetBackupMetrics(request: NextRequest) {
       throw new Error('Failed to fetch backup sizes');
     }
     
-    const totalSize = sizeData.reduce((sum: number, backup: any) => sum + (backup.file_size || 0), 0);
+    const totalSize = sizeData.reduce((sum: number, backup: unknown) => sum + (backup.file_size || 0), 0);
     
     // Get average backup duration from metrics
     const { data: durationData, error: durationError } = await supabase
@@ -46,7 +46,7 @@ async function handleGetBackupMetrics(request: NextRequest) {
     }
     
     const avgDuration = durationData.length > 0
-      ? durationData.reduce((sum: number, metric: any) => sum + metric.value, 0) / durationData.length
+      ? durationData.reduce((sum: number, metric: unknown) => sum + metric.value, 0) / durationData.length
       : 0;
     
     // Count statuses manually

@@ -1,4 +1,9 @@
-#!/usr/bin/env node
+// @ts-nocheck
+
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Apply Missing Database Migrations Script
@@ -9,11 +14,6 @@
  * Usage:
  *   node src/scripts/apply-missing-migrations.js
  */
-
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
 
 // Supabase configuration from environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

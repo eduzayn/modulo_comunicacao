@@ -6,7 +6,7 @@ import withMetrics from '../../../../../lib/with-metrics';
  * POST /api/communication/backups/init
  * Initialize backup system (create tables and storage bucket if needed)
  */
-async function handleInitBackupSystem(request: NextRequest) {
+async function handleInitBackupSystem(// // request: NextRequest) {
   try {
     // Check if backups table exists
     const { error: checkError } = await supabase

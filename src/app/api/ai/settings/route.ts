@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchAISettings, editAISettings } from '@/app/actions/ai-actions';
+// // import { AISettings } from '@/app/actions/ai-actions';
 import type { AISettings } from '@/types/index';
 import type { UpdateAISettingsInput } from '@/types/ai';
 

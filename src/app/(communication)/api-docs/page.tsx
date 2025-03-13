@@ -8,7 +8,7 @@ import ApiDocumentation from '@/components/api-docs/swagger-ui';
  */
 export default function ApiDocsPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   
   return (
     <div className="container mx-auto py-8 px-4">

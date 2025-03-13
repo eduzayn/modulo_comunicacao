@@ -3,7 +3,7 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './utils';
-import { colors } from './colors';
+// import { colors } from './colors';
 
 const alertVariants = cva(
   "relative w-full rounded-lg border p-4",
@@ -30,8 +30,8 @@ export interface AlertProps
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, module = 'enrollment', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, variant, // // // module = "enrollment", ...props }, ref) => {
+    // // const moduleColor = colors.primary[module];
     const style: React.CSSProperties = {};
     
     if (variant === 'primary') {
@@ -65,8 +65,8 @@ interface AlertTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 }
 
 const AlertTitle = React.forwardRef<HTMLHeadingElement, AlertTitleProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
+    // // const moduleColor = colors.primary[module];
     
     return (
       <h5

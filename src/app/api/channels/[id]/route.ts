@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchChannelById, editChannel } from '@/app/actions/channel-actions';
+// // import { Channel } from '@/app/actions/channel-actions';
 import type { Channel } from '@/types/index';
 import type { UpdateChannelInput } from '@/types/channels';
 

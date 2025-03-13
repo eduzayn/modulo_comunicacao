@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getChannelById, updateChannel, deleteChannel } from '../../../../../services/supabase/channels';
+// import { Channel } from '../../../../../services/supabase/channels';
 import type { Channel } from '../../../../../types';
 import type { UpdateChannelInput } from '../../../../../types/channels';
 import { z } from 'zod';
@@ -18,7 +18,7 @@ export async function GET(
   try {
     const channel = await getChannelById(params.id);
     return NextResponse.json(channel);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in channel GET route:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch channel' },
@@ -45,7 +45,7 @@ export async function PUT(
     
     const channel = await updateChannel(params.id, result.data);
     return NextResponse.json(channel);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in channel PUT route:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update channel' },
@@ -61,7 +61,7 @@ export async function DELETE(
   try {
     await deleteChannel(params.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in channel DELETE route:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete channel' },

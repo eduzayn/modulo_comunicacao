@@ -57,7 +57,7 @@ const AccessibleInput = forwardRef<HTMLInputElement, InputProps>(
     type = 'text',
     ...props 
   }, ref) => {
-    const [isFocused, setIsFocused] = useState(false);
+    // const [isFocused, setIsFocused] = useState(false);
     const { announceToScreenReader } = useAccessibility();
     
     // Generate a unique ID if not provided

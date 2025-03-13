@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAISettings, updateAISettings } from '../../../../../services/supabase/ai-settings';
+// import { AISettings } from '../../../../../services/supabase/ai-settings';
 import type { AISettings } from '../../../../../types';
 import type { UpdateAISettingsInput } from '../../../../../types/ai';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ export async function GET() {
   try {
     const settings = await getAISettings();
     return NextResponse.json(settings);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in AI settings GET route:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch AI settings' },
@@ -43,7 +43,7 @@ export async function PUT(request: Request) {
     }
     
     // Transform the data to match the database schema
-    const settingsData: any = {};
+    const settingsData: unknown = {};
     if (result.data.model !== undefined) settingsData.model = result.data.model;
     if (result.data.temperature !== undefined) settingsData.temperature = result.data.temperature;
     if (result.data.maxTokens !== undefined) settingsData.max_tokens = result.data.maxTokens;
@@ -56,7 +56,7 @@ export async function PUT(request: Request) {
     
     const settings = await updateAISettings(settingsData);
     return NextResponse.json(settings);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in AI settings PUT route:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update AI settings' },

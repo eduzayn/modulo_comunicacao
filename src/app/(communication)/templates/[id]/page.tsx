@@ -4,11 +4,11 @@ import { useTemplate } from '@/hooks/use-templates';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { TemplatePreview } from '@/components/templates/template-preview';
+// import { TemplatePreview } from '@/components/templates/template-preview';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,7 +28,7 @@ type TemplateFormValues = z.infer<typeof templateSchema>;
 export default function TemplateDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { template, isLoading, error, updateTemplate } = useTemplate(params?.id as string);
+  const { template, isLoading, // error, updateTemplate } = useTemplate(params?.id as string);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   
   const form = useForm<TemplateFormValues>({

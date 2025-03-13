@@ -20,7 +20,7 @@ export function useTemplates() {
   });
   
   const updateTemplateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => updateTemplate(id, data),
+    mutationFn: ({ id, data }: { id: string; data: unknown }) => updateTemplate(id, data),
     onSuccess: (data) => {
       if (data.success && data.data) {
         queryClient.setQueryData(['templates', data.data.id], data.data);
@@ -51,7 +51,7 @@ export function useTemplate(id: string) {
   });
   
   const updateTemplateMutation = useMutation({
-    mutationFn: (data: any) => updateTemplate(id, data),
+    mutationFn: (data: unknown) => updateTemplate(id, data),
     onSuccess: (data) => {
       if (data.success && data.data) {
         queryClient.setQueryData(['templates', id], data.data);

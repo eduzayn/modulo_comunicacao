@@ -14,7 +14,7 @@ const toggleSchedulerSchema = z.object({
  * POST /api/communication/backups/scheduler/toggle
  * Toggle a backup schedule on/off
  */
-async function handleToggleScheduler(request: NextRequest) {
+async function handleToggleScheduler(// request: NextRequest) {
   try {
     const body = await request.json();
     

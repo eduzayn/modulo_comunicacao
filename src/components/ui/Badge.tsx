@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { colors } from './colors';
+// import { colors } from './colors';
 import { cn } from './utils';
 
 const badgeVariants = cva(
@@ -33,10 +33,10 @@ export interface BadgeProps
 function Badge({ 
   className, 
   variant, 
-  module = 'enrollment',
+  // // // module = "enrollment",
   ...props 
 }: BadgeProps) {
-  const moduleColor = colors.primary[module];
+  // const moduleColor = colors.primary[module];
   const style: React.CSSProperties = {};
   
   if (variant === 'primary') {

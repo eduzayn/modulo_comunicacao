@@ -5,7 +5,7 @@
  */
 
 import { supabase, supabaseAdmin } from '../../lib/supabase';
-import type { Database } from '../../lib/database.types';
+// import type { Database } from '../../lib/database.types';
 
 // Use admin client for operations that need to bypass RLS
 const adminClient = supabaseAdmin || supabase;

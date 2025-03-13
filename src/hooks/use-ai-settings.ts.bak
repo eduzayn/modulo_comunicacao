@@ -1,0 +1,37 @@
+'use client';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchAISettings } from '../app/actions/ai-actions';
+
+export function useAISettings() {
+  const queryClient = useQueryClient();
+  
+  const settingsQuery = useQuery({
+    queryKey: ['ai-settings'],
+    queryFn: fetchAISettings,
+  });
+  
+  const updateSettingsMutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) => {
+      return fetch('/api/ai/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }).then(res => res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+    },
+  });
+  
+  return {
+    settings: settingsQuery.data?.data,
+    isLoading: settingsQuery.isLoading,
+    isError: settingsQuery.isError,
+    error: settingsQuery.error || settingsQuery.data?.error,
+    updateSettings: updateSettingsMutation.mutate,
+    isUpdating: updateSettingsMutation.isPending,
+  };
+}

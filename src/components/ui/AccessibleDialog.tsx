@@ -45,7 +45,7 @@ const AccessibleDialog = forwardRef<HTMLDivElement, DialogProps>(
     useFocusTrap(isOpen, true);
     
     // Sync internal state with props
-    useEffect(() => {
+    useEffect(() => { // Include handleClose in dependencies  // Include handleClose in dependencies
       setIsOpen(open);
       
       // Announce dialog state to screen readers
@@ -57,7 +57,7 @@ const AccessibleDialog = forwardRef<HTMLDivElement, DialogProps>(
     }, [open, title, announceToScreenReader]);
     
     // Prevent body scroll when dialog is open
-    useEffect(() => {
+    useEffect(() => { // Include handleClose in dependencies  // Include handleClose in dependencies
       if (preventScroll) {
         if (isOpen) {
           document.body.style.overflow = 'hidden';
@@ -72,7 +72,7 @@ const AccessibleDialog = forwardRef<HTMLDivElement, DialogProps>(
     }, [isOpen, preventScroll]);
     
     // Handle escape key press
-    useEffect(() => {
+    useEffect(() => { // Include handleClose in dependencies  // Include handleClose in dependencies
       const handleKeyDown = (event: KeyboardEvent) => {
         if (closeOnEscape && event.key === 'Escape' && isOpen) {
           handleClose();

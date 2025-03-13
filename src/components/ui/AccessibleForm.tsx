@@ -4,7 +4,7 @@ import React, { forwardRef, useState } from 'react';
 import { useAccessibility } from '../providers/AccessibilityProvider';
 
 export interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
-  onValidSubmit?: (data: Record<string, any>) => void;
+  onValidSubmit?: (data: Record<string, unknown>) => void;
   onInvalidSubmit?: (errors: Record<string, string>) => void;
   ariaDescribedBy?: string;
   loading?: boolean;
@@ -42,7 +42,7 @@ const AccessibleForm = forwardRef<HTMLFormElement, FormProps>(
       
       // Get form data
       const formData = new FormData(event.currentTarget);
-      const data: Record<string, any> = {};
+      const data: Record<string, unknown> = {};
       
       // Convert FormData to object
       for (const [key, value] of formData.entries()) {

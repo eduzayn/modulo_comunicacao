@@ -6,7 +6,7 @@ import withMetrics from '../../../../../lib/with-metrics';
  * GET /api/communication/backups/verify
  * Verify backup system health and configuration
  */
-async function handleVerifyBackupSystem(request: NextRequest) {
+async function handleVerifyBackupSystem(// // request: NextRequest) {
   try {
     // Check database connection
     const { data: dbCheck, error: dbError } = await supabase

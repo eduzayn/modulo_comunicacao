@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchChannels, addChannel } from '@/app/actions/channel-actions';
+// import { Channel } from '@/app/actions/channel-actions';
 import { z } from 'zod';
 import type { Channel } from '@/types/index';
 import type { CreateChannelInput, ChannelConfig } from '@/types/channels';
@@ -73,7 +73,7 @@ const createChannelSchema = z.object({
   config: z.record(z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.any())])).optional()
 });
 
-export async function GET(_request: NextRequest) {
+export async function GET(_// request: NextRequest) {
   try {
     // Get user ID from request using auth utility
     const userId = await getAuthUser();
@@ -105,7 +105,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(// request: NextRequest) {
   try {
     // Get user ID from request using auth utility
     const userId = await getAuthUser();

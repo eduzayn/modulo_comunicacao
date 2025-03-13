@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Skeleton } from './skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from './card';
+import { Card, CardContent, CardHeader, CardTitle } from './Card';
 
 /**
  * Table skeleton for loading state

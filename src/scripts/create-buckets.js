@@ -1,4 +1,20 @@
-#!/usr/bin/env node
+// @ts-nocheck
+// @ts-nocheck
+
+
+
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+dotenv.config();
+// @ts-nocheck
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
 
 /**
  * Supabase Storage Buckets Creation Script
@@ -10,8 +26,7 @@
  *   node src/scripts/create-buckets.js
  */
 
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
 const supabaseUrl = 'https://uasnyifizdjxogowijip.supabase.co';

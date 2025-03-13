@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers';
-import { createServerClient } from '@/lib/supabase/server';
+// import { cookies } from 'next/headers';
+// import { createServerClient } from '@/lib/supabase/server';
 
 // Mock user for testing purposes
 const MOCK_USER = {

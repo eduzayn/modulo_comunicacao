@@ -8,8 +8,8 @@ import {
   editChannel, 
   removeChannel 
 } from '../app/actions/channel-actions';
-import type { Channel } from '../types';
-import type { CreateChannelInput, UpdateChannelInput } from '../types/channels';
+// // import type { Channel } from '../types';
+// import type { Channel } from '../types/channels';
 
 export function useChannels() {
   const queryClient = useQueryClient();

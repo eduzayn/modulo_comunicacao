@@ -8,7 +8,7 @@ import {
   editTemplate, 
   removeTemplate 
 } from '../app/actions/template-actions';
-import type { Template } from '../types';
+// // import type { Template } from '../types';
 import type { 
   CreateTemplateInput, 
   UpdateTemplateInput,

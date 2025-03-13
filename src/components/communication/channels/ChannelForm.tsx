@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useChannels, useChannel } from '@/hooks/use-channels';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ const channelFormSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
   type: z.enum(['whatsapp', 'email', 'sms', 'chat', 'push']),
   status: z.enum(['active', 'inactive', 'pending']),
-  config: z.record(z.any()).optional(),
+  config: z.record(z.unknown()).optional(),
 });
 
 type ChannelFormValues = z.infer<typeof channelFormSchema>;
@@ -47,7 +47,7 @@ export function ChannelForm({ channelId, onSuccess }: ChannelFormProps) {
       form.reset({
         name: channel.name,
         type: channel.type as ChannelType,
-        status: channel.status as any,
+        status: channel.status as unknown,
         config: channel.config || {},
       });
     }

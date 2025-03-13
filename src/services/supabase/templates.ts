@@ -91,7 +91,7 @@ export async function createTemplate(template: CreateTemplateInput) {
 
 export async function updateTemplate(id: string, template: UpdateTemplateInput) {
   // Convert to database schema
-  const dbTemplate: any = {};
+  const dbTemplate: Partial<Database['public']['Tables']['templates']['Row']> = {};
   if (template.name !== undefined) dbTemplate.name = template.name;
   if (template.content !== undefined) dbTemplate.content = template.content;
   if (template.channelType !== undefined) dbTemplate.channel_type = template.channelType;

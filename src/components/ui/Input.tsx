@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from './utils';
-import { colors } from './colors';
+// import { colors } from './colors';
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -10,7 +10,7 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, module = 'enrollment', type, ...props }, ref) => {
+  ({ className, // // module = "enrollment", type, ...props }, ref) => {
     const moduleColor = colors.primary[module] || { light: '#3b82f6' };
     
     return (

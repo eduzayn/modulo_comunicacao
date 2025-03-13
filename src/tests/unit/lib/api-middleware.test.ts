@@ -91,7 +91,7 @@ describe('API Middleware', () => {
       const wrappedHandler = withAuthentication(mockHandler);
       const mockRequest = new NextRequest(new Request('https://example.com'));
       
-      const { authenticate } = require('@/lib/auth/authenticate');
+      import { authenticate } from '@/lib/auth/authenticate';
       authenticate.mockResolvedValue({ userId: 'user-1', role: 'admin' });
       
       // Execute
@@ -109,7 +109,7 @@ describe('API Middleware', () => {
       const wrappedHandler = withAuthentication(mockHandler);
       const mockRequest = new NextRequest(new Request('https://example.com'));
       
-      const { authenticate } = require('@/lib/auth/authenticate');
+      import { authenticate } from '@/lib/auth/authenticate';
       authenticate.mockRejectedValue(new Error('Unauthorized'));
       
       createErrorResponse.mockReturnValue({
@@ -134,7 +134,7 @@ describe('API Middleware', () => {
       const wrappedHandler = withLogging(mockHandler);
       const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
       
-      const { logger } = require('@/lib/logger');
+      import { logger } from '@/lib/logger';
       
       // Execute
       const response = await wrappedHandler(mockRequest);
@@ -153,7 +153,7 @@ describe('API Middleware', () => {
       const wrappedHandler = withLogging(mockHandler);
       const mockRequest = new NextRequest(new Request('https://example.com/api/test'));
       
-      const { logger } = require('@/lib/logger');
+      import { logger } from '@/lib/logger';
       
       // Execute
       await expect(wrappedHandler(mockRequest)).rejects.toThrow('Test error');

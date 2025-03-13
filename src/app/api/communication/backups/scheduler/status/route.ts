@@ -6,7 +6,7 @@ import withMetrics from '../../../../../../lib/with-metrics';
  * GET /api/communication/backups/scheduler/status
  * Get the status of the backup scheduler
  */
-async function handleGetSchedulerStatus(request: NextRequest) {
+async function handleGetSchedulerStatus(// // request: NextRequest) {
   try {
     // Get all backup schedules
     const { data: schedules, error } = await supabase

@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { cn } from './utils';
-import { colors } from './colors';
+// import { colors } from './colors';
 
 interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
   module?: 'communication' | 'student' | 'content' | 'enrollment';
 }
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <div className="w-full overflow-auto">
         <table
@@ -28,7 +28,7 @@ interface TableHeaderProps extends React.HTMLAttributes<HTMLTableSectionElement>
 }
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, TableHeaderProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
     );
@@ -41,7 +41,7 @@ interface TableBodyProps extends React.HTMLAttributes<HTMLTableSectionElement> {
 }
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <tbody
         ref={ref}
@@ -58,7 +58,7 @@ interface TableFooterProps extends React.HTMLAttributes<HTMLTableSectionElement>
 }
 
 const TableFooter = React.forwardRef<HTMLTableSectionElement, TableFooterProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <tfoot
         ref={ref}
@@ -75,8 +75,8 @@ interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
 }
 
 const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
+    // const moduleColor = colors.primary[module];
     
     return (
       <tr
@@ -100,8 +100,8 @@ interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
 }
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
-    const moduleColor = colors.primary[module];
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
+    // const moduleColor = colors.primary[module];
     
     return (
       <th
@@ -125,7 +125,7 @@ interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
 }
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ className, module = 'enrollment', ...props }, ref) => {
+  ({ className, // // // module = "enrollment", ...props }, ref) => {
     return (
       <td
         ref={ref}
