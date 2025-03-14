@@ -1,79 +1,169 @@
-'use client';
+/**
+ * use-templates.ts
+ * 
+ * Description: Hook for managing templates
+ * 
+ * @module hooks/use-templates
+ * @author Devin AI
+ * @created 2025-03-12
+ */
+import { useState, useEffect } from 'react';
+import { getTemplates, getTemplateById, createTemplate, editTemplate, deleteTemplate } from '@/app/actions/template-actions';
+import type { Template, CreateTemplateInput, UpdateTemplateInput } from '@/types/templates';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchTemplates, 
-  fetchTemplateById, 
-  addTemplate, 
-  editTemplate, 
-  removeTemplate 
-} from '../app/actions/template-actions';
-import type { Template } from '../types';
-import type { 
-  CreateTemplateInput, 
-  UpdateTemplateInput,
-  GetTemplatesInput
-} from '../types/templates';
+/**
+ * Hook for managing templates
+ * 
+ * @returns Templates state and methods
+ */
+export function useTemplates() {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function useTemplates(params?: GetTemplatesInput) {
-  const queryClient = useQueryClient();
-  
-  const templatesQuery = useQuery({
-    queryKey: ['templates', params],
-    queryFn: () => fetchTemplates(params),
-  });
-  
-  const createTemplateMutation = useMutation({
-    mutationFn: (data: CreateTemplateInput) => addTemplate(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['templates'] });
-    },
-  });
-  
-  const deleteTemplateMutation = useMutation({
-    mutationFn: (id: string) => removeTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['templates'] });
-    }
-  });
-  
-  return {
-    templates: templatesQuery.data?.data || [],
-    isLoading: templatesQuery.isLoading,
-    isError: templatesQuery.isError,
-    error: templatesQuery.error || templatesQuery.data?.error,
-    createTemplate: createTemplateMutation.mutate,
-    deleteTemplate: deleteTemplateMutation.mutate,
-    isCreating: createTemplateMutation.isPending,
-    isDeleting: deleteTemplateMutation.isPending
-  };
-}
-
-export function useTemplate(id: string) {
-  const queryClient = useQueryClient();
-  
-  const templateQuery = useQuery({
-    queryKey: ['template', id],
-    queryFn: () => fetchTemplateById(id),
-    enabled: !!id,
-  });
-  
-  const updateTemplateMutation = useMutation({
-    mutationFn: (data: UpdateTemplateInput) => editTemplate(id, data),
-    onSuccess: (result) => {
-      if (result.data) {
-        queryClient.setQueryData(['template', id], result.data);
-        queryClient.invalidateQueries({ queryKey: ['templates'] });
+  /**
+   * Fetch templates
+   */
+  const fetchAllTemplates = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await getTemplates();
+      
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setTemplates(result.data || []);
       }
-    },
-  });
-  
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Fetch template by ID
+   * 
+   * @param id - Template ID
+   */
+  const fetchTemplateById = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await getTemplateById(id);
+      
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setSelectedTemplate(result.data);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Add template
+   * 
+   * @param data - Template data to create
+   */
+  const addTemplate = async (data: CreateTemplateInput) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await createTemplate(data);
+      
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setTemplates(prev => [...prev, result.data as Template]);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Edit template
+   * 
+   * @param id - Template ID
+   * @param data - Template data to update
+   */
+  const updateTemplate = async (id: string, data: UpdateTemplateInput) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await editTemplate(id, data);
+      
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setTemplates(prev => prev.map(template => template.id === id ? result.data as Template : template));
+        if (selectedTemplate && selectedTemplate.id === id) {
+          setSelectedTemplate(result.data);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Remove template
+   * 
+   * @param id - Template ID
+   */
+  const removeTemplate = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await deleteTemplate(id);
+      
+      if (!result.success) {
+        setError(result.error || 'Failed to delete template');
+      } else {
+        setTemplates(prev => prev.filter(template => template.id !== id));
+        if (selectedTemplate && selectedTemplate.id === id) {
+          setSelectedTemplate(null);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch templates on mount
+  useEffect(() => {
+    fetchAllTemplates();
+  }, []);
+
   return {
-    template: templateQuery.data?.data,
-    isLoading: templateQuery.isLoading,
-    isError: templateQuery.isError,
-    error: templateQuery.error || templateQuery.data?.error,
-    updateTemplate: updateTemplateMutation.mutate,
-    isUpdating: updateTemplateMutation.isPending,
+    templates,
+    selectedTemplate,
+    isLoading,
+    error,
+    fetchTemplates: fetchAllTemplates,
+    fetchTemplateById,
+    addTemplate,
+    updateTemplate,
+    removeTemplate,
+    refreshTemplates: fetchAllTemplates,
   };
 }
+
+export default useTemplates;
