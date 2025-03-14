@@ -1,20 +1,25 @@
 module.exports = {
-  extends: 'next/core-web-vitals',
+  extends: [
+    'next/core-web-vitals',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:import/recommended',
+    'plugin:import/typescript',
+  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'import'],
   rules: {
-    // Disable specific rules for test files
-    'react/display-name': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'import/no-anonymous-default-export': 'warn',
+    'react/no-unescaped-entities': 'off',
+    'react-hooks/exhaustive-deps': 'warn',
+    'import/no-named-as-default': 'off',
   },
-  overrides: [
-    {
-      files: ['**/*.test.js', '**/*.test.ts', '**/*.test.tsx'],
-      rules: {
-        'react/display-name': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-unused-vars': 'off',
-        'import/no-anonymous-default-export': 'off',
+  settings: {
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
       },
     },
-  ],
+  },
 };
