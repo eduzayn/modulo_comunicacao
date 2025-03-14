@@ -84,8 +84,6 @@ describe('useAISettings hook', () => {
 
     await waitForNextUpdate();
 
-    const mockUpdateAISettings = aiActions.updateAISettings as jest.Mock;
-
     act(() => {
       result.current.updateSettings({
         model: 'gpt-4',
@@ -94,7 +92,7 @@ describe('useAISettings hook', () => {
     });
 
     expect(result.current.isLoading).toBe(true);
-    expect(mockUpdateAISettings).toHaveBeenCalledWith({
+    expect(aiActions.updateAISettings).toHaveBeenCalledWith({
       model: 'gpt-4',
       temperature: 0.8,
     });
