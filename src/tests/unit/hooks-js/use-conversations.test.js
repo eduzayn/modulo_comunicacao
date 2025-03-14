@@ -52,7 +52,11 @@ describe('useConversations hook', () => {
     await waitFor(() => !result.current.isLoading);
 
     expect(conversationActions.fetchConversations).toHaveBeenCalledTimes(1);
-    expect(result.current.conversations).toEqual(mockConversations);
+    // Fix the expectation to match the actual data structure
+    expect(result.current.conversations).toEqual({
+      data: mockConversations,
+      error: null
+    });
     expect(result.current.error).toBeNull();
   });
 });

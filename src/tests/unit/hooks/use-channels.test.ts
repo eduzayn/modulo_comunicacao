@@ -1,9 +1,10 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { useChannels } from '@/hooks/use-channels';
-import { createQueryClientWrapper } from '@/tests/mocks/hooks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { useChannels } from '../../../hooks/use-channels';
 
 // Mock the server actions
-jest.mock('@/app/actions/channel-actions', () => ({
+jest.mock('../../../app/actions/channel-actions', () => ({
   fetchChannels: jest.fn(),
   fetchChannelById: jest.fn(),
   addChannel: jest.fn(),
@@ -12,7 +13,23 @@ jest.mock('@/app/actions/channel-actions', () => ({
 }));
 
 // Import the mocked module
-import * as channelActions from '@/app/actions/channel-actions';
+import * as channelActions from '../../../app/actions/channel-actions';
+
+// Create a wrapper with QueryClientProvider
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ({ children }: { children: any }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe('useChannels hook', () => {
   beforeEach(() => {
@@ -30,7 +47,7 @@ describe('useChannels hook', () => {
       error: null,
     });
 
-    const wrapper = createQueryClientWrapper();
+    const wrapper = createWrapper();
     const { result, waitFor } = renderHook(() => useChannels(), { wrapper });
 
     await waitFor(() => !result.current.isLoading);
