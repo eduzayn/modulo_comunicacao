@@ -1,177 +1,171 @@
 /**
  * base-service.ts
  * 
- * Description: This module provides a base service class for Supabase database operations.
- * It implements common CRUD operations with type safety and error handling.
+ * Description: Base service for Supabase operations
  * 
- * @module services/supabase
+ * @module services/supabase/base-service
  * @author Devin AI
- * @created 2025-03-13
+ * @created 2025-03-12
  */
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/lib/database.types';
 
-import { supabase } from '@/lib/supabase';
-import { PostgrestError } from '@supabase/supabase-js';
+// Create a Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key';
+
+// Export the supabase client for use in other services
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 /**
- * BaseService - Abstract base class for Supabase table operations
- * 
- * This generic class provides type-safe CRUD operations for Supabase tables.
- * It handles error responses and provides consistent error handling.
- * 
- * @template T - The data type for the table records
+ * Base service class for Supabase operations
  */
-export abstract class BaseService<T extends { id: string }> {
-  protected tableName: string;
-
+export class BaseService {
+  protected table: string;
+  
   /**
-   * Creates a new BaseService instance
+   * Constructor
    * 
-   * @param tableName - The name of the Supabase table
+   * @param table - Table name
    */
-  constructor(tableName: string) {
-    this.tableName = tableName;
+  constructor(table: string) {
+    this.table = table;
   }
-
+  
   /**
-   * Retrieves a record by its ID
+   * Get all records
    * 
-   * @param id - The unique identifier of the record
-   * @returns Promise resolving to the record
-   * @throws Error if the record is not found or another error occurs
+   * @param options - Query options
+   * @returns All records
    */
-  async getById(id: string): Promise<T> {
+  async getAll(options: { limit?: number; offset?: number; orderBy?: string; } = {}) {
+    const { limit = 100, offset = 0, orderBy = 'created_at' } = options;
+    
+    let query = supabase
+      .from(this.table)
+      .select('*')
+      .order(orderBy, { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw new Error(`Error fetching ${this.table}: ${error.message}`);
+    }
+    
+    return data;
+  }
+  
+  /**
+   * Get a record by ID
+   * 
+   * @param id - Record ID
+   * @returns Record data
+   */
+  async getById(id: string) {
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.table)
       .select('*')
       .eq('id', id)
       .single();
-
+    
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`Error fetching ${this.table} with ID ${id}: ${error.message}`);
     }
-
-    return data as T;
+    
+    return data;
   }
-
+  
   /**
-   * Retrieves all records from the table
+   * Create a new record
    * 
-   * @param options - Optional query parameters
-   * @returns Promise resolving to an array of records
-   * @throws Error if the query fails
+   * @param data - Record data
+   * @returns Created record
    */
-  async getAll(options?: { 
-    orderBy?: string; 
-    orderDirection?: 'asc' | 'desc';
-    limit?: number;
-    filters?: Record<string, unknown>;
-  }): Promise<T[]> {
-    let query = supabase
-      .from(this.tableName)
-      .select('*');
-
-    // Apply filters if provided
-    if (options?.filters) {
-      Object.entries(options.filters).forEach(([key, value]) => {
-        query = query.eq(key, value);
-      });
-    }
-
-    // Apply ordering if provided
-    if (options?.orderBy) {
-      query = query.order(
-        options.orderBy, 
-        { ascending: options.orderDirection !== 'desc' }
-      );
-    }
-
-    // Apply limit if provided
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data as T[];
-  }
-
-  /**
-   * Creates a new record
-   * 
-   * @param data - The data for the new record
-   * @returns Promise resolving to the created record
-   * @throws Error if the creation fails
-   */
-  async create(data: Omit<T, 'id'>): Promise<T> {
+  async create(data: Record<string, unknown>) {
     const { data: createdData, error } = await supabase
-      .from(this.tableName)
+      .from(this.table)
       .insert(data)
-      .select('*')
+      .select()
       .single();
-
+    
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`Error creating ${this.table}: ${error.message}`);
     }
-
-    return createdData as T;
+    
+    return createdData;
   }
-
+  
   /**
-   * Updates an existing record
+   * Update a record
    * 
-   * @param id - The unique identifier of the record to update
-   * @param data - The data to update
-   * @returns Promise resolving to the updated record
-   * @throws Error if the update fails
+   * @param id - Record ID
+   * @param data - Record data to update
+   * @returns Updated record
    */
-  async update(id: string, data: Partial<T>): Promise<T> {
+  async update(id: string, data: Record<string, unknown>) {
     const { data: updatedData, error } = await supabase
-      .from(this.tableName)
+      .from(this.table)
       .update(data)
       .eq('id', id)
-      .select('*')
+      .select()
       .single();
-
+    
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`Error updating ${this.table} with ID ${id}: ${error.message}`);
     }
-
-    return updatedData as T;
+    
+    return updatedData;
   }
-
+  
   /**
-   * Deletes a record
+   * Delete a record
    * 
-   * @param id - The unique identifier of the record to delete
-   * @returns Promise resolving to the deleted record
-   * @throws Error if the deletion fails
+   * @param id - Record ID
+   * @returns Void response
    */
-  async delete(id: string): Promise<T> {
-    const { data: deletedData, error } = await supabase
-      .from(this.tableName)
+  async delete(id: string) {
+    const { error } = await supabase
+      .from(this.table)
       .delete()
-      .eq('id', id)
-      .select('*')
-      .single();
-
+      .eq('id', id);
+    
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`Error deleting ${this.table} with ID ${id}: ${error.message}`);
     }
-
-    return deletedData as T;
+    
+    return true;
   }
-
+  
   /**
-   * Handles Supabase errors consistently
+   * Query records with filters
    * 
-   * @param error - The PostgrestError to handle
-   * @throws Error with a formatted message
+   * @param filters - Query filters
+   * @param options - Query options
+   * @returns Filtered records
    */
-  protected handleError(error: PostgrestError): never {
-    throw new Error(`Database error: ${error.message}`);
+  async query(filters: Record<string, unknown>, options: { limit?: number; offset?: number; orderBy?: string; } = {}) {
+    const { limit = 100, offset = 0, orderBy = 'created_at' } = options;
+    
+    let query = supabase
+      .from(this.table)
+      .select('*')
+      .order(orderBy, { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw new Error(`Error querying ${this.table}: ${error.message}`);
+    }
+    
+    return data;
   }
 }
+
+export default BaseService;

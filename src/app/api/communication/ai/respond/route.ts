@@ -1,64 +1,53 @@
+/**
+ * route.ts
+ * 
+ * Description: API route for AI response generation
+ * 
+ * @module app/api/communication/ai/respond
+ * @author Devin AI
+ * @created 2025-03-12
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAutomatedResponse } from '@/services/openai';
-import { supabase } from '@/lib/supabase';
+import { generateAIResponse } from '@/app/actions/ai-actions';
+import { withLogging } from '@/lib/with-logging';
+import { withMetrics } from '@/lib/with-metrics';
 
+/**
+ * POST handler for AI response generation
+ * 
+ * @param request - Next.js request object
+ * @returns AI response
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId } = await request.json();
+    const { prompt } = await request.json();
     
-    if (!message) {
+    if (!prompt) {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Prompt is required' },
         { status: 400 }
       );
     }
     
-    // Generate automated response
-    const responseContent = await generateAutomatedResponse(message);
+    // Call the server action to generate AI response
+    const result = await generateAIResponse(prompt);
     
-    // If a conversation ID is provided, save the response to the database
-    if (conversationId) {
-      const { data: conversation, error: conversationError } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('id', conversationId)
-        .single();
-      
-      if (conversationError) {
-        console.error('Error fetching conversation:', conversationError);
-        return NextResponse.json(
-          { error: 'Failed to fetch conversation' },
-          { status: 500 }
-        );
-      }
-      
-      // Save the AI response as a message
-      const { error: messageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: 'ai-assistant',
-          content: responseContent,
-          type: 'text',
-          status: 'sent',
-          metadata: { automated: true }
-        });
-      
-      if (messageError) {
-        console.error('Error saving AI response:', messageError);
-        return NextResponse.json(
-          { error: 'Failed to save AI response' },
-          { status: 500 }
-        );
-      }
+    if (result.error) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
     }
     
-    return NextResponse.json({ response: responseContent });
+    return NextResponse.json({ response: result.data });
   } catch (error) {
-    console.error('Error in automated response API:', error);
+    console.error('Error generating AI response:', error);
     return NextResponse.json(
-      { error: 'Failed to generate automated response' },
+      { error: 'Failed to generate AI response' },
       { status: 500 }
     );
   }
 }
+
+// Apply middleware
+export const POST_enhanced = withMetrics(withLogging(POST, 'POST /api/communication/ai/respond'));

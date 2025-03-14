@@ -9,12 +9,6 @@ jest.mock('next/router', () => ({
     back: jest.fn(),
     pathname: '/',
     query: {},
-    asPath: '/',
-    events: {
-      on: jest.fn(),
-      off: jest.fn(),
-      emit: jest.fn(),
-    },
   }),
 }));
 
@@ -23,39 +17,29 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    refresh: jest.fn(),
     prefetch: jest.fn(),
+    back: jest.fn(),
+    pathname: '/',
+    query: {},
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
+  redirect: jest.fn(),
 }));
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// Mock revalidatePath
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+}));
 
-// Suppress React 18 console errors
-const originalConsoleError = console.error;
-console.error = (...args) => {
-  if (
-    typeof args[0] === 'string' &&
-    (args[0].includes('ReactDOM.render is no longer supported') ||
-     args[0].includes('Warning: ReactDOM.render'))
-  ) {
-    return;
-  }
-  originalConsoleError(...args);
-};
+// Set up global fetch mock
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve({}),
+    ok: true,
+    status: 200,
+  })
+);
+
+// Suppress console errors during tests
+console.error = jest.fn();

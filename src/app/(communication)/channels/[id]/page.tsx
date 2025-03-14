@@ -1,86 +1,83 @@
-'use client';
+"use client";
 
-import { useChannel } from '@/hooks/use-channels';
-import { Button } from '@/components/ui/Button';
+/**
+ * page.tsx
+ * 
+ * Description: Channel detail page
+ * 
+ * @module app/(communication)/channels/[id]
+ * @author Devin AI
+ * @created 2025-03-12
+ */
+import React from 'react';
+import { useChannel } from '@/hooks/use-channel';
 import { Card } from '@/components/ui/Card';
-import { useParams, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 
-export default function ChannelDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const { channel, isLoading, error, updateChannel } = useChannel(params?.id as string);
-  
+/**
+ * Channel detail page component
+ * 
+ * @param params - Page parameters
+ * @returns Channel detail page
+ */
+export default function ChannelDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
+  const { channel, isLoading, error, updateChannel, deleteChannel } = useChannel(id);
+
   if (isLoading) {
-    return <div className="text-center py-10">Carregando canal...</div>;
+    return <div>Loading channel...</div>;
   }
-  
-  if (error || !channel) {
-    return <div className="text-center py-10 text-red-500">Erro ao carregar canal</div>;
+
+  if (error) {
+    return <div>Error: {error}</div>;
   }
-  
-  const handleStatusToggle = async () => {
-    const newStatus = channel.status === 'active' ? 'inactive' : 'active';
-    updateChannel({
-      ...channel,
-      status: newStatus,
-    });
-  };
-  
+
+  if (!channel) {
+    return <div>Channel not found</div>;
+  }
+
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{channel.name}</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Configurações do canal de {channel.type}
-          </p>
-        </div>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            Voltar
-          </Button>
-          <Button 
-            variant={channel.status === 'active' ? 'destructive' : 'default'}
-            onClick={handleStatusToggle}
-          >
-            {channel.status === 'active' ? 'Desativar' : 'Ativar'}
-          </Button>
-        </div>
-      </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Channel Details</h1>
       
-      <div className="mt-6">
-        <Card className="overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900">Detalhes do Canal</h3>
-            
-            <div className="mt-4 space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Tipo</h4>
-                <p className="mt-1">{channel.type}</p>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Status</h4>
-                <div className="mt-1 flex items-center">
-                  <span className={`inline-block h-2 w-2 rounded-full mr-2 ${
-                    channel.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                  }`}></span>
-                  <span>{channel.status === 'active' ? 'Ativo' : 'Inativo'}</span>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Configuração</h4>
-                <div className="mt-1 bg-gray-50 p-4 rounded-md">
-                  <pre className="text-xs overflow-auto">
-                    {JSON.stringify(channel.config, null, 2)}
-                  </pre>
-                </div>
-              </div>
+      <Card className="mb-4">
+        <div className="p-4">
+          <h2 className="text-xl font-semibold mb-2">{channel.name}</h2>
+          <p className="mb-2"><strong>Type:</strong> {channel.type}</p>
+          <p className="mb-2"><strong>Status:</strong> {channel.status}</p>
+          
+          {channel.config && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Configuration</h3>
+              <pre className="bg-gray-100 p-2 rounded">
+                {JSON.stringify(channel.config, null, 2)}
+              </pre>
             </div>
+          )}
+          
+          <div className="mt-4 flex space-x-2">
+            <Button
+              variant="default"
+              onClick={() => {
+                // Handle edit
+              }}
+            >
+              Edit Channel
+            </Button>
+            
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirm('Are you sure you want to delete this channel?')) {
+                  deleteChannel();
+                }
+              }}
+            >
+              Delete Channel
+            </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
     </div>
   );
 }
