@@ -33,3 +33,6 @@ export async function updateAISettings(data: UpdateAISettingsInput) {
     return { data: null, error: errorMessage };
   }
 }
+
+// For backward compatibility with existing code
+export const updateAISettingsAction = updateAISettings;

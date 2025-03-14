@@ -39,32 +39,93 @@ describe('useChannels hook', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should fetch a channel by id', async () => {
-    const mockChannel = {
-      id: '1',
-      name: 'Channel 1',
+  it('should create a new channel', async () => {
+    const newChannel = {
+      name: 'New Channel',
       type: 'whatsapp',
-      status: 'active',
+      config: { apiKey: 'test-key' },
     };
 
-    (channelActions.fetchChannelById as jest.Mock).mockResolvedValue({
-      data: mockChannel,
+    const createdChannel = {
+      id: '3',
+      ...newChannel,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    (channelActions.addChannel as jest.Mock).mockResolvedValue({
+      data: createdChannel,
       error: null,
     });
 
     const { result, waitForNextUpdate } = renderHook(() => useChannels());
 
     act(() => {
-      // Call getChannelById if it exists in the hook
-      if (typeof result.current.getChannelById === 'function') {
-        result.current.getChannelById('1');
-      }
+      result.current.createChannel(newChannel);
     });
+
+    expect(result.current.isCreating).toBe(true);
+    expect(channelActions.addChannel).toHaveBeenCalledWith(newChannel);
 
     await waitForNextUpdate();
 
-    expect(result.current.isLoading).toBe(false);
-    // We're not testing the actual result here since we don't know the exact implementation
-    expect(result.current.error).toBeNull();
+    expect(result.current.isCreating).toBe(false);
+  });
+
+  it('should update a channel', async () => {
+    const channelId = '1';
+    const updateData = {
+      name: 'Updated Channel',
+      status: 'inactive',
+    };
+
+    const updatedChannel = {
+      id: channelId,
+      name: 'Updated Channel',
+      type: 'whatsapp',
+      status: 'inactive',
+      config: { apiKey: 'test-key' },
+      updatedAt: new Date().toISOString(),
+    };
+
+    (channelActions.editChannel as jest.Mock).mockResolvedValue({
+      data: updatedChannel,
+      error: null,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useChannels());
+
+    act(() => {
+      result.current.updateChannel({ id: channelId, data: updateData });
+    });
+
+    expect(result.current.isUpdating).toBe(true);
+    expect(channelActions.editChannel).toHaveBeenCalledWith(channelId, updateData);
+
+    await waitForNextUpdate();
+
+    expect(result.current.isUpdating).toBe(false);
+  });
+
+  it('should delete a channel', async () => {
+    const channelId = '1';
+
+    (channelActions.removeChannel as jest.Mock).mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useChannels());
+
+    act(() => {
+      result.current.deleteChannel(channelId);
+    });
+
+    expect(result.current.isDeleting).toBe(true);
+    expect(channelActions.removeChannel).toHaveBeenCalledWith(channelId);
+
+    await waitForNextUpdate();
+
+    expect(result.current.isDeleting).toBe(false);
   });
 });

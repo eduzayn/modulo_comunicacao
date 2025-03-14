@@ -39,32 +39,57 @@ describe('useTemplates hook', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should fetch a template by id', async () => {
-    const mockTemplate = {
-      id: '1',
-      name: 'Template 1',
-      content: 'Content 1',
-      status: 'active',
+  it('should create a new template', async () => {
+    const newTemplate = {
+      name: 'New Template',
+      content: 'New Content',
+      status: 'draft',
     };
 
-    (templateActions.fetchTemplateById as jest.Mock).mockResolvedValue({
-      data: mockTemplate,
+    const createdTemplate = {
+      id: '3',
+      ...newTemplate,
+      createdAt: new Date().toISOString(),
+    };
+
+    (templateActions.addTemplate as jest.Mock).mockResolvedValue({
+      data: createdTemplate,
       error: null,
     });
 
     const { result, waitForNextUpdate } = renderHook(() => useTemplates());
 
     act(() => {
-      // Call getTemplateById if it exists in the hook
-      if (typeof result.current.getTemplateById === 'function') {
-        result.current.getTemplateById('1');
-      }
+      result.current.createTemplate(newTemplate);
     });
+
+    expect(result.current.isCreating).toBe(true);
+    expect(templateActions.addTemplate).toHaveBeenCalledWith(newTemplate);
 
     await waitForNextUpdate();
 
-    expect(result.current.isLoading).toBe(false);
-    // We're not testing the actual result here since we don't know the exact implementation
-    expect(result.current.error).toBeNull();
+    expect(result.current.isCreating).toBe(false);
+  });
+
+  it('should delete a template', async () => {
+    const templateId = '1';
+
+    (templateActions.removeTemplate as jest.Mock).mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useTemplates());
+
+    act(() => {
+      result.current.deleteTemplate(templateId);
+    });
+
+    expect(result.current.isDeleting).toBe(true);
+    expect(templateActions.removeTemplate).toHaveBeenCalledWith(templateId);
+
+    await waitForNextUpdate();
+
+    expect(result.current.isDeleting).toBe(false);
   });
 });

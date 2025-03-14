@@ -39,32 +39,101 @@ describe('useConversations hook', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should fetch a conversation by id', async () => {
-    const mockConversation = {
-      id: '1',
-      title: 'Conversation 1',
+  it('should create a new conversation', async () => {
+    const newConversation = {
+      title: 'New Conversation',
+      channelId: '123',
       status: 'active',
-      messages: [],
     };
 
-    (conversationActions.fetchConversationById as jest.Mock).mockResolvedValue({
-      data: mockConversation,
+    const createdConversation = {
+      id: '3',
+      ...newConversation,
+      createdAt: new Date().toISOString(),
+    };
+
+    (conversationActions.createConversation as jest.Mock).mockResolvedValue({
+      data: createdConversation,
       error: null,
     });
 
     const { result, waitForNextUpdate } = renderHook(() => useConversations());
 
     act(() => {
-      // Call getConversationById if it exists in the hook
-      if (typeof result.current.getConversationById === 'function') {
-        result.current.getConversationById('1');
-      }
+      result.current.createConversation(newConversation);
     });
+
+    expect(result.current.isCreating).toBe(true);
+    expect(conversationActions.createConversation).toHaveBeenCalledWith(newConversation);
 
     await waitForNextUpdate();
 
-    expect(result.current.isLoading).toBe(false);
-    // We're not testing the actual result here since we don't know the exact implementation
-    expect(result.current.error).toBeNull();
+    expect(result.current.isCreating).toBe(false);
+  });
+
+  it('should update a conversation', async () => {
+    const conversationId = '1';
+    const updateData = {
+      title: 'Updated Conversation',
+      status: 'archived',
+    };
+
+    const updatedConversation = {
+      id: conversationId,
+      title: 'Updated Conversation',
+      status: 'archived',
+      updatedAt: new Date().toISOString(),
+    };
+
+    (conversationActions.editConversation as jest.Mock).mockResolvedValue({
+      data: updatedConversation,
+      error: null,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useConversations());
+
+    act(() => {
+      result.current.updateConversation({ id: conversationId, data: updateData });
+    });
+
+    expect(result.current.isUpdating).toBe(true);
+    expect(conversationActions.editConversation).toHaveBeenCalledWith(conversationId, updateData);
+
+    await waitForNextUpdate();
+
+    expect(result.current.isUpdating).toBe(false);
+  });
+
+  it('should send a message to a conversation', async () => {
+    const conversationId = '1';
+    const messageData = {
+      content: 'Hello, world!',
+      type: 'text',
+    };
+
+    const sentMessage = {
+      id: '123',
+      conversationId,
+      ...messageData,
+      createdAt: new Date().toISOString(),
+    };
+
+    (conversationActions.sendMessageToConversation as jest.Mock).mockResolvedValue({
+      data: sentMessage,
+      error: null,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useConversations());
+
+    act(() => {
+      result.current.sendMessage({ conversationId, data: messageData });
+    });
+
+    expect(result.current.isSending).toBe(true);
+    expect(conversationActions.sendMessageToConversation).toHaveBeenCalledWith(conversationId, messageData);
+
+    await waitForNextUpdate();
+
+    expect(result.current.isSending).toBe(false);
   });
 });
