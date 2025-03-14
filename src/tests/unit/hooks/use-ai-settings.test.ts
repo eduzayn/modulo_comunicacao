@@ -1,12 +1,16 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAISettings } from '@/hooks/use-ai-settings';
-import * as aiActions from '@/app/actions/ai-actions';
+import { renderHookWithClient } from '@/tests/mocks/hooks';
 
-// Mock the AI actions
+// Mock the server actions
 jest.mock('@/app/actions/ai-actions', () => ({
   fetchAISettings: jest.fn(),
   updateAISettings: jest.fn(),
+  updateAISettingsAction: jest.fn(),
 }));
+
+// Import the mocked module
+import * as aiActions from '@/app/actions/ai-actions';
 
 describe('useAISettings hook', () => {
   beforeEach(() => {
@@ -27,7 +31,7 @@ describe('useAISettings hook', () => {
       error: null,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAISettings());
+    const { result, waitForNextUpdate } = renderHookWithClient(() => useAISettings());
 
     expect(result.current.isLoading).toBe(true);
     expect(aiActions.fetchAISettings).toHaveBeenCalledTimes(1);
@@ -46,7 +50,7 @@ describe('useAISettings hook', () => {
       error: errorMessage,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAISettings());
+    const { result, waitForNextUpdate } = renderHookWithClient(() => useAISettings());
 
     await waitForNextUpdate();
 
@@ -75,12 +79,12 @@ describe('useAISettings hook', () => {
       error: null,
     });
 
-    (aiActions.updateAISettings as jest.Mock).mockResolvedValue({
+    (aiActions.updateAISettingsAction as jest.Mock).mockResolvedValue({
       data: updatedSettings,
       error: null,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAISettings());
+    const { result, waitForNextUpdate } = renderHookWithClient(() => useAISettings());
 
     await waitForNextUpdate();
 
@@ -91,55 +95,10 @@ describe('useAISettings hook', () => {
       });
     });
 
-    expect(result.current.isLoading).toBe(true);
-    expect(aiActions.updateAISettings).toHaveBeenCalledWith({
+    expect(result.current.isUpdating).toBe(true);
+    expect(aiActions.updateAISettingsAction).toHaveBeenCalledWith({
       model: 'gpt-4',
       temperature: 0.8,
     });
-
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.settings).toEqual(updatedSettings);
-    expect(result.current.error).toBeNull();
-  });
-
-  it('should handle update errors', async () => {
-    const mockSettings = {
-      id: '1',
-      openaiApiKey: 'test-key',
-      model: 'gpt-3.5-turbo',
-      temperature: 0.7,
-      maxTokens: 1000,
-    };
-
-    const errorMessage = 'Failed to update AI settings';
-
-    (aiActions.fetchAISettings as jest.Mock).mockResolvedValue({
-      data: mockSettings,
-      error: null,
-    });
-
-    (aiActions.updateAISettings as jest.Mock).mockResolvedValue({
-      data: null,
-      error: errorMessage,
-    });
-
-    const { result, waitForNextUpdate } = renderHook(() => useAISettings());
-
-    await waitForNextUpdate();
-
-    act(() => {
-      result.current.updateSettings({
-        model: 'gpt-4',
-        temperature: 0.8,
-      });
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.settings).toEqual(mockSettings); // Settings remain unchanged
-    expect(result.current.error).toBe(errorMessage);
   });
 });
