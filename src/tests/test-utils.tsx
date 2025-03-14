@@ -16,6 +16,16 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   queryClient?: QueryClient;
 }
 
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = createTestQueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+};
+Wrapper.displayName = 'TestWrapper';
+
 export function renderWithProviders(
   ui: ReactElement,
   {
@@ -23,24 +33,28 @@ export function renderWithProviders(
     ...renderOptions
   }: CustomRenderOptions = {}
 ) {
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
   );
+  TestWrapper.displayName = 'TestProviderWrapper';
 
-  return render(ui, { wrapper: Wrapper, ...renderOptions });
+  return render(ui, { wrapper: TestWrapper, ...renderOptions });
 }
 
 // Export a function to create a wrapper for renderHook
 export function createQueryClientWrapper() {
   const queryClient = createTestQueryClient();
   
-  return ({ children }: { children: React.ReactNode }) => (
+  const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
   );
+  QueryWrapper.displayName = 'QueryClientWrapper';
+  
+  return QueryWrapper;
 }
 
 // Re-export everything from testing-library

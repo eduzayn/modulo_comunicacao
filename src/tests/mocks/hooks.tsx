@@ -16,11 +16,10 @@ export function createQueryClientWrapper() {
     },
   });
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ children }: { children: any }) => (
+  const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  QueryWrapper.displayName = 'QueryClientWrapper';
+  
+  return QueryWrapper;
 }
-
-// Add display name to fix ESLint error
-createQueryClientWrapper.displayName = 'QueryClientWrapper';

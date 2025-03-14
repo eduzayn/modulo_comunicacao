@@ -5,7 +5,7 @@ import { createQueryClientWrapper } from '../../mocks/hooks';
 // Mock the server actions
 jest.mock('../../../app/actions/ai-actions', () => ({
   fetchAISettings: jest.fn(),
-  updateAISettingsAction: jest.fn(),
+  updateAISettings: jest.fn(),
 }));
 
 // Import the mocked module

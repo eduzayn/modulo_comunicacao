@@ -4,16 +4,16 @@ import React from 'react';
 import { useChannels } from '../../../hooks/use-channels';
 
 // Mock the server actions
-jest.mock('../../../app/actions/channel-actions', () => ({
+jest.mock('../../../app/actions/channels-actions', () => ({
   fetchChannels: jest.fn(),
-  fetchChannelById: jest.fn(),
-  addChannel: jest.fn(),
-  editChannel: jest.fn(),
-  removeChannel: jest.fn(),
+  fetchChannelsById: jest.fn(),
+  addChannels: jest.fn(),
+  editChannels: jest.fn(),
+  removeChannels: jest.fn(),
 }));
 
 // Import the mocked module
-import * as channelActions from '../../../app/actions/channel-actions';
+import * as channelsActions from '../../../app/actions/channels-actions';
 
 // Create a wrapper with QueryClientProvider
 const createWrapper = () => {
@@ -25,13 +25,12 @@ const createWrapper = () => {
     },
   });
 
+  // Add display name to fix ESLint error
   const Wrapper = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = "QueryClientWrapper";
+  Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 };
 
 describe('useChannels hook', () => {
@@ -41,11 +40,11 @@ describe('useChannels hook', () => {
 
   it('should fetch channels on mount', async () => {
     const mockChannels = [
-      { id: '1', name: 'Channel 1', type: 'whatsapp', status: 'active' },
-      { id: '2', name: 'Channel 2', type: 'email', status: 'inactive' },
+      { id: '1', name: 'Channels 1', status: 'active' },
+      { id: '2', name: 'Channels 2', status: 'inactive' },
     ];
 
-    channelActions.fetchChannels.mockResolvedValue({
+    channelsActions.fetchChannels.mockResolvedValue({
       data: mockChannels,
       error: null,
     });
@@ -55,7 +54,7 @@ describe('useChannels hook', () => {
 
     await waitFor(() => !result.current.isLoading);
 
-    expect(channelActions.fetchChannels).toHaveBeenCalledTimes(1);
+    expect(channelsActions.fetchChannels).toHaveBeenCalledTimes(1);
     expect(result.current.channels).toEqual(mockChannels);
     expect(result.current.error).toBeNull();
   });

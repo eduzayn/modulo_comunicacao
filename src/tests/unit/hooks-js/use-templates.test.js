@@ -4,16 +4,16 @@ import React from 'react';
 import { useTemplates } from '../../../hooks/use-templates';
 
 // Mock the server actions
-jest.mock('../../../app/actions/template-actions', () => ({
+jest.mock('../../../app/actions/templates-actions', () => ({
   fetchTemplates: jest.fn(),
-  fetchTemplateById: jest.fn(),
-  addTemplate: jest.fn(),
-  editTemplate: jest.fn(),
-  removeTemplate: jest.fn(),
+  fetchTemplatesById: jest.fn(),
+  addTemplates: jest.fn(),
+  editTemplates: jest.fn(),
+  removeTemplates: jest.fn(),
 }));
 
 // Import the mocked module
-import * as templateActions from '../../../app/actions/template-actions';
+import * as templatesActions from '../../../app/actions/templates-actions';
 
 // Create a wrapper with QueryClientProvider
 const createWrapper = () => {
@@ -25,13 +25,12 @@ const createWrapper = () => {
     },
   });
 
+  // Add display name to fix ESLint error
   const Wrapper = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = "QueryClientWrapper";
+  Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 };
 
 describe('useTemplates hook', () => {
@@ -41,11 +40,11 @@ describe('useTemplates hook', () => {
 
   it('should fetch templates on mount', async () => {
     const mockTemplates = [
-      { id: '1', name: 'Template 1', content: 'Content 1', status: 'active' },
-      { id: '2', name: 'Template 2', content: 'Content 2', status: 'draft' },
+      { id: '1', name: 'Templates 1', status: 'active' },
+      { id: '2', name: 'Templates 2', status: 'inactive' },
     ];
 
-    templateActions.fetchTemplates.mockResolvedValue({
+    templatesActions.fetchTemplates.mockResolvedValue({
       data: mockTemplates,
       error: null,
     });
@@ -55,7 +54,7 @@ describe('useTemplates hook', () => {
 
     await waitFor(() => !result.current.isLoading);
 
-    expect(templateActions.fetchTemplates).toHaveBeenCalledTimes(1);
+    expect(templatesActions.fetchTemplates).toHaveBeenCalledTimes(1);
     expect(result.current.templates).toEqual(mockTemplates);
     expect(result.current.error).toBeNull();
   });

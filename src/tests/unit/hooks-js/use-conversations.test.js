@@ -4,16 +4,16 @@ import React from 'react';
 import { useConversations } from '../../../hooks/use-conversations';
 
 // Mock the server actions
-jest.mock('../../../app/actions/conversation-actions', () => ({
+jest.mock('../../../app/actions/conversations-actions', () => ({
   fetchConversations: jest.fn(),
-  fetchConversationById: jest.fn(),
-  createConversation: jest.fn(),
-  editConversation: jest.fn(),
-  sendMessageToConversation: jest.fn(),
+  fetchConversationsById: jest.fn(),
+  addConversations: jest.fn(),
+  editConversations: jest.fn(),
+  removeConversations: jest.fn(),
 }));
 
 // Import the mocked module
-import * as conversationActions from '../../../app/actions/conversation-actions';
+import * as conversationsActions from '../../../app/actions/conversations-actions';
 
 // Create a wrapper with QueryClientProvider
 const createWrapper = () => {
@@ -25,13 +25,12 @@ const createWrapper = () => {
     },
   });
 
+  // Add display name to fix ESLint error
   const Wrapper = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = "QueryClientWrapper";
+  Wrapper.displayName = 'QueryClientWrapper';
   return Wrapper;
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 };
 
 describe('useConversations hook', () => {
@@ -41,11 +40,11 @@ describe('useConversations hook', () => {
 
   it('should fetch conversations on mount', async () => {
     const mockConversations = [
-      { id: '1', title: 'Conversation 1', status: 'active' },
-      { id: '2', title: 'Conversation 2', status: 'archived' },
+      { id: '1', name: 'Conversations 1', status: 'active' },
+      { id: '2', name: 'Conversations 2', status: 'inactive' },
     ];
 
-    conversationActions.fetchConversations.mockResolvedValue({
+    conversationsActions.fetchConversations.mockResolvedValue({
       data: mockConversations,
       error: null,
     });
@@ -55,12 +54,8 @@ describe('useConversations hook', () => {
 
     await waitFor(() => !result.current.isLoading);
 
-    expect(conversationActions.fetchConversations).toHaveBeenCalledTimes(1);
-    // Fix the expectation to match the actual data structure
-    expect(result.current.conversations).toEqual({
-      data: mockConversations,
-      error: null
-    });
+    expect(conversationsActions.fetchConversations).toHaveBeenCalledTimes(1);
+    expect(result.current.conversations).toEqual(mockConversations);
     expect(result.current.error).toBeNull();
   });
 });
