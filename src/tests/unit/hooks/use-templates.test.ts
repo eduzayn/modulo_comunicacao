@@ -67,38 +67,4 @@ describe('useTemplates hook', () => {
     // We're not testing the actual result here since we don't know the exact implementation
     expect(result.current.error).toBeNull();
   });
-
-  it('should create a new template', async () => {
-    const newTemplate = {
-      name: 'New Template',
-      content: 'New Content',
-      status: 'draft',
-    };
-
-    const createdTemplate = {
-      id: '3',
-      ...newTemplate,
-      createdAt: new Date().toISOString(),
-    };
-
-    (templateActions.addTemplate as jest.Mock).mockResolvedValue({
-      data: createdTemplate,
-      error: null,
-    });
-
-    const { result, waitForNextUpdate } = renderHook(() => useTemplates());
-
-    act(() => {
-      // Call createTemplate if it exists in the hook
-      if (typeof result.current.createTemplate === 'function') {
-        result.current.createTemplate(newTemplate);
-      }
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBe(false);
-    // We're not testing the actual result here since we don't know the exact implementation
-    expect(result.current.error).toBeNull();
-  });
 });

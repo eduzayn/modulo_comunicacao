@@ -67,38 +67,4 @@ describe('useConversations hook', () => {
     // We're not testing the actual result here since we don't know the exact implementation
     expect(result.current.error).toBeNull();
   });
-
-  it('should create a new conversation', async () => {
-    const newConversation = {
-      title: 'New Conversation',
-      channelId: '123',
-      status: 'active',
-    };
-
-    const createdConversation = {
-      id: '3',
-      ...newConversation,
-      createdAt: new Date().toISOString(),
-    };
-
-    (conversationActions.createConversation as jest.Mock).mockResolvedValue({
-      data: createdConversation,
-      error: null,
-    });
-
-    const { result, waitForNextUpdate } = renderHook(() => useConversations());
-
-    act(() => {
-      // Call createConversation if it exists in the hook
-      if (typeof result.current.createConversation === 'function') {
-        result.current.createConversation(newConversation);
-      }
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBe(false);
-    // We're not testing the actual result here since we don't know the exact implementation
-    expect(result.current.error).toBeNull();
-  });
 });

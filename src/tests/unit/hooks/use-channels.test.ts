@@ -6,6 +6,9 @@ import * as channelActions from '@/app/actions/channel-actions';
 jest.mock('@/app/actions/channel-actions', () => ({
   fetchChannels: jest.fn(),
   fetchChannelById: jest.fn(),
+  addChannel: jest.fn(),
+  editChannel: jest.fn(),
+  removeChannel: jest.fn(),
 }));
 
 describe('useChannels hook', () => {
