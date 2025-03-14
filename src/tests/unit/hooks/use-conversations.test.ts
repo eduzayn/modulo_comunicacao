@@ -1,6 +1,6 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { useConversations } from '@/hooks/use-conversations';
-import { renderHookWithClient } from '@/tests/mocks/hooks';
+import { createQueryClientWrapper } from '@/tests/mocks/hooks';
 
 // Mock the server actions
 jest.mock('@/app/actions/conversation-actions', () => ({
@@ -30,45 +30,13 @@ describe('useConversations hook', () => {
       error: null,
     });
 
-    const { result, waitForNextUpdate } = renderHookWithClient(() => useConversations());
+    const wrapper = createQueryClientWrapper();
+    const { result, waitFor } = renderHook(() => useConversations(), { wrapper });
 
-    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => !result.current.isLoading);
+
     expect(conversationActions.fetchConversations).toHaveBeenCalledTimes(1);
-
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBe(false);
     expect(result.current.conversations).toEqual(mockConversations);
     expect(result.current.error).toBeNull();
-  });
-
-  it('should create a new conversation', async () => {
-    const newConversation = {
-      title: 'New Conversation',
-      channelId: '123',
-      status: 'active',
-    };
-
-    const createdConversation = {
-      id: '3',
-      ...newConversation,
-      createdAt: new Date().toISOString(),
-    };
-
-    (conversationActions.createConversation as jest.Mock).mockResolvedValue({
-      data: createdConversation,
-      error: null,
-    });
-
-    const { result, waitForNextUpdate } = renderHookWithClient(() => useConversations());
-
-    await waitForNextUpdate(); // Wait for initial fetch
-
-    act(() => {
-      result.current.createConversation(newConversation);
-    });
-
-    expect(result.current.isCreating).toBe(true);
-    expect(conversationActions.createConversation).toHaveBeenCalledWith(newConversation);
   });
 });

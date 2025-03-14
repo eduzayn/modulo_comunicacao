@@ -24,6 +24,7 @@ jest.mock('next/navigation', () => ({
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
+  redirect: jest.fn(),
 }));
 
 // Mock revalidatePath
