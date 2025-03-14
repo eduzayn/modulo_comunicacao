@@ -1,24 +1,26 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Create a wrapper with QueryClientProvider
+/**
+ * Creates a wrapper with QueryClientProvider for testing hooks
+ * 
+ * @returns A React component wrapper with QueryClientProvider
+ */
 export function createQueryClientWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
+        cacheTime: 0,
       },
     },
   });
-
-  return ({ children }: { children: React.ReactNode }) => (
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ({ children }: { children: any }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 }
 
-// Helper function to render hooks with the QueryClientProvider
-export function renderHookWithClient(hook: any) {
-  const wrapper = createQueryClientWrapper();
-  return renderHook(hook, { wrapper });
-}
+// Add display name to fix ESLint error
+createQueryClientWrapper.displayName = 'QueryClientWrapper';

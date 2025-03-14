@@ -25,7 +25,11 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }) => (
+  const Wrapper = ({ children }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  Wrapper.displayName = "QueryClientWrapper";
+  return Wrapper;
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };

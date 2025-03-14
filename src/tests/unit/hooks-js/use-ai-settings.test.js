@@ -22,9 +22,12 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }) => (
+  // Add display name to fix ESLint error
+  const Wrapper = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'QueryClientWrapper';
+  return Wrapper;
 };
 
 describe('useAISettings hook', () => {

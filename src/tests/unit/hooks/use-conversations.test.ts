@@ -1,7 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { useConversations } from '../../../hooks/use-conversations';
+import { createQueryClientWrapper } from '../../mocks/hooks';
 
 // Mock the server actions
 jest.mock('../../../app/actions/conversation-actions', () => ({
@@ -14,22 +13,6 @@ jest.mock('../../../app/actions/conversation-actions', () => ({
 
 // Import the mocked module
 import * as conversationActions from '../../../app/actions/conversation-actions';
-
-// Create a wrapper with QueryClientProvider
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ children }: { children: any }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useConversations hook', () => {
   beforeEach(() => {
@@ -47,7 +30,7 @@ describe('useConversations hook', () => {
       error: null,
     });
 
-    const wrapper = createWrapper();
+    const wrapper = createQueryClientWrapper();
     const { result, waitFor } = renderHook(() => useConversations(), { wrapper });
 
     await waitFor(() => !result.current.isLoading);

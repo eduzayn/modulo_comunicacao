@@ -1,7 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { useAISettings } from '../../../hooks/use-ai-settings';
+import { createQueryClientWrapper } from '../../mocks/hooks';
 
 // Mock the server actions
 jest.mock('../../../app/actions/ai-actions', () => ({
@@ -11,22 +10,6 @@ jest.mock('../../../app/actions/ai-actions', () => ({
 
 // Import the mocked module
 import * as aiActions from '../../../app/actions/ai-actions';
-
-// Create a wrapper with QueryClientProvider
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ children }: { children: any }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useAISettings hook', () => {
   beforeEach(() => {
@@ -47,7 +30,7 @@ describe('useAISettings hook', () => {
       error: null,
     });
 
-    const wrapper = createWrapper();
+    const wrapper = createQueryClientWrapper();
     const { result, waitFor } = renderHook(() => useAISettings(), { wrapper });
 
     await waitFor(() => !result.current.isLoading);

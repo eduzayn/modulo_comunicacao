@@ -12,23 +12,36 @@ const createTestQueryClient = () => new QueryClient({
   },
 });
 
-const AllProviders = ({ children }: { children: React.ReactNode }) => {
-  const testQueryClient = createTestQueryClient();
-  
-  return (
-    <QueryClientProvider client={testQueryClient}>
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  queryClient?: QueryClient;
+}
+
+export function renderWithProviders(
+  ui: ReactElement,
+  {
+    queryClient = createTestQueryClient(),
+    ...renderOptions
+  }: CustomRenderOptions = {}
+) {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
   );
-};
 
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>,
-) => render(ui, { wrapper: AllProviders, ...options });
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
+}
+
+// Export a function to create a wrapper for renderHook
+export function createQueryClientWrapper() {
+  const queryClient = createTestQueryClient();
+  
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+}
 
 // Re-export everything from testing-library
 export * from '@testing-library/react';
-
-// Override render method
-export { customRender as render };
