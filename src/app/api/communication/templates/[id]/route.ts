@@ -1,74 +1,118 @@
-import { NextResponse } from 'next/server';
-import { getTemplateById, updateTemplate, deleteTemplate } from '../../../../../services/supabase/templates';
-import { z } from 'zod';
+/**
+ * route.ts
+ * 
+ * Description: API route for template operations by ID
+ * 
+ * @module app/api/communication/templates/[id]
+ * @author Devin AI
+ * @created 2025-03-12
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { getTemplateById, editTemplate, deleteTemplate } from '@/app/actions/template-actions';
+import { withLogging } from '@/lib/with-logging';
+import { withMetrics } from '@/lib/with-metrics';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
-const updateTemplateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  content: z.string().min(1, "Content is required").optional(),
-  channelType: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']).optional(),
-  category: z.string().optional(),
-  variables: z.array(z.string()).optional(),
-  status: z.enum(['draft', 'active', 'archived']).optional()
-});
-
-export async function GET(request: Request, { params }: Params) {
+/**
+ * GET handler for template by ID
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters
+ * @returns Template response
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const template = await getTemplateById(params.id);
-    return NextResponse.json(template);
-  } catch (error: any) {
+    const { id } = params;
+    
+    const result = await getTemplateById(id);
+    
+    if (result.error) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(result.data);
+  } catch (error) {
+    console.error('Error fetching template:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch template' }, 
+      { error: 'Failed to fetch template' },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request: Request, { params }: Params) {
+/**
+ * PUT handler for template by ID
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters
+ * @returns Updated template response
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const body = await request.json();
+    const { id } = params;
+    const data = await request.json();
     
-    // Validate request body
-    const result = updateTemplateSchema.safeParse(body);
-    if (!result.success) {
+    const result = await editTemplate(id, data);
+    
+    if (result.error) {
       return NextResponse.json(
-        { error: 'Invalid template data', details: result.error.format() }, 
+        { error: result.error },
         { status: 400 }
       );
     }
     
-    // Transform the data to match the database schema
-    const templateData: any = {};
-    if (result.data.name) templateData.name = result.data.name;
-    if (result.data.content) templateData.content = result.data.content;
-    if (result.data.channelType) templateData.channel_type = result.data.channelType;
-    if (result.data.category) templateData.category = result.data.category;
-    if (result.data.variables) templateData.variables = result.data.variables;
-    if (result.data.status) templateData.status = result.data.status;
-    
-    const template = await updateTemplate(params.id, templateData);
-    return NextResponse.json(template);
-  } catch (error: any) {
+    return NextResponse.json(result.data);
+  } catch (error) {
+    console.error('Error updating template:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update template' }, 
+      { error: 'Failed to update template' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: Request, { params }: Params) {
+/**
+ * DELETE handler for template by ID
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters
+ * @returns Delete response
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    await deleteTemplate(params.id);
+    const { id } = params;
+    
+    const result = await deleteTemplate(id);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
+    console.error('Error deleting template:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete template' }, 
+      { error: 'Failed to delete template' },
       { status: 500 }
     );
   }
 }
+
+// Apply middleware
+export const GET_enhanced = withMetrics(withLogging(GET, 'GET /api/communication/templates/[id]'));
+export const PUT_enhanced = withMetrics(withLogging(PUT, 'PUT /api/communication/templates/[id]'));
+export const DELETE_enhanced = withMetrics(withLogging(DELETE, 'DELETE /api/communication/templates/[id]'));

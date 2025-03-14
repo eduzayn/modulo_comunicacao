@@ -1,169 +1,81 @@
+/**
+ * route.ts
+ * 
+ * Description: API route for channel operations
+ * 
+ * @module app/api/communication/channels
+ * @author Devin AI
+ * @created 2025-03-12
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchChannels, addChannel } from '@/app/actions/channel-actions';
-import { z } from 'zod';
-import type { Channel } from '@/types/index';
-import type { CreateChannelInput, ChannelConfig } from '@/types/channels';
-import { getAuthUser } from '@/lib/auth/get-auth-user';
+import { getChannels, createChannel } from '@/app/actions/channel-actions';
+import { withLogging } from '@/lib/with-logging';
+import { withMetrics } from '@/lib/with-metrics';
 
 /**
- * @swagger
- * /api/communication/channels:
- *   get:
- *     summary: Get all communication channels
- *     tags: [Channels]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of communication channels
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Channel'
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- *
- *   post:
- *     summary: Create a new communication channel
- *     tags: [Channels]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateChannelInput'
- *     responses:
- *       201:
- *         description: Channel created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Channel'
- *       400:
- *         description: Invalid input
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
+ * GET handler for channels
+ * 
+ * @param request - Next.js request object
+ * @returns Channels response
  */
-
-// Validation schema for channel creation
-const createChannelSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  type: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
-  status: z.enum(['active', 'inactive', 'maintenance']),
-  config: z.record(z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.any())])).optional()
-});
-
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    // Get user ID from request using auth utility
-    const userId = await getAuthUser();
+    const searchParams = request.nextUrl.searchParams;
+    const type = searchParams.get('type');
+    const status = searchParams.get('status');
     
-    if (!userId) {
+    const params: Record<string, string> = {};
+    if (type) params.type = type;
+    if (status) params.status = status;
+    
+    const result = await getChannels(params);
+    
+    if (result.error) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { error: result.error },
+        { status: 400 }
       );
     }
     
-    // Fetch channels for the user
-    const result = await fetchChannels();
-    
-    return NextResponse.json({
-      success: true,
-      data: result.data || []
-    });
+    return NextResponse.json(result.data);
   } catch (error) {
-    console.error('Error in channels GET route:', error);
-    const err = error as Error;
+    console.error('Error fetching channels:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: err.message || 'Failed to fetch channels' 
-      },
+      { error: 'Failed to fetch channels' },
       { status: 500 }
     );
   }
 }
 
+/**
+ * POST handler for channels
+ * 
+ * @param request - Next.js request object
+ * @returns Created channel response
+ */
 export async function POST(request: NextRequest) {
   try {
-    // Get user ID from request using auth utility
-    const userId = await getAuthUser();
+    const data = await request.json();
     
-    if (!userId) {
+    const result = await createChannel(data);
+    
+    if (result.error) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-    
-    const body = await request.json();
-    
-    // Validate request body
-    const validationResult = createChannelSchema.safeParse(body);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid channel data', 
-          details: validationResult.error.format() 
-        },
+        { error: result.error },
         { status: 400 }
       );
     }
     
-    // Convert Zod validated data to CreateChannelInput type
-    const channelInput: CreateChannelInput = {
-      name: validationResult.data.name,
-      type: validationResult.data.type,
-      // Status is optional in CreateChannelInput
-      ...(validationResult.data.status && { status: validationResult.data.status }),
-      // Convert config to appropriate type based on channel type
-      config: validationResult.data.config || {} as ChannelConfig
-    };
-    
-    const result = await addChannel(channelInput);
-    
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json({
-      success: true,
-      data: result.data
-    }, { status: 201 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch (error) {
-    console.error('Error in channels POST route:', error);
-    const err = error as Error;
+    console.error('Error creating channel:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: err.message || 'Failed to create channel' 
-      },
+      { error: 'Failed to create channel' },
       { status: 500 }
     );
   }
 }
+
+// Apply middleware
+export const GET_enhanced = withMetrics(withLogging(GET, 'GET /api/communication/channels'));
+export const POST_enhanced = withMetrics(withLogging(POST, 'POST /api/communication/channels'));
