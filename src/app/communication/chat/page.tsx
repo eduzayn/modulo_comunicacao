@@ -280,148 +280,217 @@ export default function ChatPage() {
 
   return (
     <BaseLayout module="communication" items={menuItems}>
-      <TooltipProvider>
-        <div className="flex h-[calc(100vh-4rem)]">
-          {/* Lista de Conversas */}
-          <div className="flex md:hidden">
+      <div className="flex flex-col h-screen bg-background">
+        <div className="flex-1 flex">
+          {/* Sidebar para Mobile */}
+          <div className="lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="ml-2">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between p-4">
-                    <h2 className="text-lg font-semibold">Conversas</h2>
-                    <Button onClick={handleNewChat}>Nova Conversa</Button>
+                  <div className="p-4 border-b">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold">Conversas</h2>
+                      <Button onClick={handleNewChat} size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova
+                      </Button>
+                    </div>
                   </div>
                   <ScrollArea className="flex-1">
                     {isLoading ? (
                       <ChatListSkeleton />
                     ) : (
-                      chats.map((chat) => (
-                        <div
-                          key={chat.id}
-                          className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer"
-                          onClick={() => {
-                            setActiveChat(chat)
-                            setIsMobileMenuOpen(false)
-                          }}
-                        >
-                          <Avatar>
-                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
-                            <AvatarFallback>{chat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <span className="font-medium">{chat.contactName}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
-                              </span>
+                      <div className="space-y-2 p-2">
+                        {chats.map((chat) => (
+                          <div
+                            key={chat.id}
+                            className={cn(
+                              "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                              "hover:bg-accent",
+                              activeChat?.id === chat.id && "bg-accent"
+                            )}
+                            onClick={() => {
+                              setActiveChat(chat)
+                              setIsMobileMenuOpen(false)
+                            }}
+                          >
+                            <Avatar>
+                              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
+                              <AvatarFallback>{getInitials(chat.contactName)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium truncate">{chat.contactName}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
+                                </span>
+                              </div>
+                              {chat.lastMessage && (
+                                <p className="text-sm text-muted-foreground truncate">
+                                  {formatMessagePreview(chat.lastMessage.content)}
+                                </p>
+                              )}
+                              <div className="flex gap-2 mt-1 flex-wrap">
+                                {chat.tags.map(tag => (
+                                  <Badge key={tag} variant="secondary" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground truncate">Última mensagem...</p>
+                            {chat.unreadCount > 0 && (
+                              <Badge className="ml-2">{chat.unreadCount}</Badge>
+                            )}
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     )}
                   </ScrollArea>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
-          <div className="w-80 border-r bg-background hidden md:block">
-            <div className="p-4 border-b">
-              <Button onClick={handleNewChat}>Nova Conversa</Button>
+
+          {/* Sidebar para Desktop */}
+          <div className="hidden lg:flex lg:w-80 border-r bg-card">
+            <div className="flex flex-col w-full">
+              <div className="p-4 border-b">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Conversas</h2>
+                  <Button onClick={handleNewChat} size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova
+                  </Button>
+                </div>
+              </div>
+              <ScrollArea className="flex-1">
+                {isLoading ? (
+                  <ChatListSkeleton />
+                ) : (
+                  <div className="space-y-2 p-2">
+                    {chats
+                      .filter(chat => chat.status === 'active')
+                      .map(chat => (
+                        <div
+                          key={chat.id}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                            "hover:bg-accent",
+                            activeChat?.id === chat.id && "bg-accent"
+                          )}
+                          onClick={() => setActiveChat(chat)}
+                        >
+                          <Avatar>
+                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
+                            <AvatarFallback>{getInitials(chat.contactName)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium truncate">{chat.contactName}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
+                              </span>
+                            </div>
+                            {chat.lastMessage && (
+                              <p className="text-sm text-muted-foreground truncate">
+                                {formatMessagePreview(chat.lastMessage.content)}
+                              </p>
+                            )}
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              {chat.tags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          {chat.unreadCount > 0 && (
+                            <Badge className="ml-2">{chat.unreadCount}</Badge>
+                          )}
+                        </div>
+                      ))
+                    }
+                  </div>
+                )}
+              </ScrollArea>
             </div>
-            <ScrollArea className="flex-1">
-              {isLoading ? (
-                <ChatListSkeleton />
-              ) : (
-                chats
-                  .filter(chat => chat.status === 'active')
-                  .map(chat => (
-                    <div
-                      key={chat.id}
-                      className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer"
-                      onClick={() => setActiveChat(chat)}
-                    >
-                      <Avatar>
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
-                        <AvatarFallback>{chat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <span className="font-medium">{chat.contactName}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
-                          </span>
-                        </div>
-                        {chat.lastMessage && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            {formatMessagePreview(chat.lastMessage.content)}
-                          </p>
-                        )}
-                        <div className="flex gap-2 mt-1">
-                          {chat.tags.map(tag => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      {chat.unreadCount > 0 && (
-                        <Badge className="ml-2">{chat.unreadCount}</Badge>
-                      )}
-                    </div>
-                  ))
-              )}
-            </ScrollArea>
           </div>
 
-          {/* Área de Mensagens */}
-          {activeChat && (
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
-                    <AvatarFallback>{activeChat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="font-medium">{activeChat.contactName}</h2>
-                    <p className="text-sm text-muted-foreground">{activeChat.contactType}</p>
+          {/* Área Principal */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {activeChat ? (
+              <>
+                {/* Cabeçalho do Chat */}
+                <div className="flex items-center justify-between p-4 border-b bg-card">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
+                      <AvatarFallback>{getInitials(activeChat.contactName)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="font-medium">{activeChat.contactName}</h2>
+                      <p className="text-sm text-muted-foreground">{activeChat.contactType}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowContactDetails(!showContactDetails)}
+                    >
+                      <Forward className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setShowContactDetails(!showContactDetails)}>
-                  <Forward className="h-4 w-4" />
-                </Button>
-              </div>
 
-              <ScrollArea className="flex-1 p-4">
-                {isLoading ? (
-                  <MessagesSkeleton />
-                ) : (
-                  messages.map((message) => (
-                    <div key={message.id} className="flex items-start gap-3 p-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${message.sender}`} />
-                        <AvatarFallback>{message.sender.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{message.sender}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
-                              {formatTime(message.timestamp)}
-                            </span>
+                {/* Área de Mensagens */}
+                <ScrollArea className="flex-1 p-4">
+                  {isLoading ? (
+                    <MessagesSkeleton />
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={cn(
+                            "flex items-start gap-3",
+                            message.sender === 'Você' ? 'flex-row-reverse' : 'flex-row'
+                          )}
+                        >
+                          <Avatar className="h-8 w-8 mt-1">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${message.sender}`} />
+                            <AvatarFallback>{getInitials(message.sender)}</AvatarFallback>
+                          </Avatar>
+                          <div className={cn(
+                            "flex flex-col max-w-[70%]",
+                            message.sender === 'Você' ? 'items-end' : 'items-start'
+                          )}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium">{message.sender}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatTime(message.timestamp)}
+                              </span>
+                            </div>
+                            <div className={cn(
+                              "rounded-lg p-3",
+                              message.sender === 'Você'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            )}>
+                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            </div>
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button variant="ghost" size="icon" className="h-6 w-6 mt-1">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-40" align="end">
+                              <PopoverContent className="w-40" align={message.sender === 'Você' ? 'end' : 'start'}>
                                 <div className="space-y-1">
                                   <Button
                                     variant="ghost"
@@ -452,102 +521,116 @@ export default function ChatPage() {
                             </Popover>
                           </div>
                         </div>
-                        <p className="text-sm">{message.content}</p>
-                      </div>
+                      ))}
+                      <div ref={messagesEndRef} />
                     </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </ScrollArea>
+                  )}
+                </ScrollArea>
 
-              <div className="p-4 border-t">
-                <div className="flex gap-2">
-                  <Textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSendMessage()
-                      }
-                    }}
-                    placeholder="Digite sua mensagem..."
-                    className="min-h-[40px] max-h-[120px]"
-                    style={{ resize: 'none' }}
-                  />
+                {/* Área de Input */}
+                <div className="p-4 border-t bg-card">
                   <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Paperclip className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Anexar arquivo</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Mic className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Gravar áudio</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Button onClick={handleSendMessage}>Enviar</Button>
+                    <Textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSendMessage()
+                        }
+                      }}
+                      placeholder="Digite sua mensagem..."
+                      className="min-h-[40px] max-h-[120px]"
+                      style={{ resize: 'none' }}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-10 w-10">
+                            <Paperclip className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Anexar arquivo</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-10 w-10">
+                            <Mic className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Gravar áudio</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Button onClick={handleSendMessage} size="icon" className="h-10 w-10">
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Área de Detalhes do Contato */}
-          {activeChat && showContactDetails && (
-            <div className="w-80 border-l bg-background p-4">
-              <div className="flex flex-col items-center gap-4 p-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
-                  <AvatarFallback>{activeChat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <h3 className="font-medium">{activeChat.contactName}</h3>
-                  <p className="text-sm text-muted-foreground">{activeChat.contactEmail}</p>
-                  <p className="text-sm text-muted-foreground">{activeChat.contactPhone}</p>
+                  <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground" />
+                  <h3 className="mt-4 text-lg font-medium">Nenhuma conversa selecionada</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Selecione uma conversa ou inicie uma nova
+                  </p>
+                  <Button onClick={handleNewChat} className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Conversa
+                  </Button>
                 </div>
               </div>
+            )}
+          </div>
 
-              <Separator />
-
-              <div>
-                <h4 className="font-medium mb-2">Tags</h4>
-                <div className="flex flex-wrap gap-2">
-                  {activeChat.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">{tag}</Badge>
-                  ))}
+          {/* Painel de Detalhes do Contato */}
+          {activeChat && showContactDetails && (
+            <div className="hidden md:flex w-80 border-l bg-card">
+              <div className="flex flex-col w-full p-4">
+                <div className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
+                    <AvatarFallback>{getInitials(activeChat.contactName)}</AvatarFallback>
+                  </Avatar>
+                  <div className="text-center">
+                    <h3 className="font-medium">{activeChat.contactName}</h3>
+                    <p className="text-sm text-muted-foreground">{activeChat.contactEmail}</p>
+                    <p className="text-sm text-muted-foreground">{activeChat.contactPhone}</p>
+                  </div>
                 </div>
-              </div>
 
-              <Separator />
+                <Separator className="my-4" />
 
-              <div>
-                <h4 className="font-medium mb-2">Status</h4>
-                <Badge variant={activeChat.status === 'active' ? 'default' : 'secondary'}>
-                  {activeChat.status === 'active' ? 'Ativo' : 'Arquivado'}
-                </Badge>
-              </div>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {activeChat.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
 
-              <Separator />
+                  <div>
+                    <h4 className="font-medium mb-2">Status</h4>
+                    <Badge variant={activeChat.status === 'active' ? 'default' : 'secondary'}>
+                      {activeChat.status === 'active' ? 'Ativo' : 'Arquivado'}
+                    </Badge>
+                  </div>
 
-              <div>
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={() => setShowEditDialog(true)}
-                >
-                  Editar Contato
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowEditDialog(true)}
+                  >
+                    Editar Contato
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -699,7 +782,7 @@ export default function ChatPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </TooltipProvider>
+      </div>
     </BaseLayout>
   )
 } 
