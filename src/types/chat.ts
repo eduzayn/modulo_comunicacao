@@ -10,6 +10,9 @@ export interface Message {
   status?: 'sent' | 'delivered' | 'read'
   duration?: string // para áudios
   fileName?: string // para arquivos
+  fileSize?: string // para arquivos
+  fileType?: string // para arquivos
+  tags?: string[] // para contexto do arquivo
 }
 
 export interface Chat {
