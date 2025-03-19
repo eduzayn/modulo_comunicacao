@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS workflows (
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at_column') THEN
-    CREATE FUNCTION update_updated_at_column()
+    CREATE OR REPLACE FUNCTION update_updated_at_column()
     RETURNS TRIGGER AS $$
     BEGIN
       NEW.updated_at = NOW();
