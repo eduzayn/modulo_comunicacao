@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type CreateQuickPhraseFormData } from '../schemas'
 import { createQuickPhrase } from '../services/quick-phrases'
+import { importKinboxQuickPhrases } from '@/services/kinbox'
 
 export function useCreateQuickPhrase() {
   const queryClient = useQueryClient()
@@ -38,6 +39,17 @@ export function useCreateQuickPhrase() {
 
       return createQuickPhrase(formData)
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quickPhrases'] })
+    },
+  })
+}
+
+export function useImportKinboxPhrases() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: importKinboxQuickPhrases,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quickPhrases'] })
     },

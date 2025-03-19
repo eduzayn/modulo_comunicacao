@@ -1,4 +1,7 @@
 import { env } from '@/env.mjs'
+import { api } from '@/lib/api'
+import { type ActionResponse } from '@/types/actions'
+import { type QuickPhrase } from '@/app/settings/quick-phrases/types'
 
 interface KinboxConfig {
   apiSecret: string
@@ -69,4 +72,73 @@ class KinboxService {
   }
 }
 
-export const kinboxService = new KinboxService() 
+export const kinboxService = new KinboxService()
+
+interface KinboxQuickPhrase {
+  id: string
+  text: string
+  shortcut: string
+  visibility: 'all' | 'group' | 'personal'
+  assignedTo?: string[]
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+}
+
+export async function importKinboxQuickPhrases(): Promise<ActionResponse<QuickPhrase[]>> {
+  try {
+    // Busca as frases rápidas do Kinbox
+    const kinboxResponse = await fetch(`${process.env.NEXT_PUBLIC_KINBOX_API_URL}/quick-phrases`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('kinbox_token')}`,
+      },
+    })
+
+    if (!kinboxResponse.ok) {
+      throw new Error('Erro ao buscar frases rápidas do Kinbox')
+    }
+
+    const kinboxPhrases: KinboxQuickPhrase[] = await kinboxResponse.json()
+
+    // Converte as frases do Kinbox para o formato do nosso sistema
+    const convertedPhrases = kinboxPhrases.map((phrase): Omit<QuickPhrase, 'id'> => ({
+      type: 'text',
+      phrase: phrase.text,
+      shortcut: phrase.shortcut,
+      visibility: phrase.visibility,
+      assignedTo: phrase.assignedTo || [],
+      createdAt: phrase.createdAt,
+      updatedAt: phrase.updatedAt,
+      createdBy: phrase.createdBy,
+    }))
+
+    // Importa as frases convertidas para nosso sistema
+    const importPromises = convertedPhrases.map(async (phrase) => {
+      const formData = new FormData()
+      formData.append('type', phrase.type)
+      formData.append('phrase', phrase.phrase || '')
+      formData.append('shortcut', phrase.shortcut)
+      formData.append('visibility', phrase.visibility)
+      formData.append('assignedTo', JSON.stringify(phrase.assignedTo))
+
+      const response = await api.post('/quick-phrases', formData)
+      return response.data
+    })
+
+    const importedPhrases = await Promise.all(importPromises)
+
+    return {
+      success: true,
+      data: importedPhrases,
+    }
+  } catch (error) {
+    console.error('Erro ao importar frases rápidas do Kinbox:', error)
+    return {
+      success: false,
+      error: {
+        code: 'KINBOX_IMPORT_ERROR',
+        message: 'Erro ao importar frases rápidas do Kinbox. Tente novamente.',
+      },
+    }
+  }
+} 
