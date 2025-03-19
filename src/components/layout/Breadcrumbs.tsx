@@ -7,22 +7,26 @@ interface BreadcrumbsProps {
     title: string
     href: string
   }[]
-  module?: 'communication' | 'student' | 'content' | 'enrollment'
+  module: 'communication' | 'student' | 'content' | 'enrollment'
 }
 
 export function Breadcrumbs({ items, module }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center space-x-1 text-sm text-muted-foreground">
+    <nav 
+      aria-label="Navegação estrutural" 
+      className="flex items-center space-x-1 text-sm text-muted-foreground"
+    >
       <Link
         href="/"
         className="flex items-center hover:text-foreground transition-colors"
+        aria-label="Ir para página inicial"
       >
         <Home className="h-4 w-4" />
-        <span className="sr-only">Início</span>
       </Link>
+
       {items.map((item, index) => (
         <div key={index} className="flex items-center">
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <Link
             href={item.href}
             className={cn(
@@ -34,6 +38,7 @@ export function Breadcrumbs({ items, module }: BreadcrumbsProps) {
                 'text-enrollment-dark font-medium': module === 'enrollment',
               }
             )}
+            aria-current={index === items.length - 1 ? 'page' : undefined}
           >
             {item.title}
           </Link>

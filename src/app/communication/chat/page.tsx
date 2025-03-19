@@ -86,7 +86,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Link } from 'next/navigation'
+import { Link, usePathname } from 'next/navigation'
 import { sizes, spacing, fontSize } from "@/lib/constants"
 
 const menuItems = [
@@ -119,6 +119,7 @@ function FileMessage({ message }: { message: Message }) {
 }
 
 export default function ChatPage() {
+  const pathname = usePathname()
   const [chats, setChats] = useState<Chat[]>(generateMockChats())
   const [activeChat, setActiveChat] = useState<Chat | null>(null)
   const [messages, setMessages] = useState<Message[]>([])

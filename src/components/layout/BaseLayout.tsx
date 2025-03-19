@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { PageTransition } from './PageTransition'
-import { MessageSquare, Users, BarChart2, Settings, Home, Book, GraduationCap, FileText } from 'lucide-react'
+import { MessageSquare, Users, BarChart2, Settings, Home, Book, GraduationCap, FileText, Library, CreditCard } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
@@ -35,17 +35,22 @@ const moduleMenuItems: Record<'communication' | 'student' | 'content' | 'enrollm
   student: [
     { title: 'Início', href: '/student', icon: <Home className="h-4 w-4" /> },
     { title: 'Alunos', href: '/student/list', icon: <Users className="h-4 w-4" /> },
+    { title: 'Matrículas', href: '/student/enrollments', icon: <GraduationCap className="h-4 w-4" /> },
+    { title: 'Documentos', href: '/student/documents', icon: <FileText className="h-4 w-4" /> },
     { title: 'Configurações', href: '/student/settings', icon: <Settings className="h-4 w-4" /> }
   ],
   content: [
     { title: 'Início', href: '/content', icon: <Home className="h-4 w-4" /> },
     { title: 'Materiais', href: '/content/materials', icon: <Book className="h-4 w-4" /> },
+    { title: 'Cursos', href: '/content/courses', icon: <GraduationCap className="h-4 w-4" /> },
+    { title: 'Biblioteca', href: '/content/library', icon: <Library className="h-4 w-4" /> },
     { title: 'Configurações', href: '/content/settings', icon: <Settings className="h-4 w-4" /> }
   ],
   enrollment: [
     { title: 'Início', href: '/enrollment', icon: <Home className="h-4 w-4" /> },
     { title: 'Matrículas', href: '/enrollment/list', icon: <GraduationCap className="h-4 w-4" /> },
     { title: 'Documentos', href: '/enrollment/documents', icon: <FileText className="h-4 w-4" /> },
+    { title: 'Pagamentos', href: '/enrollment/payments', icon: <CreditCard className="h-4 w-4" /> },
     { title: 'Configurações', href: '/enrollment/settings', icon: <Settings className="h-4 w-4" /> }
   ]
 }
