@@ -7,6 +7,9 @@ import { usePathname } from 'next/navigation'
 import { PageTransition } from './PageTransition'
 import { MessageSquare, Users, BarChart2, Settings, Home } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { Header } from './Header'
+import { Sidebar } from './sidebar'
+import { Breadcrumbs } from './Breadcrumbs'
 
 interface MenuItem {
   name: string
@@ -16,7 +19,12 @@ interface MenuItem {
 
 interface BaseLayoutProps {
   children: ReactNode
-  module: 'communication'
+  module: 'communication' | 'student' | 'content' | 'enrollment'
+  items: {
+    title: string
+    href: string
+    icon: React.ReactNode
+  }[]
 }
 
 const moduleMenuItems: Record<'communication', MenuItem[]> = {
@@ -43,53 +51,29 @@ const menuVariants = {
   })
 }
 
-export function BaseLayout({ children, module }: BaseLayoutProps) {
+export function BaseLayout({ children, module, items }: BaseLayoutProps) {
   const pathname = usePathname()
   const menuItems = moduleMenuItems[module]
+  
+  // Gera os itens do breadcrumb baseado no pathname atual
+  const breadcrumbItems = pathname.split('/').filter(Boolean).map((segment, index, array) => {
+    const href = '/' + array.slice(0, index + 1).join('/')
+    const title = items.find(item => item.href === href)?.title || segment
+    return { href, title }
+  })
 
   return (
-    <div className="flex h-screen">
-      <aside className="w-64 bg-card border-r">
-        <div className="p-6">
-          <motion.h1 
-            className="text-2xl font-bold text-foreground"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Sistema
-          </motion.h1>
-        </div>
-        <nav className="px-4">
-          {menuItems.map((item, i) => (
-            <motion.div
-              key={item.href}
-              custom={i}
-              initial="hidden"
-              animate="visible"
-              variants={menuVariants}
-            >
-              <Link
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200',
-                  pathname === item.href && 'bg-accent text-foreground'
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            </motion.div>
-          ))}
-        </nav>
-      </aside>
-      <main className="flex-1 overflow-auto">
-        <div className="container py-8">
+    <div className="flex min-h-screen">
+      <Sidebar module={module} items={items} />
+      <div className="flex-1">
+        <Header />
+        <main className="flex-1 space-y-4 p-8 pt-6">
+          <Breadcrumbs items={breadcrumbItems} module={module} />
           <PageTransition>
             {children}
           </PageTransition>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 } 

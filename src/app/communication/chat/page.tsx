@@ -1,90 +1,266 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { BaseLayout } from '@/components/layout/BaseLayout'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Send } from 'lucide-react'
+import { Menu, Send, Archive, Plus } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+}
+
+interface Chat {
+  id: string
+  title: string
+  messages: Message[]
+  archived: boolean
+}
+
+const mockResponses = [
+  'Olá! Como posso ajudar?',
+  'Entendi sua pergunta. Vou pesquisar e responder.',
+  'Claro, posso ajudar com isso.',
+  'Poderia fornecer mais detalhes?'
+]
 
 export default function ChatPage() {
+  const [chats, setChats] = useState<Chat[]>([])
+  const [activeChat, setActiveChat] = useState<Chat | null>(null)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    // Fecha o menu mobile quando selecionar um chat
+    if (activeChat) {
+      setIsMobileMenuOpen(false)
+    }
+  }, [activeChat])
+
+  const handleNewChat = () => {
+    const newChat: Chat = {
+      id: Math.random().toString(36).substring(7),
+      title: 'Nova Conversa',
+      messages: [],
+      archived: false
+    }
+    setChats([...chats, newChat])
+    setActiveChat(newChat)
+    setError(null)
+    setIsMobileMenuOpen(false)
+  }
+
+  const handleSendMessage = async () => {
+    if (!activeChat) {
+      setError('Nenhuma conversa ativa')
+      return
+    }
+
+    if (!message.trim()) return
+
+    setIsLoading(true)
+    const newMessage: Message = {
+      id: Math.random().toString(36).substring(7),
+      role: 'user',
+      content: message.trim(),
+      timestamp: new Date()
+    }
+
+    const updatedChat = {
+      ...activeChat,
+      messages: [...activeChat.messages, newMessage]
+    }
+
+    setChats(chats.map(chat => 
+      chat.id === activeChat.id ? updatedChat : chat
+    ))
+    setActiveChat(updatedChat)
+    setMessage('')
+
+    // Simula resposta da IA
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const aiResponse: Message = {
+        id: Math.random().toString(36).substring(7),
+        role: 'assistant',
+        content: mockResponses[Math.floor(Math.random() * mockResponses.length)],
+        timestamp: new Date()
+      }
+
+      const chatWithResponse = {
+        ...updatedChat,
+        messages: [...updatedChat.messages, aiResponse]
+      }
+
+      setChats(chats.map(chat => 
+        chat.id === activeChat.id ? chatWithResponse : chat
+      ))
+      setActiveChat(chatWithResponse)
+    } catch (err) {
+      setError('Erro ao processar mensagem')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleArchiveChat = () => {
+    if (!activeChat) return
+    setIsArchiveDialogOpen(true)
+  }
+
+  const confirmArchive = () => {
+    if (!activeChat) return
+
+    const updatedChat = {
+      ...activeChat,
+      archived: true
+    }
+
+    setChats(chats.map(chat => 
+      chat.id === activeChat.id ? updatedChat : chat
+    ))
+    setActiveChat(null)
+    setIsArchiveDialogOpen(false)
+  }
+
   return (
     <BaseLayout module="communication">
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Chat</h2>
-          <p className="text-muted-foreground">
-            Gerencie suas conversas com alunos e professores
-          </p>
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Sidebar */}
+        <div 
+          data-testid="chat-sidebar"
+          className={cn(
+            "w-64 border-r bg-background p-4",
+            "fixed inset-y-0 left-0 z-50 md:relative",
+            "transition-transform duration-200 ease-in-out",
+            !isMobileMenuOpen && "-translate-x-full md:translate-x-0"
+          )}
+        >
+          <Button 
+            onClick={handleNewChat}
+            className="w-full mb-4"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Conversa
+          </Button>
+
+          <ScrollArea className="h-[calc(100vh-8rem)]">
+            {chats.filter(chat => !chat.archived).map(chat => (
+              <Button
+                key={chat.id}
+                variant={chat.id === activeChat?.id ? 'secondary' : 'ghost'}
+                className="w-full justify-start mb-1"
+                onClick={() => setActiveChat(chat)}
+              >
+                {chat.title}
+              </Button>
+            ))}
+          </ScrollArea>
         </div>
 
-        <div className="grid grid-cols-12 gap-4 h-[calc(100vh-12rem)]">
-          {/* Lista de Contatos */}
-          <Card className="col-span-3 p-4">
-            <div className="mb-4">
-              <Input placeholder="Buscar contatos..." />
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                name="Menu"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              <h2 className="text-2xl font-bold">Chat</h2>
             </div>
-            <ScrollArea className="h-[calc(100vh-16rem)]">
-              <div className="space-y-2">
-                {['Maria Silva', 'João Santos', 'Carlos Oliveira', 'Ana Pereira'].map((name, i) => (
-                  <div
-                    key={i}
-                    className="p-3 rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-communication/10 flex items-center justify-center text-communication">
-                        {name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{name}</p>
-                        <p className="text-sm text-muted-foreground">Online</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {activeChat && (
+              <Button
+                variant="outline"
+                onClick={handleArchiveChat}
+                name="Arquivar Conversa"
+              >
+                <Archive className="h-4 w-4 mr-2" />
+                Arquivar Conversa
+              </Button>
+            )}
+          </div>
+
+          <Card className="flex-1 p-4 mb-4">
+            <ScrollArea className="h-full">
+              {activeChat?.messages.map(msg => (
+                <div
+                  key={msg.id}
+                  data-testid={`message-${msg.role}`}
+                  className={cn(
+                    "mb-4 p-3 rounded-lg",
+                    msg.role === 'user' ? 'bg-primary/10 ml-auto' : 'bg-muted',
+                    "max-w-[80%]"
+                  )}
+                >
+                  {msg.content}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-center py-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              )}
             </ScrollArea>
           </Card>
 
-          {/* Área de Chat */}
-          <Card className="col-span-9 p-4 flex flex-col">
-            <div className="flex-1 overflow-y-auto mb-4">
-              <ScrollArea className="h-[calc(100vh-20rem)]">
-                <div className="space-y-4">
-                  {[
-                    { sender: 'Maria Silva', message: 'Olá, tudo bem?', time: '10:30' },
-                    { sender: 'Você', message: 'Oi Maria! Tudo ótimo, e com você?', time: '10:31' },
-                    { sender: 'Maria Silva', message: 'Estou bem também! Gostaria de tirar uma dúvida sobre o curso.', time: '10:32' },
-                  ].map((msg, i) => (
-                    <div
-                      key={i}
-                      className={`flex ${msg.sender === 'Você' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[70%] p-3 rounded-lg ${
-                          msg.sender === 'Você'
-                            ? 'bg-communication text-white'
-                            : 'bg-accent'
-                        }`}
-                      >
-                        <p className="text-sm font-medium">{msg.sender}</p>
-                        <p>{msg.message}</p>
-                        <p className="text-xs mt-1 opacity-70">{msg.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-            <div className="flex gap-2">
-              <Input placeholder="Digite sua mensagem..." className="flex-1" />
-              <Button>
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </Card>
+          <div className="flex gap-2">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Digite sua mensagem..."
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+              disabled={isLoading}
+            />
+            <Button 
+              onClick={handleSendMessage}
+              disabled={isLoading}
+              name="Enviar"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Enviar
+            </Button>
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
         </div>
       </div>
+
+      <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Arquivar Conversa</DialogTitle>
+          </DialogHeader>
+          <p>Tem certeza que deseja arquivar esta conversa?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsArchiveDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmArchive}>
+              Arquivar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </BaseLayout>
   )
 } 
