@@ -73,4 +73,75 @@ export async function toggleAssignmentRule(ruleId: string, enabled: boolean): Pr
   if (error) {
     throw new Error('Erro ao atualizar regra de atribuição')
   }
+}
+
+export interface Automation {
+  id: string
+  name: string
+  event: string
+  action: string
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateAutomationData {
+  name: string
+  event: string
+  action: string
+}
+
+export async function createAutomation(data: CreateAutomationData): Promise<Automation> {
+  const { data: automation, error } = await supabase
+    .from('automations')
+    .insert([
+      {
+        name: data.name,
+        event: data.event,
+        action: data.action
+      }
+    ])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar automação')
+  }
+
+  return automation
+}
+
+export async function getAutomations(): Promise<Automation[]> {
+  const { data: automations, error } = await supabase
+    .from('automations')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar automações')
+  }
+
+  return automations
+}
+
+export async function toggleAutomation(automationId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('automations')
+    .update({ enabled })
+    .eq('id', automationId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar automação')
+  }
+}
+
+export async function deleteAutomation(automationId: string): Promise<void> {
+  const { error } = await supabase
+    .from('automations')
+    .delete()
+    .eq('id', automationId)
+
+  if (error) {
+    throw new Error('Erro ao excluir automação')
+  }
 } 
