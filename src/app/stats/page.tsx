@@ -2,6 +2,16 @@
 
 import React, { useState } from 'react';
 import { BarChart, LineChart, PieChart, Activity, MessageSquare, Clock, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+
+// Função para buscar dados das estatísticas
+async function fetchStats(period: string) {
+  const response = await fetch(`/api/stats?period=${period}`);
+  if (!response.ok) {
+    throw new Error('Falha ao carregar estatísticas');
+  }
+  return response.json();
+}
 
 // Componente de gráfico de barras simulado
 const BarChartComponent = () => (
@@ -46,6 +56,29 @@ export default function StatsPage() {
   const [period, setPeriod] = useState('7d');
   const [activeTab, setActiveTab] = useState('activity');
   
+  // Query para dados em tempo real
+  const { data: stats, isLoading, error } = useQuery({
+    queryKey: ['stats', period],
+    queryFn: () => fetchStats(period),
+    refetchInterval: 30000, // Atualiza a cada 30 segundos
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 text-red-600 rounded-lg">
+        Erro ao carregar estatísticas. Por favor, tente novamente.
+      </div>
+    );
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
