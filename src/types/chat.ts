@@ -78,8 +78,11 @@ export function getInitials(name: string) {
     .slice(0, 2)
 }
 
-export function formatMessagePreview(content: string) {
-  return content.length > 40 ? content.slice(0, 40) + '...' : content
+export function formatMessagePreview(message: Message): string {
+  if (message.type === 'file') {
+    return `📎 ${message.fileName}`
+  }
+  return message.content.length > 50 ? `${message.content.slice(0, 47)}...` : message.content
 }
 
 export function formatTime(date: Date) {

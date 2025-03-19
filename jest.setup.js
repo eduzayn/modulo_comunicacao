@@ -43,3 +43,44 @@ global.fetch = jest.fn(() =>
 
 // Suppress console errors during tests
 console.error = jest.fn();
+
+// Mock do ResizeObserver
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+window.ResizeObserver = ResizeObserverMock
+
+// Mock do IntersectionObserver
+class IntersectionObserverMock {
+  constructor(callback) {
+    this.callback = callback
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+window.IntersectionObserver = IntersectionObserverMock
+
+// Mock do matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+})
+
+// Limpa todos os mocks após cada teste
+afterEach(() => {
+  jest.clearAllMocks()
+})
