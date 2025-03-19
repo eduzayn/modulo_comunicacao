@@ -169,6 +169,120 @@ const moduleConfig = {
   }
 }
 
+const moduleMenuItems = {
+  communication: [
+    { name: 'Chat', href: '/communication/chat', icon: MessageSquare },
+    { name: 'Contatos', href: '/communication/contacts', icon: Users },
+    { name: 'Estatísticas', href: '/communication/stats', icon: BarChart2 },
+    { name: 'Configurações', href: '/communication/settings', icon: Settings }
+  ],
+  student: {
+    title: 'Portal do Aluno',
+    items: [
+      {
+        title: 'Início',
+        href: '/student',
+        icon: <Home className="h-5 w-5" />
+      },
+      {
+        title: 'Meus Cursos',
+        href: '/student/courses',
+        icon: <BookOpen className="h-5 w-5" />
+      },
+      {
+        title: 'Progresso',
+        href: '/student/progress',
+        icon: <GraduationCap className="h-5 w-5" />
+      },
+      {
+        title: 'Certificados',
+        href: '/student/certificates',
+        icon: <Trophy className="h-5 w-5" />
+      },
+      {
+        title: 'Agenda',
+        href: '/student/schedule',
+        icon: <Clock className="h-5 w-5" />
+      },
+      {
+        title: 'Ajuda',
+        href: '/student/help',
+        icon: <HelpCircle className="h-5 w-5" />
+      }
+    ]
+  },
+  content: {
+    title: 'Módulo de Conteúdo',
+    items: [
+      {
+        title: 'Início',
+        href: '/content',
+        icon: <Home className="h-5 w-5" />
+      },
+      {
+        title: 'Materiais',
+        href: '/content/materials',
+        icon: <FileText className="h-5 w-5" />
+      },
+      {
+        title: 'Vídeo Aulas',
+        href: '/content/videos',
+        icon: <Video className="h-5 w-5" />
+      },
+      {
+        title: 'Recursos',
+        href: '/content/resources',
+        icon: <Image className="h-5 w-5" />
+      },
+      {
+        title: 'Estatísticas',
+        href: '/content/stats',
+        icon: <BarChart2 className="h-5 w-5" />
+      },
+      {
+        title: 'Configurações',
+        href: '/content/settings',
+        icon: <Settings className="h-5 w-5" />
+      }
+    ]
+  },
+  enrollment: {
+    title: 'Módulo de Matrículas',
+    items: [
+      {
+        title: 'Início',
+        href: '/enrollment',
+        icon: <Home className="h-5 w-5" />
+      },
+      {
+        title: 'Alunos',
+        href: '/enrollment/students',
+        icon: <Users className="h-5 w-5" />
+      },
+      {
+        title: 'Financeiro',
+        href: '/enrollment/financial',
+        icon: <DollarSign className="h-5 w-5" />
+      },
+      {
+        title: 'Matrículas',
+        href: '/enrollment/registrations',
+        icon: <CalendarCheck className="h-5 w-5" />
+      },
+      {
+        title: 'Relatórios',
+        href: '/enrollment/reports',
+        icon: <TrendingUp className="h-5 w-5" />
+      },
+      {
+        title: 'Configurações',
+        href: '/enrollment/settings',
+        icon: <Settings className="h-5 w-5" />
+      }
+    ]
+  }
+}
+
 export function BaseLayout({ children, module }: BaseLayoutProps) {
   const config = moduleConfig[module]
 
