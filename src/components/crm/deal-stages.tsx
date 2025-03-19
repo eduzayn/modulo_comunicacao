@@ -4,7 +4,22 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
-const stages = [
+interface Deal {
+  id: string
+  title: string
+  value: number
+  customer: string
+  updatedAt: string
+}
+
+interface Stage {
+  id: string
+  title: string
+  count: number
+  deals: Deal[]
+}
+
+const stages: Stage[] = [
   {
     id: 'pos-vendas',
     title: 'PÓS-VENDAS',
@@ -57,7 +72,9 @@ export function DealStages() {
           <div className="space-y-4">
             {stage.deals.map((deal) => (
               <Card key={deal.id} className="p-4">
-                {/* Conteúdo do card */}
+                <h4 className="font-medium">{deal.title}</h4>
+                <p className="text-sm text-muted-foreground">{deal.customer}</p>
+                <p className="text-sm font-medium">R$ {deal.value.toLocaleString()}</p>
               </Card>
             ))}
           </div>
