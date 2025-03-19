@@ -11,15 +11,18 @@ CREATE TABLE IF NOT EXISTS workflows (
 
 -- Create function to update updated_at if not exists
 DO $$
+DECLARE
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at_column') THEN
     CREATE OR REPLACE FUNCTION update_updated_at_column()
-    RETURNS TRIGGER AS $$
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+    AS $BODY$
     BEGIN
       NEW.updated_at = NOW();
       RETURN NEW;
     END;
-    $$ LANGUAGE plpgsql;
+    $BODY$;
   END IF;
 END $$;
 
