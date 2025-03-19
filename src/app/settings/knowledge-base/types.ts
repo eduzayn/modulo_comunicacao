@@ -1,57 +1,63 @@
-export type ContentType = 
-  | 'pdf'           // Documentos PDF
-  | 'text'          // Texto livre
-  | 'qa'            // Perguntas e respostas
-  | 'flow'          // Fluxos de conversação
-  | 'script'        // Scripts de atendimento
-  | 'api'           // Documentação de API
-  | 'rules'         // Regras de negócio
+import { z } from 'zod'
 
-export type TrainingStatus =
-  | 'pending'       // Aguardando treinamento
-  | 'processing'    // Em processamento
-  | 'trained'       // Treinado
-  | 'failed'        // Falhou
-  | 'outdated'      // Precisa atualizar
+export type ContentType = 'pdf' | 'text' | 'qa' | 'flow' | 'script' | 'api' | 'rules'
+export type TrainingStatus = 'pending' | 'processing' | 'trained' | 'failed' | 'outdated'
+export type KnowledgeBaseStatus = 'active' | 'inactive' | 'draft'
 
 export interface KnowledgeBaseContent {
-  raw: string          // Conteúdo original
-  processed: string    // Conteúdo processado para a IA
-  embeddings?: number[] // Vetores para busca semântica
+  id: string
+  knowledge_base_id: string
+  type: ContentType
+  content: string
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
 }
 
 export interface KnowledgeBaseMetadata {
+  id: string
+  knowledge_base_id: string
   source: string
-  lastUpdated: string
   version: string
-  author: string
   tags: string[]
+  created_at: string
+  updated_at: string
 }
 
 export interface TrainingMetrics {
+  total_tokens: number
+  training_time: number
   accuracy: number
-  coverage: number
-  confidence: number
+  error_rate: number
 }
 
 export interface TrainingInfo {
+  id: string
+  knowledge_base_id: string
   status: TrainingStatus
-  lastTrainedAt?: string
-  error?: string
-  metrics?: TrainingMetrics
+  started_at: string
+  completed_at: string | null
+  error: string | null
+  metrics: TrainingMetrics
+  created_at: string
+  updated_at: string
 }
 
 export interface KnowledgeBaseSettings {
-  priority: number     // Prioridade no matching
-  threshold: number    // Limiar de confiança
-  contextWindow: number // Tamanho do contexto
+  language: string
+  maxTokens: number
+  temperature: number
+  status: KnowledgeBaseStatus
 }
 
 export interface UsageMetrics {
-  timesUsed: number
-  lastUsedAt: string
-  averageConfidence: number
-  feedbackScore: number
+  id: string
+  knowledge_base_id: string
+  totalQueries: number
+  averageLatency: number
+  errorRate: number
+  created_at: string
+  updated_at: string
 }
 
 export interface KnowledgeBase {
@@ -59,15 +65,26 @@ export interface KnowledgeBase {
   name: string
   description: string
   type: ContentType
-  content: KnowledgeBaseContent
+  content: KnowledgeBaseContent[]
   metadata: KnowledgeBaseMetadata
-  training: TrainingInfo
   settings: KnowledgeBaseSettings
+  training: TrainingInfo
   usage: UsageMetrics
   createdAt: string
   updatedAt: string
-  createdBy: string
 }
+
+export const knowledgeBaseSchema = z.object({
+  name: z.string().min(3, 'O nome deve ter no mínimo 3 caracteres'),
+  description: z.string().min(10, 'A descrição deve ter no mínimo 10 caracteres'),
+  type: z.enum(['pdf', 'text', 'qa', 'flow', 'script', 'api', 'rules']),
+  settings: z.object({
+    language: z.enum(['pt-BR', 'en-US', 'es']),
+    maxTokens: z.number().min(1).max(4096),
+    temperature: z.number().min(0).max(2),
+    status: z.enum(['active', 'inactive', 'draft']),
+  }),
+})
 
 export interface CreateKnowledgeBaseFormData {
   name: string

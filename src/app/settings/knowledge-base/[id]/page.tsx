@@ -12,6 +12,11 @@ interface EditKnowledgeBasePageProps {
   }
 }
 
+export const metadata = {
+  title: 'Editar Base de Conhecimento',
+  description: 'Edite uma base de conhecimento existente.',
+}
+
 export default function EditKnowledgeBasePage({
   params,
 }: EditKnowledgeBasePageProps) {
@@ -51,7 +56,7 @@ export default function EditKnowledgeBasePage({
             Editar Base de Conhecimento
           </h1>
           <p className="text-muted-foreground">
-            Edite as informações da base de conhecimento.
+            Edite uma base de conhecimento existente.
           </p>
         </div>
       </div>

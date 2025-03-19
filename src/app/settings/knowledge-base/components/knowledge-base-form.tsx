@@ -1,388 +1,224 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { X } from 'lucide-react'
-import { createKnowledgeBaseSchema } from '../schemas'
-import type { CreateKnowledgeBaseFormData, KnowledgeBase } from '../types'
-import { useCreateKnowledgeBase, useUpdateKnowledgeBase } from '../hooks/use-knowledge-base'
-import { useRouter } from 'next/navigation'
-
-const contentTypeOptions = [
-  { value: 'pdf', label: 'PDF' },
-  { value: 'text', label: 'Texto' },
-  { value: 'qa', label: 'Perguntas e Respostas' },
-  { value: 'flow', label: 'Fluxo de Conversa' },
-  { value: 'script', label: 'Script' },
-  { value: 'api', label: 'API' },
-  { value: 'rules', label: 'Regras' },
-]
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useKnowledgeBase } from '../hooks/use-knowledge-base'
+import { KnowledgeBase, knowledgeBaseSchema } from '../types'
+import { Loader2 } from 'lucide-react'
 
 interface KnowledgeBaseFormProps {
-  knowledgeBase?: KnowledgeBase
+  id?: string
+  onSuccess?: () => void
 }
 
-export function KnowledgeBaseForm({ knowledgeBase }: KnowledgeBaseFormProps) {
-  const router = useRouter()
-  const { mutateAsync: createKnowledgeBaseMutation, isPending: isCreating } =
-    useCreateKnowledgeBase()
-  const { mutateAsync: updateKnowledgeBaseMutation, isPending: isUpdating } =
-    useUpdateKnowledgeBase()
+export function KnowledgeBaseForm({ id, onSuccess }: KnowledgeBaseFormProps) {
+  const { knowledgeBase, create, update, isCreating, isUpdating } = useKnowledgeBase(id)
 
-  const form = useForm<CreateKnowledgeBaseFormData>({
-    resolver: zodResolver(createKnowledgeBaseSchema),
-    defaultValues: knowledgeBase
-      ? {
-          name: knowledgeBase.name,
-          description: knowledgeBase.description,
-          type: knowledgeBase.type,
-          content: {
-            raw: knowledgeBase.content.raw,
-          },
-          metadata: knowledgeBase.metadata,
-          settings: knowledgeBase.settings,
-        }
-      : {
-          name: '',
-          description: '',
-          type: 'text',
-          content: {
-            raw: '',
-          },
-          metadata: {
-            source: '',
-            version: '1.0.0',
-            tags: [],
-          },
-          settings: {
-            priority: 50,
-            threshold: 0.7,
-            contextWindow: 1000,
-          },
-        },
+  const form = useForm<KnowledgeBase>({
+    resolver: zodResolver(knowledgeBaseSchema),
+    defaultValues: knowledgeBase || {
+      name: '',
+      description: '',
+      status: 'active',
+      type: 'qa',
+      settings: {
+        language: 'pt-BR',
+        maxTokens: 2048,
+        temperature: 0.7,
+      },
+    },
   })
 
-  const { watch, setValue } = form
-  const tags = watch('metadata.tags')
-  const type = watch('type')
-
-  async function handleSubmit(data: CreateKnowledgeBaseFormData) {
+  async function onSubmit(data: KnowledgeBase) {
     try {
-      if (knowledgeBase) {
-        await updateKnowledgeBaseMutation({
-          id: knowledgeBase.id,
-          ...data,
-        })
+      if (id) {
+        await update({ id, data })
       } else {
-        await createKnowledgeBaseMutation(data)
+        await create(data)
       }
-
-      router.push('/settings/knowledge-base')
+      onSuccess?.()
     } catch (error) {
-      console.error(error)
+      console.error('Erro ao salvar base de conhecimento:', error)
     }
   }
 
-  function handleAddTag(tag: string) {
-    if (!tag) return
-    if (tags.includes(tag)) return
-    if (tags.length >= 10) return
-
-    setValue('metadata.tags', [...tags, tag])
-  }
-
-  function handleRemoveTag(tag: string) {
-    setValue(
-      'metadata.tags',
-      tags.filter((t) => t !== tag)
-    )
-  }
+  const isLoading = isCreating || isUpdating
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome da base de conhecimento" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card>
+      <CardHeader>
+        <CardTitle>{id ? 'Editar' : 'Nova'} Base de Conhecimento</CardTitle>
+        <CardDescription>
+          Configure os detalhes da base de conhecimento para treinar a IA.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: FAQ Geral" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descrição da base de conhecimento"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descreva o propósito desta base de conhecimento"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {contentTypeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="qa">Perguntas e Respostas</SelectItem>
+                        <SelectItem value="flow">Fluxo de Conversa</SelectItem>
+                        <SelectItem value="script">Script de Atendimento</SelectItem>
+                        <SelectItem value="api">Documentação de API</SelectItem>
+                        <SelectItem value="rules">Regras de Negócio</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        {type === 'text' && (
-          <FormField
-            control={form.control}
-            name="content.raw"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Conteúdo</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Digite o conteúdo"
-                    className="min-h-[200px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="inactive">Inativo</SelectItem>
+                        <SelectItem value="draft">Rascunho</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        {type === 'pdf' && (
-          <FormField
-            control={form.control}
-            name="content.file"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>Arquivo PDF</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) onChange(file)
-                    }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="settings.language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Idioma</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o idioma" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="pt-BR">Português (BR)</SelectItem>
+                        <SelectItem value="en-US">English (US)</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          control={form.control}
-          name="metadata.source"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fonte</FormLabel>
-              <FormControl>
-                <Input placeholder="Fonte do conteúdo" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <FormField
+                control={form.control}
+                name="settings.maxTokens"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Máximo de Tokens</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={1} max={4096} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          control={form.control}
-          name="metadata.version"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Versão</FormLabel>
-              <FormControl>
-                <Input placeholder="Versão do conteúdo" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <FormField
+                control={form.control}
+                name="settings.temperature"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Temperatura</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={2}
+                        step={0.1}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <FormField
-          control={form.control}
-          name="metadata.tags"
-          render={() => (
-            <FormItem>
-              <FormLabel>Tags</FormLabel>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Adicionar tag"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        handleAddTag(e.currentTarget.value)
-                        e.currentTarget.value = ''
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={(e) => {
-                      const input = e.currentTarget
-                        .previousElementSibling as HTMLInputElement
-                      handleAddTag(input.value)
-                      input.value = ''
-                    }}
-                  >
-                    Adicionar
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 ml-1"
-                        onClick={() => handleRemoveTag(tag)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-                <FormMessage />
-              </div>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="settings.priority"
-          render={({ field: { value, onChange } }) => (
-            <FormItem>
-              <FormLabel>Prioridade</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[value]}
-                    onValueChange={([value]) => onChange(value)}
-                  />
-                  <span className="w-12 text-right">{value}</span>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="settings.threshold"
-          render={({ field: { value, onChange } }) => (
-            <FormItem>
-              <FormLabel>Limiar de Confiança</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    value={[value]}
-                    onValueChange={([value]) => onChange(value)}
-                  />
-                  <span className="w-12 text-right">{value}</span>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="settings.contextWindow"
-          render={({ field: { value, onChange } }) => (
-            <FormItem>
-              <FormLabel>Janela de Contexto</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    min={100}
-                    max={2000}
-                    step={100}
-                    value={[value]}
-                    onValueChange={([value]) => onChange(value)}
-                  />
-                  <span className="w-12 text-right">{value}</span>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={isCreating || isUpdating}
-          >
-            {knowledgeBase ? 'Atualizar' : 'Criar'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {id ? 'Atualizar' : 'Criar'} Base de Conhecimento
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   )
 } 

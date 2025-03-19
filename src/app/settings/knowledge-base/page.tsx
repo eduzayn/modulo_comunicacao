@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { KnowledgeBaseList } from './components/knowledge-base-list'
 
+export const metadata = {
+  title: 'Base de Conhecimento',
+  description: 'Gerencie suas bases de conhecimento para treinar a IA.',
+}
+
 export default function KnowledgeBasePage() {
   const router = useRouter()
 
@@ -16,7 +21,7 @@ export default function KnowledgeBasePage() {
             Base de Conhecimento
           </h1>
           <p className="text-muted-foreground">
-            Gerencie o conteúdo que será utilizado pelo assistente virtual.
+            Gerencie suas bases de conhecimento para treinar a IA.
           </p>
         </div>
 
