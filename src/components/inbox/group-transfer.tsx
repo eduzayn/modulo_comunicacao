@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getGroups, moveToGroup } from '@/services/inbox'
+import { Group } from '@/types/inbox'
 import { 
   Users,
   Laptop,
@@ -14,68 +18,50 @@ import {
   HelpCircle,
   Wallet,
   Timer,
-  Scroll
+  Scroll,
+  Loader2
 } from 'lucide-react'
 
-const groups = [
-  {
-    id: 'sem-grupo',
-    name: 'Sem grupo',
-    icon: Users
-  },
-  {
-    id: 'plataforma-unicv',
-    name: 'PLATAFORMA UNICV',
-    icon: Laptop
-  },
-  {
-    id: 'desqualificados',
-    name: 'DESQUALIFICADOS',
-    icon: UserX
-  },
-  {
-    id: 'secretaria-musica',
-    name: 'SECRETÁRIA DE MÚSICA',
-    icon: Music
-  },
-  {
-    id: 'primeira-graduacao',
-    name: 'PRIMEIRA GRADUAÇÃO UNICV',
-    icon: GraduationCap
-  },
-  {
-    id: 'analise-certificacao',
-    name: 'ANÁLISE CERTIFICAÇÃO',
-    icon: Award
-  },
-  {
-    id: 'certificacao-andamento',
-    name: 'CERTIFICAÇÃO EM ANDAMENTO',
-    icon: Clock
-  },
-  {
-    id: 'suporte',
-    name: 'SUPORTE',
-    icon: HelpCircle
-  },
-  {
-    id: 'financeiro',
-    name: 'FINANCEIRO',
-    icon: Wallet
-  },
-  {
-    id: 'apressamentos',
-    name: 'APRESSAMENTOS',
-    icon: Timer
-  },
-  {
-    id: 'aguardando-diploma',
-    name: 'AGUARDANDO DIPLOMA',
-    icon: Scroll
-  }
-]
+const iconMap = {
+  Users,
+  Laptop,
+  UserX,
+  Music,
+  GraduationCap,
+  Award,
+  Clock,
+  HelpCircle,
+  Wallet,
+  Timer,
+  Scroll
+}
 
-export function GroupTransfer() {
+interface GroupTransferProps {
+  conversationId: string
+  onSuccess?: () => void
+}
+
+export function GroupTransfer({ conversationId, onSuccess }: GroupTransferProps) {
+  const [search, setSearch] = useState('')
+  const queryClient = useQueryClient()
+
+  const { data: groups = [], isLoading } = useQuery({
+    queryKey: ['groups'],
+    queryFn: getGroups
+  })
+
+  const { mutate: handleMoveToGroup, isPending } = useMutation({
+    mutationFn: (groupId: string) => moveToGroup(conversationId, groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      onSuccess?.()
+    }
+  })
+
+  const filteredGroups = groups.filter(group => 
+    group.name.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <div className="w-full max-w-sm">
       <div className="space-y-4">
@@ -87,20 +73,32 @@ export function GroupTransfer() {
           type="search"
           placeholder="Pesquisar"
           className="h-9"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         <ScrollArea className="h-[400px]">
           <div className="space-y-1">
-            {groups.map((group) => (
-              <Button
-                key={group.id}
-                variant="ghost"
-                className="w-full justify-start gap-2 h-12"
-              >
-                <group.icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{group.name}</span>
-              </Button>
-            ))}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredGroups.map((group) => {
+              const Icon = iconMap[group.icon as keyof typeof iconMap] || Users
+
+              return (
+                <Button
+                  key={group.id}
+                  variant="ghost"
+                  className="w-full justify-start gap-2 h-12"
+                  onClick={() => handleMoveToGroup(group.id)}
+                  disabled={isPending}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{group.name}</span>
+                </Button>
+              )
+            })}
           </div>
         </ScrollArea>
       </div>
