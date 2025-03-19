@@ -11,8 +11,8 @@
  */
 import React from 'react';
 import { useTemplate } from '@/hooks/use-template';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 /**
  * Template detail page component

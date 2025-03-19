@@ -8,7 +8,7 @@
  * @created 2025-03-14
  */
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 
 // Define colors for the design system
 const colors = {

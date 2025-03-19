@@ -3,7 +3,7 @@
 import React from 'react';
 import { MessageList } from './message-list';
 import { MessageInput } from './message-input';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { Message } from '@/types/conversations';
 
 interface ChatProps {

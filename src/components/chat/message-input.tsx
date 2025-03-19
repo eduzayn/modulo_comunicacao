@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, FormEvent } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SendIcon, PaperclipIcon, MicIcon } from 'lucide-react';
 import { EmojiPicker } from '@/components/ui/emoji-picker';

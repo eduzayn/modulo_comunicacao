@@ -1,8 +1,8 @@
 'use client';
 
 import { useTemplates } from '@/hooks/use-templates';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 
 export default function TemplatesPage() {
