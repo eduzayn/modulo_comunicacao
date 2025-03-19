@@ -25,6 +25,25 @@ export interface Chat {
   tags: string[]
   status: 'active' | 'archived'
   lastMessage?: Message
+  assignedTo?: {
+    type: 'agent' | 'group'
+    id: string
+    name: string
+  }
+  transferHistory?: {
+    timestamp: Date
+    from: {
+      type: 'agent' | 'group'
+      id: string
+      name: string
+    }
+    to: {
+      type: 'agent' | 'group'
+      id: string
+      name: string
+    }
+    reason?: string
+  }[]
 }
 
 export interface Conversation {
@@ -166,4 +185,17 @@ export function simulateResponse(message: string): Message {
     type: 'text',
     status: 'sent'
   }
-} 
+}
+
+// Mock de agentes e grupos
+export const mockAgents = [
+  { id: '1', name: 'Carlos Silva', status: 'online' },
+  { id: '2', name: 'Ana Santos', status: 'offline' },
+  { id: '3', name: 'Pedro Oliveira', status: 'online' }
+]
+
+export const mockGroups = [
+  { id: '1', name: 'Suporte Geral', members: ['1', '2'] },
+  { id: '2', name: 'Secretaria de Música', members: ['2', '3'] },
+  { id: '3', name: 'Financeiro', members: ['1', '3'] }
+] 

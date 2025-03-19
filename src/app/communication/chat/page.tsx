@@ -270,99 +270,99 @@ export default function ChatPage() {
 
   // Funções para manipulação de mensagens
   const handleSimplifyMessage = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Versão simplificada de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Versão simplificada:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleRewriteMessage = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Versão reescrita de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Versão reescrita:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleExpandMessage = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Versão expandida de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Versão expandida:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleExplainMessage = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Explicação de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Explicação:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleCorrectGrammar = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Versão corrigida de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Correção gramatical:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleTranslateToEnglish = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `English translation of: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `English translation:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleTranslateToSpanish = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Traducción al español de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Traducción al español:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleChangeTone = (message: Message) => {
-    const newMessage: Message = {
-      id: String(messages.length + 1),
-      content: `Versão amigável de: "${message.content}"`,
+    const response: Message = {
+      id: String(Date.now()),
+      content: `Tom amigável:\n${message.content}`,
       sender: 'Assistente',
       timestamp: new Date(),
       type: 'text',
       status: 'sent'
-    };
-    setMessages(prev => [...prev, newMessage]);
+    }
+    setMessages(prev => [...prev, response])
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -807,47 +807,92 @@ export default function ChatPage() {
             {/* Painel de Detalhes do Contato */}
             {activeChat && showContactDetails && (
               <div className="hidden md:flex w-80 border-l bg-card">
-                <div className="flex flex-col w-full p-4">
-                  <div className="flex flex-col items-center gap-4">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
-                      <AvatarFallback>{getInitials(activeChat.contactName)}</AvatarFallback>
-                    </Avatar>
-                    <div className="text-center">
-                      <h3 className="font-medium">{activeChat.contactName}</h3>
-                      <p className="text-sm text-muted-foreground">{activeChat.contactEmail}</p>
-                      <p className="text-sm text-muted-foreground">{activeChat.contactPhone}</p>
-                    </div>
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Tags</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {activeChat.tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary">{tag}</Badge>
-                        ))}
+                <ScrollArea className="flex-1">
+                  <div className="flex flex-col w-full p-4">
+                    <div className="flex flex-col items-center gap-4">
+                      <Avatar className="h-24 w-24">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
+                        <AvatarFallback>{getInitials(activeChat.contactName)}</AvatarFallback>
+                      </Avatar>
+                      <div className="text-center">
+                        <h3 className="font-medium">{activeChat.contactName}</h3>
+                        <p className="text-sm text-muted-foreground">{activeChat.contactEmail}</p>
+                        <p className="text-sm text-muted-foreground">{activeChat.contactPhone}</p>
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">Status</h4>
-                      <Badge variant={activeChat.status === 'active' ? 'default' : 'secondary'}>
-                        {activeChat.status === 'active' ? 'Ativo' : 'Arquivado'}
-                      </Badge>
-                    </div>
+                    <Separator className="my-4" />
 
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setShowEditDialog(true)}
-                    >
-                      Editar Contato
-                    </Button>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Responsável</h4>
+                        {activeChat.assignedTo ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">
+                              {activeChat.assignedTo.type === 'agent' ? 'Agente' : 'Grupo'}
+                            </Badge>
+                            <span className="text-sm">{activeChat.assignedTo.name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Não atribuído</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Tags</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {activeChat.tags.map((tag, index) => (
+                            <Badge key={index} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Status</h4>
+                        <Badge variant={activeChat.status === 'active' ? 'default' : 'secondary'}>
+                          {activeChat.status === 'active' ? 'Ativo' : 'Arquivado'}
+                        </Badge>
+                      </div>
+
+                      {activeChat.transferHistory && activeChat.transferHistory.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Histórico de Transferências</h4>
+                          <div className="space-y-2">
+                            {activeChat.transferHistory.map((transfer, index) => (
+                              <div key={index} className="text-sm border rounded-lg p-2">
+                                <div className="flex items-center gap-2">
+                                  <Forward className="h-4 w-4" />
+                                  <span className="font-medium">De: {transfer.from.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2 ml-6">
+                                  <span className="font-medium">Para: {transfer.to.name}</span>
+                                </div>
+                                <div className="ml-6 mt-1">
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatTime(transfer.timestamp)}
+                                  </span>
+                                  {transfer.reason && (
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      Motivo: {transfer.reason}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowEditDialog(true)}
+                      >
+                        Editar Contato
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </ScrollArea>
               </div>
             )}
 
