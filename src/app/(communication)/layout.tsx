@@ -4,11 +4,13 @@ import { ReactNode } from 'react'
 export default function CommunicationLayout({
   children,
 }: {
-  children: ReactNode
+  children: React.ReactNode
 }) {
   return (
-    <BaseLayout module="communication">
-      {children}
-    </BaseLayout>
+    <div className="container mx-auto py-8">
+      <div className="grid gap-8">
+        {children}
+      </div>
+    </div>
   )
 }
