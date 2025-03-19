@@ -92,11 +92,19 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showContactDetails, setShowContactDetails] = useState(true)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showNewContactDialog, setShowNewContactDialog] = useState(false)
   const [editingContact, setEditingContact] = useState({
     name: '',
     email: '',
     phone: '',
     type: ''
+  })
+  const [newContact, setNewContact] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    type: '',
+    message: ''
   })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -152,19 +160,55 @@ export default function ChatPage() {
   }
 
   const handleNewChat = () => {
+    setShowNewContactDialog(true)
+  }
+
+  const handleCreateNewContact = () => {
+    if (!newContact.name || !newContact.type) return
+
     const newChat: Chat = {
       id: String(Date.now()),
-      contactName: 'Novo Contato',
-      contactEmail: 'novo@email.com',
-      contactPhone: '(00) 00000-0000',
-      contactType: 'Prospect',
+      contactName: newContact.name,
+      contactEmail: newContact.email,
+      contactPhone: newContact.phone,
+      contactType: newContact.type,
       unreadCount: 0,
       tags: ['novo'],
       status: 'active'
     }
+
     setChats(prev => [newChat, ...prev])
     setActiveChat(newChat)
     setMessages([])
+    setShowNewContactDialog(false)
+
+    // Se houver mensagem inicial, enviar
+    if (newContact.message) {
+      const initialMessage: Message = {
+        id: String(Date.now()),
+        content: newContact.message,
+        sender: 'Você',
+        timestamp: new Date(),
+        type: 'text',
+        status: 'sent'
+      }
+      setMessages([initialMessage])
+
+      // Simular resposta após 1 segundo
+      setTimeout(() => {
+        const response = simulateResponse(newContact.message)
+        setMessages(prev => [...prev, response])
+      }, 1000)
+    }
+
+    // Limpar o formulário
+    setNewContact({
+      name: '',
+      email: '',
+      phone: '',
+      type: '',
+      message: ''
+    })
   }
 
   const handleEditContact = () => {
@@ -570,6 +614,87 @@ export default function ChatPage() {
                   Cancelar
                 </Button>
                 <Button onClick={handleEditContact}>Salvar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Diálogo de Novo Contato */}
+          <Dialog open={showNewContactDialog} onOpenChange={setShowNewContactDialog}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Nova Conversa</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome do Contato</Label>
+                  <Input
+                    id="name"
+                    placeholder="Digite o nome do contato"
+                    value={newContact.name}
+                    onChange={(e) =>
+                      setNewContact({ ...newContact, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Digite o email do contato"
+                    value={newContact.email}
+                    onChange={(e) =>
+                      setNewContact({ ...newContact, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    placeholder="Digite o telefone do contato"
+                    value={newContact.phone}
+                    onChange={(e) =>
+                      setNewContact({ ...newContact, phone: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="type">Tipo de Contato</Label>
+                  <Select
+                    value={newContact.type}
+                    onValueChange={(value) =>
+                      setNewContact({ ...newContact, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de contato" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Aluno">Aluno</SelectItem>
+                      <SelectItem value="Prospect">Prospect</SelectItem>
+                      <SelectItem value="Ex-Aluno">Ex-Aluno</SelectItem>
+                      <SelectItem value="Parceiro">Parceiro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Mensagem Inicial (opcional)</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Digite uma mensagem inicial..."
+                    value={newContact.message}
+                    onChange={(e) =>
+                      setNewContact({ ...newContact, message: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowNewContactDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleCreateNewContact}>Criar Conversa</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
