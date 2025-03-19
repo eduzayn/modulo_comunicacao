@@ -144,4 +144,80 @@ export async function deleteAutomation(automationId: string): Promise<void> {
   if (error) {
     throw new Error('Erro ao excluir automação')
   }
+}
+
+export interface WorkflowStep {
+  action: string
+  target: string
+}
+
+export interface Workflow {
+  id: string
+  name: string
+  trigger: string
+  steps: WorkflowStep[]
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateWorkflowData {
+  name: string
+  trigger: string
+  steps: WorkflowStep[]
+}
+
+export async function createWorkflow(data: CreateWorkflowData): Promise<Workflow> {
+  const { data: workflow, error } = await supabase
+    .from('workflows')
+    .insert([
+      {
+        name: data.name,
+        trigger: data.trigger,
+        steps: data.steps
+      }
+    ])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar cenário')
+  }
+
+  return workflow
+}
+
+export async function getWorkflows(): Promise<Workflow[]> {
+  const { data: workflows, error } = await supabase
+    .from('workflows')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar cenários')
+  }
+
+  return workflows
+}
+
+export async function toggleWorkflow(workflowId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('workflows')
+    .update({ enabled })
+    .eq('id', workflowId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar cenário')
+  }
+}
+
+export async function deleteWorkflow(workflowId: string): Promise<void> {
+  const { error } = await supabase
+    .from('workflows')
+    .delete()
+    .eq('id', workflowId)
+
+  if (error) {
+    throw new Error('Erro ao excluir cenário')
+  }
 } 
