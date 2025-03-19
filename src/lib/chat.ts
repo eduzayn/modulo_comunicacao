@@ -3,11 +3,11 @@ import { ptBR } from 'date-fns/locale'
 
 export interface Message {
   id: string
+  role: 'user' | 'assistant'
   content: string
-  sender: string
   timestamp: Date
+  status: 'sent' | 'delivered' | 'read'
   type: 'text' | 'audio' | 'file'
-  status?: 'sent' | 'delivered' | 'read'
   duration?: string // para áudios
   fileName?: string // para arquivos
 }
@@ -18,33 +18,10 @@ export interface Chat {
   contactEmail: string
   contactPhone: string
   contactType: string
+  lastMessage?: Message
   unreadCount: number
   tags: string[]
   status: 'active' | 'archived'
-  lastMessage?: Message
-}
-
-export interface Conversation {
-  id: string
-  title: string
-  created_at: string
-  updated_at: string
-  user_id: string
-  status: 'active' | 'archived'
-  context?: string
-  metadata?: {
-    topic?: string
-    course?: string
-    student?: string
-    lead?: string
-  }
-}
-
-export interface ChatState {
-  messages: Message[]
-  conversation: Conversation | null
-  isLoading: boolean
-  error: string | null
 }
 
 export function getInitials(name: string) {
@@ -79,11 +56,11 @@ export function generateMockChats(): Chat[] {
       status: 'active',
       lastMessage: {
         id: '1',
+        role: 'assistant',
         content: 'Olá! Como posso ajudar?',
-        sender: 'Maria Silva',
         timestamp: new Date(),
-        type: 'text',
-        status: 'read'
+        status: 'read',
+        type: 'text'
       }
     },
     {
@@ -97,11 +74,29 @@ export function generateMockChats(): Chat[] {
       status: 'active',
       lastMessage: {
         id: '2',
+        role: 'user',
         content: 'Gostaria de saber mais sobre os cursos',
-        sender: 'João Santos',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        type: 'text',
-        status: 'read'
+        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 dia atrás
+        status: 'read',
+        type: 'text'
+      }
+    },
+    {
+      id: '3',
+      contactName: 'Ana Oliveira',
+      contactEmail: 'ana@exemplo.com',
+      contactPhone: '(11) 94567-8901',
+      contactType: 'Aluno',
+      unreadCount: 1,
+      tags: ['Financeiro', 'Urgente'],
+      status: 'active',
+      lastMessage: {
+        id: '3',
+        role: 'user',
+        content: 'Preciso de ajuda com o pagamento',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 horas atrás
+        status: 'delivered',
+        type: 'text'
       }
     }
   ]
@@ -115,30 +110,57 @@ export function generateMockMessages(chatId: string): Message[] {
       return [
         {
           id: '1',
+          role: 'assistant',
           content: 'Olá! Como posso ajudar?',
-          sender: 'Maria Silva',
           timestamp: new Date(baseDate.getTime() - 30 * 60000),
-          type: 'text',
-          status: 'read'
+          status: 'read',
+          type: 'text'
         },
         {
           id: '2',
+          role: 'user',
           content: 'Preciso de informações sobre matrícula',
-          sender: 'Você',
           timestamp: new Date(baseDate.getTime() - 25 * 60000),
-          type: 'text',
-          status: 'read'
+          status: 'read',
+          type: 'text'
+        },
+        {
+          id: '3',
+          role: 'assistant',
+          content: 'Claro! Vou te explicar o processo de matrícula. Primeiro, você precisa...',
+          timestamp: new Date(baseDate.getTime() - 20 * 60000),
+          status: 'read',
+          type: 'text'
         }
       ]
     case '2':
       return [
         {
           id: '1',
+          role: 'user',
           content: 'Gostaria de saber mais sobre os cursos',
-          sender: 'João Santos',
           timestamp: new Date(baseDate.getTime() - 24 * 60 * 60 * 1000),
-          type: 'text',
-          status: 'read'
+          status: 'read',
+          type: 'text'
+        },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'Temos vários cursos disponíveis. Qual área te interessa?',
+          timestamp: new Date(baseDate.getTime() - 23 * 60 * 60 * 1000),
+          status: 'read',
+          type: 'text'
+        }
+      ]
+    case '3':
+      return [
+        {
+          id: '1',
+          role: 'user',
+          content: 'Preciso de ajuda com o pagamento',
+          timestamp: new Date(baseDate.getTime() - 2 * 60 * 60 * 1000),
+          status: 'delivered',
+          type: 'text'
         }
       ]
     default:
@@ -157,10 +179,10 @@ export function simulateResponse(message: string): Message {
 
   return {
     id: Math.random().toString(36).substring(7),
+    role: 'assistant',
     content: responses[Math.floor(Math.random() * responses.length)],
-    sender: 'Assistente',
     timestamp: new Date(),
-    type: 'text',
-    status: 'sent'
+    status: 'sent',
+    type: 'text'
   }
 } 

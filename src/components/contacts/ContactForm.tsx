@@ -1,36 +1,50 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const contactTypes = [
+  { value: 'Aluno', label: 'Aluno' },
+  { value: 'Professor', label: 'Professor' },
+  { value: 'Parceiro', label: 'Parceiro' },
+  { value: 'Outro', label: 'Outro' }
+] as const;
 
 const contactSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   email: z.string().email('Email inválido'),
-  phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
-  type: z.enum(['Aluno', 'Professor', 'Parceiro', 'Outro']),
+  phone: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone deve estar no formato (99) 99999-9999'),
+  type: z.enum(['Aluno', 'Professor', 'Parceiro', 'Outro'], {
+    required_error: 'Selecione um tipo de contato',
+  }),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
 interface ContactFormProps {
-  initialData?: ContactFormData;
   onSubmit: (data: ContactFormData) => void;
-  onCancel: () => void;
+  initialData?: ContactFormData;
 }
 
-export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProps) {
+export function ContactForm({ onSubmit, initialData }: ContactFormProps) {
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: initialData || {
-      name: '',
-      email: '',
-      phone: '',
-      type: 'Aluno',
+    defaultValues: {
+      name: initialData?.name || '',
+      email: initialData?.email || '',
+      phone: initialData?.phone || '',
+      type: initialData?.type || 'Aluno',
     },
   });
 
@@ -44,7 +58,7 @@ export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProp
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Nome completo" {...field} />
+                <Input {...field} data-testid="contact-name-input" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -58,7 +72,7 @@ export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProp
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="email@exemplo.com" {...field} />
+                <Input {...field} type="email" data-testid="contact-email-input" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,7 +86,19 @@ export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProp
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input placeholder="(00) 00000-0000" {...field} />
+                <Input
+                  {...field}
+                  placeholder="(99) 99999-9999"
+                  data-testid="contact-phone-input"
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    value = value.replace(/\D/g, '');
+                    if (value.length <= 11) {
+                      value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                    }
+                    field.onChange(value);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,14 +111,23 @@ export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProp
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo</FormLabel>
-              <Select
-                onValueChange={field.onChange}
+              <Select 
+                onValueChange={field.onChange} 
                 defaultValue={field.value}
+                value={field.value}
               >
-                <option value="Aluno">Aluno</option>
-                <option value="Professor">Professor</option>
-                <option value="Parceiro">Parceiro</option>
-                <option value="Outro">Outro</option>
+                <FormControl>
+                  <SelectTrigger className="w-full" data-testid="contact-type-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {contactTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
@@ -100,11 +135,8 @@ export function ContactForm({ initialData, onSubmit, onCancel }: ContactFormProp
         />
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit">
-            {initialData ? 'Salvar' : 'Adicionar'}
+          <Button type="submit" data-testid="contact-submit-button">
+            Salvar
           </Button>
         </div>
       </form>

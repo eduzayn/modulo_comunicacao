@@ -1,266 +1,580 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BaseLayout } from '@/components/layout/BaseLayout'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Menu, Send, Archive, Plus } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Menu,
+  Send,
+  Archive,
+  Plus,
+  MessageSquare,
+  Home,
+  Paperclip,
+  Mic,
+  MoreVertical,
+  ChevronDown,
+  Phone,
+  Forward,
+  Reply,
+  PlayCircle,
+  Copy,
+  Trash
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from '@/components/ui/tooltip'
+import { 
+  Chat, 
+  Message,
+  getInitials,
+  formatMessagePreview,
+  formatTime,
+  generateMockChats,
+  generateMockMessages,
+  simulateResponse
+} from '@/types/chat'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from "@/components/ui/separator"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-interface Chat {
-  id: string
-  title: string
-  messages: Message[]
-  archived: boolean
-}
-
-const mockResponses = [
-  'Olá! Como posso ajudar?',
-  'Entendi sua pergunta. Vou pesquisar e responder.',
-  'Claro, posso ajudar com isso.',
-  'Poderia fornecer mais detalhes?'
+const menuItems = [
+  { title: 'Início', href: '/communication', icon: <Home className="h-4 w-4" /> },
+  { title: 'Chat', href: '/communication/chat', icon: <MessageSquare className="h-4 w-4" /> }
 ]
 
 export default function ChatPage() {
-  const [chats, setChats] = useState<Chat[]>([])
+  const [chats, setChats] = useState<Chat[]>(generateMockChats())
   const [activeChat, setActiveChat] = useState<Chat | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showContactDetails, setShowContactDetails] = useState(true)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingContact, setEditingContact] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    type: ''
+  })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    // Fecha o menu mobile quando selecionar um chat
+    // Simular carregamento inicial
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
     if (activeChat) {
-      setIsMobileMenuOpen(false)
+      setMessages(generateMockMessages(activeChat.id))
+      setEditingContact({
+        name: activeChat.contactName,
+        email: activeChat.contactEmail,
+        phone: activeChat.contactPhone,
+        type: activeChat.contactType
+      })
     }
   }, [activeChat])
 
-  const handleNewChat = () => {
-    const newChat: Chat = {
-      id: Math.random().toString(36).substring(7),
-      title: 'Nova Conversa',
-      messages: [],
-      archived: false
-    }
-    setChats([...chats, newChat])
-    setActiveChat(newChat)
-    setError(null)
-    setIsMobileMenuOpen(false)
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handleSendMessage = async () => {
-    if (!activeChat) {
-      setError('Nenhuma conversa ativa')
-      return
-    }
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
-    if (!message.trim()) return
+  const handleSendMessage = () => {
+    if (!message.trim() || !activeChat) return
 
-    setIsLoading(true)
     const newMessage: Message = {
-      id: Math.random().toString(36).substring(7),
-      role: 'user',
-      content: message.trim(),
-      timestamp: new Date()
+      id: String(Date.now()),
+      content: message,
+      sender: 'Você',
+      timestamp: new Date(),
+      type: 'text',
+      status: 'sent'
     }
 
-    const updatedChat = {
-      ...activeChat,
-      messages: [...activeChat.messages, newMessage]
-    }
-
-    setChats(chats.map(chat => 
-      chat.id === activeChat.id ? updatedChat : chat
-    ))
-    setActiveChat(updatedChat)
+    setMessages(prev => [...prev, newMessage])
     setMessage('')
 
-    // Simula resposta da IA
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const aiResponse: Message = {
-        id: Math.random().toString(36).substring(7),
-        role: 'assistant',
-        content: mockResponses[Math.floor(Math.random() * mockResponses.length)],
-        timestamp: new Date()
-      }
+    // Simular resposta após 1 segundo
+    setTimeout(() => {
+      const response = simulateResponse(message)
+      setMessages(prev => [...prev, response])
+    }, 1000)
+  }
 
-      const chatWithResponse = {
-        ...updatedChat,
-        messages: [...updatedChat.messages, aiResponse]
-      }
-
-      setChats(chats.map(chat => 
-        chat.id === activeChat.id ? chatWithResponse : chat
-      ))
-      setActiveChat(chatWithResponse)
-    } catch (err) {
-      setError('Erro ao processar mensagem')
-    } finally {
-      setIsLoading(false)
+  const handleNewChat = () => {
+    const newChat: Chat = {
+      id: String(Date.now()),
+      contactName: 'Novo Contato',
+      contactEmail: 'novo@email.com',
+      contactPhone: '(00) 00000-0000',
+      contactType: 'Prospect',
+      unreadCount: 0,
+      tags: ['novo'],
+      status: 'active'
     }
+    setChats(prev => [newChat, ...prev])
+    setActiveChat(newChat)
+    setMessages([])
   }
 
-  const handleArchiveChat = () => {
-    if (!activeChat) return
-    setIsArchiveDialogOpen(true)
-  }
-
-  const confirmArchive = () => {
+  const handleEditContact = () => {
     if (!activeChat) return
 
-    const updatedChat = {
+    const updatedChat: Chat = {
       ...activeChat,
-      archived: true
+      contactName: editingContact.name,
+      contactEmail: editingContact.email,
+      contactPhone: editingContact.phone,
+      contactType: editingContact.type
     }
 
-    setChats(chats.map(chat => 
-      chat.id === activeChat.id ? updatedChat : chat
-    ))
-    setActiveChat(null)
-    setIsArchiveDialogOpen(false)
+    setChats(prev =>
+      prev.map(chat => (chat.id === activeChat.id ? updatedChat : chat))
+    )
+    setActiveChat(updatedChat)
+    setShowEditDialog(false)
+  }
+
+  // Adicionar função para copiar mensagem
+  const handleCopyMessage = (content: string) => {
+    navigator.clipboard.writeText(content)
+  }
+
+  // Adicionar função para responder mensagem
+  const handleReplyMessage = (message: Message) => {
+    setMessage(`> ${message.content}\n\n`)
+  }
+
+  // Adicionar função para excluir mensagem
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages(messages.filter(msg => msg.id !== messageId))
+  }
+
+  // Componente de carregamento para a lista de conversas
+  function ChatListSkeleton() {
+    return (
+      <div className="space-y-4 p-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Componente de carregamento para as mensagens
+  function MessagesSkeleton() {
+    return (
+      <div className="space-y-4 p-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
-    <BaseLayout module="communication">
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Sidebar */}
-        <div 
-          data-testid="chat-sidebar"
-          className={cn(
-            "w-64 border-r bg-background p-4",
-            "fixed inset-y-0 left-0 z-50 md:relative",
-            "transition-transform duration-200 ease-in-out",
-            !isMobileMenuOpen && "-translate-x-full md:translate-x-0"
-          )}
-        >
-          <Button 
-            onClick={handleNewChat}
-            className="w-full mb-4"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Conversa
-          </Button>
-
-          <ScrollArea className="h-[calc(100vh-8rem)]">
-            {chats.filter(chat => !chat.archived).map(chat => (
-              <Button
-                key={chat.id}
-                variant={chat.id === activeChat?.id ? 'secondary' : 'ghost'}
-                className="w-full justify-start mb-1"
-                onClick={() => setActiveChat(chat)}
-              >
-                {chat.title}
-              </Button>
-            ))}
-          </ScrollArea>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col p-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                name="Menu"
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-              <h2 className="text-2xl font-bold">Chat</h2>
-            </div>
-            {activeChat && (
-              <Button
-                variant="outline"
-                onClick={handleArchiveChat}
-                name="Arquivar Conversa"
-              >
-                <Archive className="h-4 w-4 mr-2" />
-                Arquivar Conversa
-              </Button>
-            )}
+    <BaseLayout module="communication" items={menuItems}>
+      <TooltipProvider>
+        <div className="flex h-[calc(100vh-4rem)]">
+          {/* Lista de Conversas */}
+          <div className="flex md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between p-4">
+                    <h2 className="text-lg font-semibold">Conversas</h2>
+                    <Button onClick={handleNewChat}>Nova Conversa</Button>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    {isLoading ? (
+                      <ChatListSkeleton />
+                    ) : (
+                      chats.map((chat) => (
+                        <div
+                          key={chat.id}
+                          className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer"
+                          onClick={() => {
+                            setActiveChat(chat)
+                            setIsMobileMenuOpen(false)
+                          }}
+                        >
+                          <Avatar>
+                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
+                            <AvatarFallback>{chat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <span className="font-medium">{chat.contactName}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate">Última mensagem...</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </ScrollArea>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
-
-          <Card className="flex-1 p-4 mb-4">
-            <ScrollArea className="h-full">
-              {activeChat?.messages.map(msg => (
-                <div
-                  key={msg.id}
-                  data-testid={`message-${msg.role}`}
-                  className={cn(
-                    "mb-4 p-3 rounded-lg",
-                    msg.role === 'user' ? 'bg-primary/10 ml-auto' : 'bg-muted',
-                    "max-w-[80%]"
-                  )}
-                >
-                  {msg.content}
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex justify-center py-2">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                </div>
+          <div className="w-80 border-r bg-background hidden md:block">
+            <div className="p-4 border-b">
+              <Button onClick={handleNewChat}>Nova Conversa</Button>
+            </div>
+            <ScrollArea className="flex-1">
+              {isLoading ? (
+                <ChatListSkeleton />
+              ) : (
+                chats
+                  .filter(chat => chat.status === 'active')
+                  .map(chat => (
+                    <div
+                      key={chat.id}
+                      className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer"
+                      onClick={() => setActiveChat(chat)}
+                    >
+                      <Avatar>
+                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chat.contactName}`} />
+                        <AvatarFallback>{chat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{chat.contactName}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {chat.lastMessage ? formatTime(chat.lastMessage.timestamp) : ''}
+                          </span>
+                        </div>
+                        {chat.lastMessage && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            {formatMessagePreview(chat.lastMessage.content)}
+                          </p>
+                        )}
+                        <div className="flex gap-2 mt-1">
+                          {chat.tags.map(tag => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      {chat.unreadCount > 0 && (
+                        <Badge className="ml-2">{chat.unreadCount}</Badge>
+                      )}
+                    </div>
+                  ))
               )}
             </ScrollArea>
-          </Card>
-
-          <div className="flex gap-2">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Digite sua mensagem..."
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-              disabled={isLoading}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              disabled={isLoading}
-              name="Enviar"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Enviar
-            </Button>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="mt-2">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-      </div>
+          {/* Área de Mensagens */}
+          {activeChat && (
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
+                    <AvatarFallback>{activeChat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="font-medium">{activeChat.contactName}</h2>
+                    <p className="text-sm text-muted-foreground">{activeChat.contactType}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowContactDetails(!showContactDetails)}>
+                  <Forward className="h-4 w-4" />
+                </Button>
+              </div>
 
-      <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Arquivar Conversa</DialogTitle>
-          </DialogHeader>
-          <p>Tem certeza que deseja arquivar esta conversa?</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsArchiveDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={confirmArchive}>
-              Arquivar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <ScrollArea className="flex-1 p-4">
+                {isLoading ? (
+                  <MessagesSkeleton />
+                ) : (
+                  messages.map((message) => (
+                    <div key={message.id} className="flex items-start gap-3 p-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${message.sender}`} />
+                        <AvatarFallback>{message.sender.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{message.sender}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              {formatTime(message.timestamp)}
+                            </span>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-40" align="end">
+                                <div className="space-y-1">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-start"
+                                    onClick={() => handleCopyMessage(message.content)}
+                                  >
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Copiar
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-start"
+                                    onClick={() => handleReplyMessage(message)}
+                                  >
+                                    <Reply className="mr-2 h-4 w-4" />
+                                    Responder
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-start text-destructive"
+                                    onClick={() => handleDeleteMessage(message.id)}
+                                  >
+                                    <Trash className="mr-2 h-4 w-4" />
+                                    Excluir
+                                  </Button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
+                        <p className="text-sm">{message.content}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </ScrollArea>
+
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
+                  <Textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSendMessage()
+                      }
+                    }}
+                    placeholder="Digite sua mensagem..."
+                    className="min-h-[40px] max-h-[120px]"
+                    style={{ resize: 'none' }}
+                  />
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Paperclip className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Anexar arquivo</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Mic className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Gravar áudio</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Button onClick={handleSendMessage}>Enviar</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Área de Detalhes do Contato */}
+          {activeChat && showContactDetails && (
+            <div className="w-80 border-l bg-background p-4">
+              <div className="flex flex-col items-center gap-4 p-4">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat.contactName}`} />
+                  <AvatarFallback>{activeChat.contactName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <h3 className="font-medium">{activeChat.contactName}</h3>
+                  <p className="text-sm text-muted-foreground">{activeChat.contactEmail}</p>
+                  <p className="text-sm text-muted-foreground">{activeChat.contactPhone}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium mb-2">Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {activeChat.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary">{tag}</Badge>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium mb-2">Status</h4>
+                <Badge variant={activeChat.status === 'active' ? 'default' : 'secondary'}>
+                  {activeChat.status === 'active' ? 'Ativo' : 'Arquivado'}
+                </Badge>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => setShowEditDialog(true)}
+                >
+                  Editar Contato
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Contato</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nome</Label>
+                  <Input
+                    id="name"
+                    value={editingContact.name}
+                    onChange={(e) =>
+                      setEditingContact({ ...editingContact, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editingContact.email}
+                    onChange={(e) =>
+                      setEditingContact({ ...editingContact, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={editingContact.phone}
+                    onChange={(e) =>
+                      setEditingContact({ ...editingContact, phone: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type">Tipo</Label>
+                  <Select
+                    value={editingContact.type}
+                    onValueChange={(value) =>
+                      setEditingContact({ ...editingContact, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Aluno">Aluno</SelectItem>
+                      <SelectItem value="Prospect">Prospect</SelectItem>
+                      <SelectItem value="Ex-Aluno">Ex-Aluno</SelectItem>
+                      <SelectItem value="Parceiro">Parceiro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleEditContact}>Salvar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </TooltipProvider>
     </BaseLayout>
   )
 } 

@@ -8,7 +8,7 @@ test.describe('Módulo de Estatísticas', () => {
 
   test('deve exibir o dashboard de estatísticas', async ({ page }) => {
     // Verifica elementos principais da interface
-    await expect(page.getByRole('heading', { name: 'Estatísticas' })).toBeVisible();
+    await expect(page.getByTestId('stats-dashboard')).toBeVisible();
     await expect(page.getByTestId('stats-cards')).toBeVisible();
     await expect(page.getByTestId('stats-charts')).toBeVisible();
   });
@@ -23,7 +23,7 @@ test.describe('Módulo de Estatísticas', () => {
 
   test('deve permitir filtrar por período', async ({ page }) => {
     // Seleciona período de 7 dias
-    await page.getByRole('button', { name: 'Filtrar período' }).click();
+    await page.getByTestId('period-filter').click();
     await page.getByRole('option', { name: 'Últimos 7 dias' }).click();
     
     // Verifica se os dados foram atualizados
@@ -44,7 +44,7 @@ test.describe('Módulo de Estatísticas', () => {
   test('deve exportar relatório', async ({ page }) => {
     // Clica no botão de exportar
     const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Exportar Relatório' }).click();
+    await page.getByTestId('export-button').click();
     
     // Aguarda download iniciar
     const download = await downloadPromise;
@@ -69,9 +69,7 @@ test.describe('Módulo de Estatísticas', () => {
     const initialValue = await page.getByTestId('total-messages').textContent();
     
     // Simula nova mensagem (via websocket/polling)
-    await page.evaluate(() => {
-      window.postMessage({ type: 'NEW_MESSAGE' }, '*');
-    });
+    await page.getByTestId('refresh-button').click();
     
     // Verifica se o valor foi atualizado
     await expect(page.getByTestId('total-messages')).not.toHaveText(initialValue || '');

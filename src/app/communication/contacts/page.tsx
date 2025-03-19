@@ -1,304 +1,196 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { BaseLayout } from '@/components/layout/BaseLayout'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Search, Plus, Filter } from 'lucide-react'
+import { ContactForm } from '@/components/contacts/ContactForm'
+import { ContactList } from '@/components/contacts/ContactList'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, MoreVertical, Mail, Phone, MapPin } from 'lucide-react'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-
-const contactSchema = z.object({
-  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-  email: z.string().email('Email inválido'),
-  phone: z.string().min(8, 'Telefone deve ter no mínimo 8 caracteres'),
-  role: z.string().min(2, 'Função deve ter no mínimo 2 caracteres'),
-  location: z.string().min(2, 'Localização deve ter no mínimo 2 caracteres')
-})
-
-type ContactFormData = z.infer<typeof contactSchema>
-
-interface Contact extends ContactFormData {
-  id: string
-}
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from '@/hooks/useContacts'
+import type { Contact, ContactFormData } from '@/types/contacts'
 
 export default function ContactsPage() {
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      id: '1',
-      name: 'Maria Silva',
-      email: 'maria@exemplo.com',
-      phone: '(11) 98765-4321',
-      role: 'Aluna',
-      location: 'São Paulo, SP'
-    },
-    {
-      id: '2',
-      name: 'João Santos',
-      email: 'joao@exemplo.com',
-      phone: '(11) 98765-4322',
-      role: 'Professor',
-      location: 'Rio de Janeiro, RJ'
-    }
-  ])
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<string | null>(null)
+  const [isNewContactOpen, setIsNewContactOpen] = useState(false)
+  const [isEditContactOpen, setIsEditContactOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
 
-  const form = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      role: '',
-      location: ''
+  // Queries e Mutations
+  const { data: contacts = [], isLoading } = useContacts(searchTerm)
+  const createContact = useCreateContact()
+  const updateContact = useUpdateContact()
+  const deleteContact = useDeleteContact()
+
+  const selectedContactData = contacts.find(contact => contact.id === selectedContact)
+
+  const handleAddContact = async (data: ContactFormData) => {
+    try {
+      await createContact.mutateAsync(data)
+      setIsNewContactOpen(false)
+      toast({
+        title: 'Contato adicionado',
+        description: 'O contato foi adicionado com sucesso.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao adicionar contato. Tente novamente.',
+        variant: 'destructive',
+      })
     }
-  })
+  }
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.email.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const handleEditContact = async (data: ContactFormData) => {
+    if (!selectedContact) return
+    try {
+      await updateContact.mutateAsync({ id: selectedContact, ...data })
+      setIsEditContactOpen(false)
+      toast({
+        title: 'Contato atualizado',
+        description: 'As alterações foram salvas com sucesso.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao atualizar contato. Tente novamente.',
+        variant: 'destructive',
+      })
+    }
+  }
 
-  const handleOpenModal = (contact?: Contact) => {
-    if (contact) {
-      form.reset(contact)
-      setSelectedContact(contact)
-    } else {
-      form.reset()
+  const handleDeleteContact = async () => {
+    if (!selectedContact) return
+    try {
+      await deleteContact.mutateAsync(selectedContact)
       setSelectedContact(null)
+      setIsDeleteDialogOpen(false)
+      toast({
+        title: 'Contato excluído',
+        description: 'O contato foi excluído com sucesso.',
+        variant: 'destructive',
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir contato. Tente novamente.',
+        variant: 'destructive',
+      })
     }
-    setIsModalOpen(true)
   }
 
-  const handleSaveContact = (data: ContactFormData) => {
-    if (selectedContact) {
-      setContacts(contacts.map(contact =>
-        contact.id === selectedContact.id
-          ? { ...data, id: contact.id }
-          : contact
-      ))
-    } else {
-      setContacts([...contacts, {
-        ...data,
-        id: Math.random().toString(36).substring(7)
-      }])
-    }
-    setIsModalOpen(false)
-  }
-
-  const handleDeleteContact = (contact: Contact) => {
-    setSelectedContact(contact)
-    setIsDeleteDialogOpen(true)
-  }
-
-  const confirmDelete = () => {
-    if (selectedContact) {
-      setContacts(contacts.filter(c => c.id !== selectedContact.id))
-    }
-    setIsDeleteDialogOpen(false)
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
   return (
-    <BaseLayout module="communication">
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Contatos</h2>
-            <p className="text-muted-foreground">
-              Gerencie seus contatos e informações
-            </p>
-          </div>
-          <Button onClick={() => handleOpenModal()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Contato
-          </Button>
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Contatos</h1>
+          <p className="text-muted-foreground">
+            Gerencie seus contatos
+          </p>
         </div>
-
-        <Card className="p-4">
-          <div className="mb-6">
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
+              type="text"
               placeholder="Buscar contatos..."
+              className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="contact-search"
             />
           </div>
-
-          <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            data-testid="contact-grid"
+          <Button
+            variant="outline"
+            className="flex-1 md:flex-none"
+            data-testid="filter-button"
           >
-            <div data-testid="contact-list">
-              {filteredContacts.map((contact) => (
-                <Card key={contact.id} className="p-4 mb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-full bg-communication/10 flex items-center justify-center text-communication text-lg font-semibold">
-                        {contact.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold" data-testid="contact-name">{contact.name}</h3>
-                        <p className="text-sm text-muted-foreground">{contact.role}</p>
-                        <div className="mt-2 space-y-1">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Mail className="h-4 w-4 mr-2" />
-                            {contact.email}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Phone className="h-4 w-4 mr-2" />
-                            {contact.phone}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mr-2" />
-                            {contact.location}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          data-testid="contact-actions-menu"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          onClick={() => handleOpenModal(contact)}
-                          data-testid="edit-contact-button"
-                        >
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleDeleteContact(contact)}
-                          className="text-destructive"
-                          data-testid="delete-contact-button"
-                        >
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </Card>
+            <Filter className="h-4 w-4 mr-2" />
+            Filtrar
+          </Button>
+          <Button
+            onClick={() => setIsNewContactOpen(true)}
+            className="flex-1 md:flex-none"
+            data-testid="new-contact-button"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Contato
+          </Button>
+        </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <ContactList
+        contacts={contacts}
+        selectedId={selectedContact}
+        onSelect={setSelectedContact}
+        onEdit={(id) => {
+          setSelectedContact(id)
+          setIsEditContactOpen(true)
+        }}
+        onDelete={(id) => {
+          setSelectedContact(id)
+          setIsDeleteDialogOpen(true)
+        }}
+      />
+
+      {/* Modal de Novo Contato */}
+      <Dialog open={isNewContactOpen} onOpenChange={setIsNewContactOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedContact ? 'Editar Contato' : 'Novo Contato'}</DialogTitle>
+            <DialogTitle>Novo Contato</DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSaveContact)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Função</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Localização</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  Salvar
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <ContactForm onSubmit={handleAddContact} />
         </DialogContent>
       </Dialog>
 
+      {/* Modal de Edição */}
+      <Dialog open={isEditContactOpen} onOpenChange={setIsEditContactOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Contato</DialogTitle>
+          </DialogHeader>
+          <ContactForm
+            onSubmit={handleEditContact}
+            initialData={selectedContactData}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Confirmação de Exclusão */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Excluir Contato</DialogTitle>
           </DialogHeader>
           <p>Tem certeza que deseja excluir este contato?</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteContact}
+              data-testid="confirm-delete-button"
+            >
               Excluir
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
-    </BaseLayout>
+    </div>
   )
 } 

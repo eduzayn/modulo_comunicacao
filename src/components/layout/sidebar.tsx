@@ -29,7 +29,7 @@ export function Sidebar({ module, items }: SidebarProps) {
         <SheetTrigger asChild>
           <Button
             variant="ghost"
-            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
+            className="fixed top-4 left-4 mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
           >
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle Menu</span>
@@ -65,7 +65,7 @@ export function Sidebar({ module, items }: SidebarProps) {
               <nav className="grid gap-1 px-2">
                 {items.map((item, index) => (
                   <Link
-                    key={index}
+                    key={item.href}
                     href={item.href}
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent',
@@ -110,9 +110,9 @@ function MobileNav({ module, items }: SidebarProps) {
         )}>
           Menu
         </h2>
-        {items.map((item, index) => (
+        {items.map((item) => (
           <Link
-            key={index}
+            key={item.href}
             href={item.href}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',

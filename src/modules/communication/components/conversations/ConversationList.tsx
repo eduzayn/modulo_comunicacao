@@ -1,16 +1,20 @@
 import React from "react";
 import { Conversation } from "../../types";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface ConversationListProps {
   conversations: Conversation[];
   onSelectConversation: (conversation: Conversation) => void;
   selectedConversationId?: string;
+  onNewChat: () => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
   onSelectConversation,
   selectedConversationId,
+  onNewChat,
 }) => {
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -77,6 +81,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             </div>
           </div>
         ))}
+        <Button
+          onClick={onNewChat}
+          className="w-full justify-start gap-2"
+          data-testid="new-chat-button"
+        >
+          <Plus className="h-4 w-4" />
+          Nova Conversa
+        </Button>
       </div>
     </div>
   );

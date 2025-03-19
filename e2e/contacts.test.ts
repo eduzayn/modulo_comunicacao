@@ -9,22 +9,22 @@ test.describe('Módulo de Contatos', () => {
   test('deve exibir a lista de contatos', async ({ page }) => {
     // Verifica elementos principais da interface
     await expect(page.getByRole('heading', { name: 'Contatos' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Adicionar Contato' })).toBeVisible();
-    await expect(page.getByPlaceholder('Buscar contatos...')).toBeVisible();
+    await expect(page.getByTestId('new-contact-button')).toBeVisible();
+    await expect(page.getByTestId('contact-search')).toBeVisible();
   });
 
   test('deve filtrar contatos pela busca', async ({ page }) => {
     // Preenche o campo de busca
-    await page.getByPlaceholder('Buscar contatos...').fill('João');
+    await page.getByTestId('contact-search').fill('João');
     
     // Verifica se a lista foi filtrada
-    await expect(page.getByTestId('contact-list')).toContainText('João');
-    await expect(page.getByTestId('contact-list')).not.toContainText('Maria');
+    await expect(page.getByTestId('contact-name')).toContainText('João');
+    await expect(page.getByTestId('contact-name')).not.toContainText('Maria');
   });
 
   test('deve abrir modal de novo contato', async ({ page }) => {
     // Clica no botão de adicionar contato
-    await page.getByRole('button', { name: 'Adicionar Contato' }).click();
+    await page.getByTestId('new-contact-button').click();
     
     // Verifica se o modal foi aberto
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -33,17 +33,18 @@ test.describe('Módulo de Contatos', () => {
 
   test('deve adicionar novo contato', async ({ page }) => {
     // Abre o modal de novo contato
-    await page.getByRole('button', { name: 'Adicionar Contato' }).click();
+    await page.getByTestId('new-contact-button').click();
     
     // Preenche o formulário
-    await page.getByLabel('Nome').fill('João Silva');
-    await page.getByLabel('Email').fill('joao@exemplo.com');
-    await page.getByLabel('Telefone').fill('(11) 99999-9999');
-    await page.getByRole('button', { name: 'Salvar' }).click();
+    await page.getByTestId('contact-name-input').fill('João Silva');
+    await page.getByTestId('contact-email-input').fill('joao@exemplo.com');
+    await page.getByTestId('contact-phone-input').fill('(11) 99999-9999');
+    await page.getByTestId('contact-type-select').selectOption('Aluno');
+    await page.getByTestId('contact-submit-button').click();
     
     // Verifica se o contato foi adicionado
-    await expect(page.getByText('João Silva')).toBeVisible();
-    await expect(page.getByText('joao@exemplo.com')).toBeVisible();
+    await expect(page.getByTestId('contact-name')).toContainText('João Silva');
+    await expect(page.getByTestId('contact-email')).toContainText('joao@exemplo.com');
   });
 
   test('deve editar contato existente', async ({ page }) => {
@@ -51,11 +52,11 @@ test.describe('Módulo de Contatos', () => {
     await page.getByTestId('edit-contact-button').first().click();
     
     // Edita o nome do contato
-    await page.getByLabel('Nome').fill('João Silva Editado');
-    await page.getByRole('button', { name: 'Salvar' }).click();
+    await page.getByTestId('contact-name-input').fill('João Silva Editado');
+    await page.getByTestId('contact-submit-button').click();
     
     // Verifica se o contato foi atualizado
-    await expect(page.getByText('João Silva Editado')).toBeVisible();
+    await expect(page.getByTestId('contact-name')).toContainText('João Silva Editado');
   });
 
   test('deve excluir contato', async ({ page }) => {
@@ -66,10 +67,10 @@ test.describe('Módulo de Contatos', () => {
     await page.getByTestId('delete-contact-button').first().click();
     
     // Confirma a exclusão
-    await page.getByRole('button', { name: 'Confirmar' }).click();
+    await page.getByTestId('confirm-delete-button').click();
     
     // Verifica se o contato foi removido
-    await expect(page.getByText(nomeContato || '')).not.toBeVisible();
+    await expect(page.getByTestId('contact-name')).not.toContainText(nomeContato || '');
   });
 
   test('deve ser responsivo em dispositivos móveis', async ({ page }) => {
