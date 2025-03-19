@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { PageTransition } from './PageTransition'
-import { MessageSquare, Users, BarChart2, Settings, Home } from 'lucide-react'
+import { MessageSquare, Users, BarChart2, Settings, Home, Book, GraduationCap, FileText } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Header } from './Header'
-import { Sidebar } from './sidebar'
+import { Sidebar } from './Sidebar'
 import { Breadcrumbs } from './Breadcrumbs'
 
 interface MenuItem {
@@ -20,20 +20,36 @@ interface MenuItem {
 interface BaseLayoutProps {
   children: ReactNode
   module: 'communication' | 'student' | 'content' | 'enrollment'
-  items: {
+  items?: {
     title: string
     href: string
     icon: React.ReactNode
   }[]
 }
 
-const moduleMenuItems: Record<'communication', MenuItem[]> = {
+const moduleMenuItems: Record<'communication' | 'student' | 'content' | 'enrollment', MenuItem[]> = {
   communication: [
     { name: 'Início', href: '/communication', icon: Home },
     { name: 'Chat', href: '/communication/chat', icon: MessageSquare },
     { name: 'Contatos', href: '/communication/contacts', icon: Users },
     { name: 'Estatísticas', href: '/communication/stats', icon: BarChart2 },
     { name: 'Configurações', href: '/communication/settings', icon: Settings }
+  ],
+  student: [
+    { name: 'Início', href: '/student', icon: Home },
+    { name: 'Alunos', href: '/student/list', icon: Users },
+    { name: 'Configurações', href: '/student/settings', icon: Settings }
+  ],
+  content: [
+    { name: 'Início', href: '/content', icon: Home },
+    { name: 'Materiais', href: '/content/materials', icon: Book },
+    { name: 'Configurações', href: '/content/settings', icon: Settings }
+  ],
+  enrollment: [
+    { name: 'Início', href: '/enrollment', icon: Home },
+    { name: 'Matrículas', href: '/enrollment/list', icon: GraduationCap },
+    { name: 'Documentos', href: '/enrollment/documents', icon: FileText },
+    { name: 'Configurações', href: '/enrollment/settings', icon: Settings }
   ]
 }
 
@@ -51,14 +67,15 @@ const menuVariants = {
   })
 }
 
-export function BaseLayout({ children, module, items }: BaseLayoutProps) {
+export function BaseLayout({ children, module, items = [] }: BaseLayoutProps) {
   const pathname = usePathname()
   const menuItems = moduleMenuItems[module]
   
   // Gera os itens do breadcrumb baseado no pathname atual
   const breadcrumbItems = pathname.split('/').filter(Boolean).map((segment, index, array) => {
     const href = '/' + array.slice(0, index + 1).join('/')
-    const title = items.find(item => item.href === href)?.title || segment
+    const matchingItem = items.find(item => item.href === href)
+    const title = matchingItem ? matchingItem.title : segment
     return { href, title }
   })
 

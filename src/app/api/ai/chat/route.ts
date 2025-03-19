@@ -1,8 +1,8 @@
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import OpenAI from 'openai'
+import { streamText } from 'ai'
+import { createOpenAI } from '@ai-sdk/openai'
 import { NextResponse } from 'next/server'
 
-const openai = new OpenAI({
+const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY
 })
 
@@ -20,9 +20,8 @@ ${metadata?.course ? `\nCurso: ${metadata.course}` : ''}
 ${metadata?.student ? `\nAluno: ${metadata.student}` : ''}
 ${metadata?.lead ? `\nLead: ${metadata.lead}` : ''}`
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      stream: true,
+    const result = await streamText({
+      model: openai('gpt-4-turbo-preview'),
       messages: [
         {
           role: 'system',
@@ -31,11 +30,10 @@ ${metadata?.lead ? `\nLead: ${metadata.lead}` : ''}`
         ...messages
       ],
       temperature: 0.7,
-      max_tokens: 500
+      maxTokens: 500
     })
 
-    const stream = OpenAIStream(response)
-    return new StreamingTextResponse(stream)
+    return result.toTextStreamResponse()
   } catch (error) {
     console.error('Erro ao processar mensagem:', error)
     return NextResponse.json(
