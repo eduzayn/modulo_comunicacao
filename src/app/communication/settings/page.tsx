@@ -6,9 +6,8 @@ import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Bell, Mail, MessageSquare, Clock, Shield } from 'lucide-react'
-import { FC } from 'react'
 
-const SettingsPage: FC = () => {
+export default function SettingsPage() {
   return (
     <BaseLayout module="communication">
       <div className="space-y-8">
@@ -112,6 +111,4 @@ const SettingsPage: FC = () => {
       </div>
     </BaseLayout>
   )
-}
-
-export default SettingsPage 
+} 

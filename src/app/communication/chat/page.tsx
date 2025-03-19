@@ -6,9 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send } from 'lucide-react'
-import { FC } from 'react'
 
-const ChatPage: FC = () => {
+export default function ChatPage() {
   return (
     <BaseLayout module="communication">
       <div className="space-y-4">
@@ -88,6 +87,4 @@ const ChatPage: FC = () => {
       </div>
     </BaseLayout>
   )
-}
-
-export default ChatPage 
+} 

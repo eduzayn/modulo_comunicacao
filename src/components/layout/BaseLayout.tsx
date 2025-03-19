@@ -1,297 +1,93 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { Sidebar } from './Sidebar'
-import { 
-  MessageSquare, 
-  Users, 
-  Settings, 
-  HelpCircle, 
-  Home, 
-  BarChart2,
-  BookOpen,
-  GraduationCap,
-  Trophy,
-  Clock,
-  FileText,
-  Video,
-  Image,
-  DollarSign,
-  CalendarCheck,
-  TrendingUp
-} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { PageTransition } from './PageTransition'
+import { MessageSquare, Users, BarChart2, Settings, Home } from 'lucide-react'
+import { motion } from 'framer-motion'
+
+interface MenuItem {
+  name: string
+  href: string
+  icon: any // Temporariamente usando 'any' para os ícones
+}
 
 interface BaseLayoutProps {
   children: ReactNode
-  module: 'communication' | 'student' | 'content' | 'enrollment'
+  module: 'communication'
 }
 
-const moduleConfig = {
-  communication: {
-    title: 'Módulo de Comunicação',
-    items: [
-      {
-        title: 'Início',
-        href: '/communication',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Chat',
-        href: '/communication/chat',
-        icon: <MessageSquare className="h-5 w-5" />
-      },
-      {
-        title: 'Contatos',
-        href: '/communication/contacts',
-        icon: <Users className="h-5 w-5" />
-      },
-      {
-        title: 'Estatísticas',
-        href: '/communication/stats',
-        icon: <BarChart2 className="h-5 w-5" />
-      },
-      {
-        title: 'Configurações',
-        href: '/communication/settings',
-        icon: <Settings className="h-5 w-5" />
-      },
-      {
-        title: 'Ajuda',
-        href: '/communication/help',
-        icon: <HelpCircle className="h-5 w-5" />
-      }
-    ]
-  },
-  student: {
-    title: 'Portal do Aluno',
-    items: [
-      {
-        title: 'Início',
-        href: '/student',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Meus Cursos',
-        href: '/student/courses',
-        icon: <BookOpen className="h-5 w-5" />
-      },
-      {
-        title: 'Progresso',
-        href: '/student/progress',
-        icon: <GraduationCap className="h-5 w-5" />
-      },
-      {
-        title: 'Certificados',
-        href: '/student/certificates',
-        icon: <Trophy className="h-5 w-5" />
-      },
-      {
-        title: 'Agenda',
-        href: '/student/schedule',
-        icon: <Clock className="h-5 w-5" />
-      },
-      {
-        title: 'Ajuda',
-        href: '/student/help',
-        icon: <HelpCircle className="h-5 w-5" />
-      }
-    ]
-  },
-  content: {
-    title: 'Módulo de Conteúdo',
-    items: [
-      {
-        title: 'Início',
-        href: '/content',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Materiais',
-        href: '/content/materials',
-        icon: <FileText className="h-5 w-5" />
-      },
-      {
-        title: 'Vídeo Aulas',
-        href: '/content/videos',
-        icon: <Video className="h-5 w-5" />
-      },
-      {
-        title: 'Recursos',
-        href: '/content/resources',
-        icon: <Image className="h-5 w-5" />
-      },
-      {
-        title: 'Estatísticas',
-        href: '/content/stats',
-        icon: <BarChart2 className="h-5 w-5" />
-      },
-      {
-        title: 'Configurações',
-        href: '/content/settings',
-        icon: <Settings className="h-5 w-5" />
-      }
-    ]
-  },
-  enrollment: {
-    title: 'Módulo de Matrículas',
-    items: [
-      {
-        title: 'Início',
-        href: '/enrollment',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Alunos',
-        href: '/enrollment/students',
-        icon: <Users className="h-5 w-5" />
-      },
-      {
-        title: 'Financeiro',
-        href: '/enrollment/financial',
-        icon: <DollarSign className="h-5 w-5" />
-      },
-      {
-        title: 'Matrículas',
-        href: '/enrollment/registrations',
-        icon: <CalendarCheck className="h-5 w-5" />
-      },
-      {
-        title: 'Relatórios',
-        href: '/enrollment/reports',
-        icon: <TrendingUp className="h-5 w-5" />
-      },
-      {
-        title: 'Configurações',
-        href: '/enrollment/settings',
-        icon: <Settings className="h-5 w-5" />
-      }
-    ]
-  }
-}
-
-const moduleMenuItems = {
+const moduleMenuItems: Record<'communication', MenuItem[]> = {
   communication: [
+    { name: 'Início', href: '/communication', icon: Home },
     { name: 'Chat', href: '/communication/chat', icon: MessageSquare },
     { name: 'Contatos', href: '/communication/contacts', icon: Users },
     { name: 'Estatísticas', href: '/communication/stats', icon: BarChart2 },
     { name: 'Configurações', href: '/communication/settings', icon: Settings }
-  ],
-  student: {
-    title: 'Portal do Aluno',
-    items: [
-      {
-        title: 'Início',
-        href: '/student',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Meus Cursos',
-        href: '/student/courses',
-        icon: <BookOpen className="h-5 w-5" />
-      },
-      {
-        title: 'Progresso',
-        href: '/student/progress',
-        icon: <GraduationCap className="h-5 w-5" />
-      },
-      {
-        title: 'Certificados',
-        href: '/student/certificates',
-        icon: <Trophy className="h-5 w-5" />
-      },
-      {
-        title: 'Agenda',
-        href: '/student/schedule',
-        icon: <Clock className="h-5 w-5" />
-      },
-      {
-        title: 'Ajuda',
-        href: '/student/help',
-        icon: <HelpCircle className="h-5 w-5" />
-      }
-    ]
-  },
-  content: {
-    title: 'Módulo de Conteúdo',
-    items: [
-      {
-        title: 'Início',
-        href: '/content',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Materiais',
-        href: '/content/materials',
-        icon: <FileText className="h-5 w-5" />
-      },
-      {
-        title: 'Vídeo Aulas',
-        href: '/content/videos',
-        icon: <Video className="h-5 w-5" />
-      },
-      {
-        title: 'Recursos',
-        href: '/content/resources',
-        icon: <Image className="h-5 w-5" />
-      },
-      {
-        title: 'Estatísticas',
-        href: '/content/stats',
-        icon: <BarChart2 className="h-5 w-5" />
-      },
-      {
-        title: 'Configurações',
-        href: '/content/settings',
-        icon: <Settings className="h-5 w-5" />
-      }
-    ]
-  },
-  enrollment: {
-    title: 'Módulo de Matrículas',
-    items: [
-      {
-        title: 'Início',
-        href: '/enrollment',
-        icon: <Home className="h-5 w-5" />
-      },
-      {
-        title: 'Alunos',
-        href: '/enrollment/students',
-        icon: <Users className="h-5 w-5" />
-      },
-      {
-        title: 'Financeiro',
-        href: '/enrollment/financial',
-        icon: <DollarSign className="h-5 w-5" />
-      },
-      {
-        title: 'Matrículas',
-        href: '/enrollment/registrations',
-        icon: <CalendarCheck className="h-5 w-5" />
-      },
-      {
-        title: 'Relatórios',
-        href: '/enrollment/reports',
-        icon: <TrendingUp className="h-5 w-5" />
-      },
-      {
-        title: 'Configurações',
-        href: '/enrollment/settings',
-        icon: <Settings className="h-5 w-5" />
-      }
-    ]
-  }
+  ]
+}
+
+const menuVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.1,
+      type: "spring",
+      stiffness: 260,
+      damping: 20
+    }
+  })
 }
 
 export function BaseLayout({ children, module }: BaseLayoutProps) {
-  const config = moduleConfig[module]
+  const pathname = usePathname()
+  const menuItems = moduleMenuItems[module]
 
   return (
     <div className="flex h-screen">
-      <Sidebar module={module} items={config.items} />
-      <main className="flex-1 overflow-y-auto bg-background">
-        <div className="container mx-auto py-6">
-          {children}
+      <aside className="w-64 bg-card border-r">
+        <div className="p-6">
+          <motion.h1 
+            className="text-2xl font-bold text-foreground"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Sistema
+          </motion.h1>
+        </div>
+        <nav className="px-4">
+          {menuItems.map((item, i) => (
+            <motion.div
+              key={item.href}
+              custom={i}
+              initial="hidden"
+              animate="visible"
+              variants={menuVariants}
+            >
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200',
+                  pathname === item.href && 'bg-accent text-foreground'
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            </motion.div>
+          ))}
+        </nav>
+      </aside>
+      <main className="flex-1 overflow-auto">
+        <div className="container py-8">
+          <PageTransition>
+            {children}
+          </PageTransition>
         </div>
       </main>
     </div>

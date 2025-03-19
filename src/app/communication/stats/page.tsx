@@ -4,9 +4,8 @@ import { BaseLayout } from '@/components/layout/BaseLayout'
 import { Card } from '@/components/ui/card'
 import { StatsCard } from '@/components/ui/stats-card'
 import { MessageSquare, Users, Clock, BarChart2, TrendingUp, TrendingDown } from 'lucide-react'
-import { FC } from 'react'
 
-const StatsPage: FC = () => {
+export default function StatsPage() {
   return (
     <BaseLayout module="communication">
       <div className="space-y-8">
@@ -105,6 +104,4 @@ const StatsPage: FC = () => {
       </div>
     </BaseLayout>
   )
-}
-
-export default StatsPage 
+} 
