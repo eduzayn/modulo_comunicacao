@@ -70,6 +70,10 @@ class KinboxService {
       body: JSON.stringify(message)
     })
   }
+
+  async getQuickPhrases() {
+    return this.request('/v3/quick-phrases')
+  }
 }
 
 export const kinboxService = new KinboxService()
@@ -87,18 +91,8 @@ interface KinboxQuickPhrase {
 
 export async function importKinboxQuickPhrases(): Promise<ActionResponse<QuickPhrase[]>> {
   try {
-    // Busca as frases rápidas do Kinbox
-    const kinboxResponse = await fetch(`${process.env.NEXT_PUBLIC_KINBOX_API_URL}/quick-phrases`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('kinbox_token')}`,
-      },
-    })
-
-    if (!kinboxResponse.ok) {
-      throw new Error('Erro ao buscar frases rápidas do Kinbox')
-    }
-
-    const kinboxPhrases: KinboxQuickPhrase[] = await kinboxResponse.json()
+    // Busca as frases rápidas usando o KinboxService
+    const kinboxPhrases: KinboxQuickPhrase[] = await kinboxService.getQuickPhrases()
 
     // Converte as frases do Kinbox para o formato do nosso sistema
     const convertedPhrases = kinboxPhrases.map((phrase): Omit<QuickPhrase, 'id'> => ({

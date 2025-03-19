@@ -14,10 +14,10 @@ export default function QuickPhrasesPage() {
     try {
       const result = await importPhrases()
       
-      if (result.success) {
+      if (result.success && result.data) {
         toast.success(`${result.data.length} frases rápidas importadas com sucesso!`)
       } else {
-        toast.error(result.error.message)
+        toast.error(result.error?.message || 'Erro ao importar frases rápidas')
       }
     } catch (error) {
       console.error('Erro ao importar frases:', error)
