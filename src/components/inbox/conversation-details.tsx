@@ -1,117 +1,129 @@
 'use client'
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
-import { MessageCircle, Phone, Mail, Info, Smile, Upload, Paperclip, Send, Search } from 'lucide-react'
+import React, { useState } from 'react'
 import {
-  CheckCircle,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Calendar,
   User,
-  MoreHorizontal,
-  DollarSign,
+  Heart,
+  Tag,
   MessageSquare,
-  Facebook,
-  Instagram,
-  Loader2
+  ChevronRight,
+  Edit2,
+  Plus,
+  Trash2,
+  Star,
+  UserCircle,
+  Package,
+  BarChart2
 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { CreateDealForm } from '@/components/crm/create-deal-form'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-// Definição dos tipos de canais
-type ChannelType = 'whatsapp' | 'email' | 'facebook' | 'instagram' | 'chat' | 'sms'
-
-// Interface para as propriedades do componente
-interface ConversationDetailsProps {
-  contactId: string
-  contactName?: string
-  conversation?: {
-    id: string
-    channel: ChannelType
-    channelData?: Record<string, any>
+// Interfaces
+interface Conversation {
+  id: string
+  status?: 'active' | 'pending' | 'closed'
+  channelData?: {
+    type: string
+    name?: string
+    avatar?: string
   }
-  onSendMessage?: (message: string, attachments?: File[]) => Promise<void>
 }
 
-const agents = [
-  {
-    id: '1',
-    name: 'Não atribuído',
-    avatar: null
-  },
-  {
-    id: '2',
-    name: 'Ana Lucia Moreira Gonçalves',
-    avatar: '/avatars/ana.png'
-  },
-  {
-    id: '3',
-    name: 'Erick Moreira',
-    avatar: '/avatars/erick.png'
-  },
-  {
-    id: '4',
-    name: 'Daniela Tovar',
-    avatar: '/avatars/daniela.png'
+interface Task {
+  id: string
+  title: string
+  dueDate: Date
+  status: 'pending' | 'completed' | 'overdue'
+}
+
+interface Deal {
+  id: string
+  title: string
+  stage: string
+  value: number
+  probability: number
+  expectedCloseDate: Date
+}
+
+interface Tag {
+  id: string
+  name: string
+  color: string
+}
+
+interface ContactHistoryItem {
+  id: string
+  type: 'message' | 'call' | 'email' | 'note' | 'meeting'
+  content: string
+  date: Date
+  channel?: string
+}
+
+interface ConversationDetailsProps {
+  contactId?: string
+  contactName?: string
+  conversation?: Conversation
+  onSendMessage?: (message: string, attachments: any[]) => Promise<void>
+}
+
+const dummyTags: Tag[] = [
+  { id: '1', name: 'Interessado', color: 'bg-green-100 text-green-800' },
+  { id: '2', name: 'Novo Lead', color: 'bg-blue-100 text-blue-800' },
+  { id: '3', name: 'Aguardando Retorno', color: 'bg-amber-100 text-amber-800' }
+]
+
+const dummyTasks: Task[] = [
+  { id: '1', title: 'Enviar proposta comercial', dueDate: new Date(Date.now() + 86400000), status: 'pending' },
+  { id: '2', title: 'Agendar demonstração', dueDate: new Date(Date.now() + 86400000 * 3), status: 'pending' },
+  { id: '3', title: 'Fazer follow-up por telefone', dueDate: new Date(Date.now() - 86400000), status: 'overdue' }
+]
+
+const dummyDeals: Deal[] = [
+  { 
+    id: '1', 
+    title: 'Plano Básico Mensalidade', 
+    stage: 'Proposta', 
+    value: 1200, 
+    probability: 60,
+    expectedCloseDate: new Date(Date.now() + 86400000 * 7)
   }
 ]
 
-// Função para obter o ícone e cor do canal
-const getChannelInfo = (channelType: ChannelType) => {
-  switch (channelType) {
-    case 'whatsapp':
-      return { 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        color: 'bg-green-500 text-white',
-        name: 'WhatsApp'
-      }
-    case 'facebook':
-      return { 
-        icon: <Facebook className="h-5 w-5" />, 
-        color: 'bg-blue-600 text-white',
-        name: 'Facebook'
-      }
-    case 'instagram':
-      return { 
-        icon: <Instagram className="h-5 w-5" />, 
-        color: 'bg-pink-600 text-white',
-        name: 'Instagram'
-      }
-    case 'email':
-      return { 
-        icon: <Mail className="h-5 w-5" />, 
-        color: 'bg-blue-500 text-white',
-        name: 'Email'
-      }
-    case 'sms':
-      return { 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        color: 'bg-purple-500 text-white',
-        name: 'SMS'
-      }
-    default:
-      return { 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        color: 'bg-gray-500 text-white',
-        name: 'Chat'
-      }
+const dummyHistory: ContactHistoryItem[] = [
+  {
+    id: '1',
+    type: 'message',
+    content: 'Olá, gostaria de saber mais sobre os planos disponíveis',
+    date: new Date(Date.now() - 86400000 * 2),
+    channel: 'whatsapp'
+  },
+  {
+    id: '2',
+    type: 'note',
+    content: 'Cliente interessado no plano básico, mas quer negociar desconto',
+    date: new Date(Date.now() - 86400000),
+  },
+  {
+    id: '3',
+    type: 'call',
+    content: 'Ligação para esclarecer dúvidas sobre o contrato',
+    date: new Date(Date.now() - 86400000 / 2),
   }
-}
+]
 
 export default function ConversationDetails({ 
   contactId, 
@@ -120,55 +132,58 @@ export default function ConversationDetails({
   onSendMessage 
 }: ConversationDetailsProps) {
   const [isCreateDealOpen, setIsCreateDealOpen] = useState(false)
-  const [message, setMessage] = useState('')
-  const [selectedTab, setSelectedTab] = useState('info')
-  const [isLoading, setIsLoading] = useState(false)
-  const [attachments, setAttachments] = useState<File[]>([])
-  const [agentId, setAgentId] = useState('1')
+  const [activeTab, setActiveTab] = useState('info')
   const [replyText, setReplyText] = useState('')
-  const [quickResponses, setQuickResponses] = useState(['Olá!', 'Como posso ajudar?', 'Tudo bem?'])
   const [isSending, setIsSending] = useState(false)
-
-  // Define o canal atual ou usa um padrão
-  const currentChannel = conversation?.channel || 'chat'
-  const channelInfo = getChannelInfo(currentChannel)
-
-  const handleSendMessage = async () => {
-    if (!message.trim() && attachments.length === 0) return
-    
-    setIsLoading(true)
-    try {
-      if (onSendMessage) {
-        await onSendMessage(message, attachments)
-      }
-      setMessage('')
-      setAttachments([])
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error)
-    } finally {
-      setIsLoading(false)
+  const [contactDetails] = useState({
+    id: contactId || '1',
+    name: contactName || 'Visitante',
+    email: 'cliente@exemplo.com',
+    phone: '+55 (83) 8233-2493',
+    address: 'Rua Exemplo, 123 - Cidade',
+    source: 'WhatsApp',
+    createdAt: new Date(Date.now() - 86400000 * 30),
+    lastContact: new Date(Date.now() - 86400000),
+    stage: 'Lead Qualificado',
+    assignedTo: 'Juliana Mendes',
+    tags: dummyTags,
+    company: 'Empresa Exemplo Ltda.',
+    position: 'Gerente de Marketing',
+    website: 'www.exemplo.com.br',
+    socialMedia: {
+      linkedin: 'linkedin.com/in/exemplo',
+      facebook: 'facebook.com/exemplo'
     }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setAttachments(Array.from(e.target.files))
+  })
+  
+  const currentChannel = conversation?.channelData?.type || 'whatsapp'
+  
+  // Informações do canal atual
+  const channelInfo = {
+    whatsapp: {
+      name: 'WhatsApp',
+      color: 'bg-green-500/10 text-green-600',
+      icon: <MessageSquare className="w-3 h-3" />
+    },
+    facebook: {
+      name: 'Facebook',
+      color: 'bg-blue-500/10 text-blue-600',
+      icon: <MessageSquare className="w-3 h-3" />
+    },
+    instagram: {
+      name: 'Instagram',
+      color: 'bg-pink-500/10 text-pink-600',
+      icon: <MessageSquare className="w-3 h-3" />
+    },
+    email: {
+      name: 'Email',
+      color: 'bg-purple-500/10 text-purple-600',
+      icon: <Mail className="w-3 h-3" />
     }
-  }
-
-  const getPlaceholder = () => {
-    switch (currentChannel) {
-      case 'facebook':
-        return 'Escreva uma resposta ao comentário...'
-      case 'instagram':
-        return 'Escreva uma resposta...'
-      case 'whatsapp':
-        return 'Escreva uma mensagem...'
-      case 'email':
-        return 'Escreva um email...'
-      default:
-        return 'Escreva uma mensagem...'
-    }
+  }[currentChannel] || {
+    name: 'Chat',
+    color: 'bg-primary/10 text-primary',
+    icon: <MessageSquare className="w-3 h-3" />
   }
 
   const handleSend = async () => {
@@ -187,6 +202,147 @@ export default function ConversationDetails({
     }
   }
 
+  const formatDate = (date: Date) => {
+    return format(date, 'dd MMM yyyy', { locale: ptBR })
+  }
+
+  const formatDateTime = (date: Date) => {
+    return format(date, 'dd MMM yyyy - HH:mm', { locale: ptBR })
+  }
+
+  const renderTagBadge = (tag: Tag) => (
+    <Badge 
+      key={tag.id} 
+      className={cn("text-xs font-normal", tag.color)}
+    >
+      {tag.name}
+    </Badge>
+  )
+  
+  // Renderização de itens de histórico
+  const renderHistoryItem = (item: ContactHistoryItem) => {
+    const iconMap = {
+      message: <MessageSquare className="h-3.5 w-3.5" />,
+      call: <Phone className="h-3.5 w-3.5" />,
+      email: <Mail className="h-3.5 w-3.5" />,
+      note: <Edit2 className="h-3.5 w-3.5" />,
+      meeting: <Calendar className="h-3.5 w-3.5" />
+    }
+    
+    const bgColorMap = {
+      message: 'bg-blue-50',
+      call: 'bg-green-50',
+      email: 'bg-purple-50',
+      note: 'bg-amber-50',
+      meeting: 'bg-indigo-50'
+    }
+    
+    const textColorMap = {
+      message: 'text-blue-600',
+      call: 'text-green-600',
+      email: 'text-purple-600',
+      note: 'text-amber-600',
+      meeting: 'text-indigo-600'
+    }
+    
+    return (
+      <div key={item.id} className="mb-3 last:mb-0">
+        <div className="flex gap-2">
+          <div className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center", bgColorMap[item.type])}>
+            <div className={textColorMap[item.type]}>
+              {iconMap[item.type]}
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-1">
+              <div className="font-medium text-sm capitalize">{item.type}</div>
+              <div className="text-xs text-muted-foreground">{format(item.date, 'dd/MM - HH:mm')}</div>
+            </div>
+            <div className="text-sm">{item.content}</div>
+            {item.channel && (
+              <Badge variant="outline" className="mt-1 text-xs">
+                {item.channel}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Renderização de tarefas
+  const renderTaskItem = (task: Task) => {
+    const isOverdue = task.status === 'overdue'
+    const isPending = task.status === 'pending'
+    const isCompleted = task.status === 'completed'
+    
+    const statusClasses = {
+      completed: 'bg-green-50 text-green-800 border-green-200',
+      pending: 'bg-blue-50 text-blue-800 border-blue-200',
+      overdue: 'bg-red-50 text-red-800 border-red-200'
+    }
+    
+    return (
+      <div key={task.id} className="mb-3 last:mb-0">
+        <div className="flex items-start gap-2">
+          <div className="w-4 h-4 mt-0.5 flex-shrink-0">
+            <input 
+              type="checkbox" 
+              className="h-4 w-4 rounded border-gray-300 text-primary" 
+              checked={isCompleted}
+              readOnly
+            />
+          </div>
+          <div className="flex-1">
+            <div className="font-medium text-sm">{task.title}</div>
+            <div className="flex items-center mt-1">
+              <Clock className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {formatDate(task.dueDate)}
+              </span>
+              <Badge className={cn("ml-2 text-xs", statusClasses[task.status])}>
+                {isOverdue ? 'Atrasada' : isPending ? 'Pendente' : 'Concluída'}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Renderização de negociações
+  const renderDealItem = (deal: Deal) => {
+    return (
+      <div key={deal.id} className="bg-card shadow-sm p-3 rounded-lg border mb-3 last:mb-0">
+        <div className="flex items-start justify-between mb-2">
+          <div className="font-medium">{deal.title}</div>
+          <Badge variant="outline" className="font-normal">
+            {deal.stage}
+          </Badge>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+          <div className="flex items-center">
+            <Package className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+            <span className="text-muted-foreground">Valor:</span>
+          </div>
+          <div className="font-medium">R$ {deal.value.toLocaleString('pt-BR')}</div>
+          
+          <div className="flex items-center">
+            <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+            <span className="text-muted-foreground">Prob.:</span>
+          </div>
+          <div className="font-medium">{deal.probability}%</div>
+          
+          <div className="flex items-center">
+            <Calendar className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+            <span className="text-muted-foreground">Previsão:</span>
+          </div>
+          <div className="font-medium">{formatDate(deal.expectedCloseDate)}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -203,206 +359,189 @@ export default function ConversationDetails({
       </div>
 
       {/* Corpo */}
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
-        <TabsList className="w-full px-1 pt-1 bg-background/50 rounded-none border-b">
-          <TabsTrigger value="info" className="flex-1 rounded-t-lg text-xs py-1">Informações</TabsTrigger>
-          <TabsTrigger value="agent" className="flex-1 rounded-t-lg text-xs py-1">Atribuir</TabsTrigger>
-          <TabsTrigger value="reply" className="flex-1 rounded-t-lg text-xs py-1">Responder</TabsTrigger>
-        </TabsList>
-
-        {/* Tab de Informações */}
-        <TabsContent value="info" className="flex-1 overflow-hidden flex flex-col">
-          <ScrollArea className="flex-1">
-            <div className="p-3 space-y-4">
-              {/* Contato */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 ring-1 ring-primary/10">
-                    {conversation?.channelData?.avatar && (
-                      <AvatarImage src={conversation.channelData.avatar} alt={contactName || 'Cliente'} />
-                    )}
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/30 text-primary">
-                      {contactName?.slice(0, 1).toUpperCase() || 'C'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-medium text-base">{contactName || 'Cliente'}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Badge variant="secondary" className="text-[10px] rounded-full px-1.5 py-0">
-                        {currentChannel === 'facebook' ? 'Comentário' : 
-                         currentChannel === 'instagram' ? 'Instagram' : 
-                         'Contato'}
-                      </Badge>
-                      <Badge variant="outline" className="text-[10px] rounded-full px-1.5 py-0">Atendimento</Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 bg-background/50 p-2 rounded-lg">
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Phone className="h-3.5 w-3.5 text-primary" />
-                    <span>+55 (83) 8233-2493</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Mail className="h-3.5 w-3.5 text-primary" />
-                    <span>cliente@email.com</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Informações do Canal */}
-              {currentChannel === 'facebook' && (
-                <div className="space-y-1.5 border-t pt-3">
-                  <h4 className="font-medium text-xs text-muted-foreground">Detalhes do Facebook</h4>
-                  <div className="bg-background/50 p-2 rounded-lg text-xs space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <Facebook className="h-3.5 w-3.5 text-blue-600" />
-                      <p>Página: {conversation?.channelData?.pageName || 'Minha Página'}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5 text-blue-600" />
-                      <p>Post: {conversation?.channelData?.postTitle || 'Publicação'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Ações para o contato */}
-              <div className="space-y-2 border-t pt-3">
-                <h4 className="font-medium text-xs text-muted-foreground">Ações</h4>
-                <div className="flex gap-1.5">
-                  <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 h-8 text-xs">
-                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                    Resolver
+      <ScrollArea className="flex-1 p-3">
+        <div className="space-y-6">
+          {/* Informações de Contato */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-12 w-12 ring-1 ring-primary/10">
+                {conversation?.channelData?.avatar && (
+                  <AvatarImage src={conversation.channelData.avatar} alt={contactName || 'Cliente'} />
+                )}
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/30 text-primary">
+                  {contactName?.slice(0, 1).toUpperCase() || 'C'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-base">{contactName || 'Cliente'}</h3>
+                  <Button variant="ghost" size="icon-sm" className="h-7 w-7 rounded-full">
+                    <Edit2 className="h-3.5 w-3.5" />
                   </Button>
-                  <Dialog open={isCreateDealOpen} onOpenChange={setIsCreateDealOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1 h-8 text-xs">
-                        <DollarSign className="h-3.5 w-3.5 mr-1.5" />
-                        Criar negociação
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <CreateDealForm 
-                        contactId={contactId}
-                        contactName={contactName || ''}
-                        onSuccess={() => setIsCreateDealOpen(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Badge variant="secondary" className="text-[10px] rounded-full px-1.5 py-0">
+                    {contactDetails.stage}
+                  </Badge>
+                  {currentChannel && (
+                    <Badge variant="outline" className="text-[10px] rounded-full px-1.5 py-0">
+                      {channelInfo.name}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
-          </ScrollArea>
-        </TabsContent>
 
-        {/* Tab de Atribuição */}
-        <TabsContent value="agent" className="flex-1 overflow-hidden flex flex-col">
-          <div className="p-2 border-b">
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-2.5 top-[9px] text-muted-foreground" />
-              <Input 
-                type="search"
-                placeholder="Pesquisar agentes"
-                className="h-8 pl-8 text-xs bg-background/60"
-              />
-            </div>
-          </div>
-          
-          <ScrollArea className="flex-1">
-            <div className="p-1.5">
-              {agents.map((agent) => (
-                <button
-                  key={agent.id}
-                  className={cn(
-                    "flex items-center gap-2 w-full text-left p-2 rounded-lg mb-0.5 transition-colors text-xs",
-                    agent.id === agentId ? "bg-accent" : "hover:bg-accent/50"
-                  )}
-                  onClick={() => setAgentId(agent.id)}
-                >
-                  <Avatar className="h-8 w-8">
-                    {agent.avatar ? (
-                      <AvatarImage src={agent.avatar} alt={agent.name} />
-                    ) : null}
-                    <AvatarFallback className={agent.id === '1' ? 'bg-muted' : undefined}>
-                      {agent.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{agent.name}</p>
-                    {agent.id === '1' && (
-                      <p className="text-[10px] text-muted-foreground">Sem agente atribuído</p>
-                    )}
+            {/* Tabs */}
+            <Tabs defaultValue="info" className="w-full" onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-4 h-8 mb-4 text-xs">
+                <TabsTrigger value="info">Info</TabsTrigger>
+                <TabsTrigger value="hist">Histórico</TabsTrigger>
+                <TabsTrigger value="tasks">Tarefas</TabsTrigger>
+                <TabsTrigger value="deals">Negócios</TabsTrigger>
+              </TabsList>
+              
+              {/* Tab de Informações */}
+              <TabsContent value="info" className="mt-0">
+                <div className="space-y-4">
+                  {/* Dados de contato */}
+                  <Card className="shadow-none">
+                    <CardHeader className="p-3 pb-1.5">
+                      <CardTitle className="text-sm flex items-center">
+                        <User className="w-4 h-4 mr-1.5" />
+                        Dados de Contato
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0 text-sm">
+                      <div className="grid grid-cols-[20px_1fr] gap-x-2 gap-y-2">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        <div>{contactDetails.phone}</div>
+                        
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <div>{contactDetails.email}</div>
+                        
+                        {contactDetails.address && (
+                          <>
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
+                            <div>{contactDetails.address}</div>
+                          </>
+                        )}
+                        
+                        {contactDetails.company && (
+                          <>
+                            <Package className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              {contactDetails.company}
+                              {contactDetails.position && (
+                                <span className="text-xs text-muted-foreground block">
+                                  {contactDetails.position}
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Informações adicionais */}
+                  <Card className="shadow-none">
+                    <CardHeader className="p-3 pb-1.5">
+                      <CardTitle className="text-sm flex items-center">
+                        <Clock className="w-4 h-4 mr-1.5" />
+                        Informações Adicionais
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0 text-sm">
+                      <div className="grid grid-cols-[1fr_auto] gap-2">
+                        <div className="text-muted-foreground">Origem</div>
+                        <div>{contactDetails.source}</div>
+                        
+                        <div className="text-muted-foreground">Cliente desde</div>
+                        <div>{formatDate(contactDetails.createdAt)}</div>
+                        
+                        <div className="text-muted-foreground">Último contato</div>
+                        <div>{formatDate(contactDetails.lastContact)}</div>
+                        
+                        <div className="text-muted-foreground">Responsável</div>
+                        <div>{contactDetails.assignedTo}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Tags */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-sm font-medium flex items-center">
+                        <Tag className="w-4 h-4 mr-1.5" />
+                        Tags
+                      </h4>
+                      <Button variant="ghost" size="icon-sm" className="h-6 w-6 rounded-full">
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {contactDetails.tags.map(renderTagBadge)}
+                    </div>
                   </div>
-                  {agent.id === agentId && (
-                    <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-
-          <div className="p-2 border-t bg-background/60">
-            <Button className="w-full h-8 text-xs">Atribuir Agente</Button>
+                </div>
+              </TabsContent>
+              
+              {/* Tab de Histórico */}
+              <TabsContent value="hist" className="mt-0 space-y-3">
+                <div className="space-y-3 divide-y">
+                  {dummyHistory.map(renderHistoryItem)}
+                </div>
+                <Button variant="outline" size="sm" className="w-full text-xs">
+                  Carregar mais
+                </Button>
+              </TabsContent>
+              
+              {/* Tab de Tarefas */}
+              <TabsContent value="tasks" className="mt-0">
+                <div className="mb-3 space-y-3 divide-y">
+                  {dummyTasks.map(renderTaskItem)}
+                </div>
+                
+                <Button variant="outline" size="sm" className="w-full flex items-center text-xs mb-2">
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Nova Tarefa
+                </Button>
+              </TabsContent>
+              
+              {/* Tab de Negócios */}
+              <TabsContent value="deals" className="mt-0">
+                <div className="mb-3">
+                  {dummyDeals.map(renderDealItem)}
+                </div>
+                
+                <Button variant="outline" size="sm" className="w-full flex items-center text-xs">
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Novo Negócio
+                </Button>
+              </TabsContent>
+            </Tabs>
           </div>
-        </TabsContent>
-
-        {/* Tab de Resposta */}
-        <TabsContent value="reply" className="flex-1 overflow-hidden flex flex-col">
-          <div className="p-3 border-b">
-            <div className="flex items-center gap-1.5 mb-2">
-              <h4 className="text-xs font-medium">Responder</h4>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{channelInfo.name}</Badge>
-            </div>
-            <Textarea 
-              placeholder="Digite sua mensagem..." 
-              className="min-h-20 text-xs bg-background/80 resize-none"
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-            />
-          </div>
-
-          <div className="p-1.5 flex-1">
-            <div className="flex items-center gap-1.5 p-1">
-              <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-                <Smile className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-                <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-                <Upload className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-            </div>
-            
-            <div className="px-1.5 mt-1.5">
-              <h4 className="text-xs font-medium mb-1.5">Respostas Rápidas</h4>
-              <div className="space-y-1 max-h-40 overflow-y-auto pr-1.5">
-                {quickResponses.map((response, index) => (
-                  <button
-                    key={index}
-                    className="w-full text-left p-1.5 text-xs rounded-lg bg-background hover:bg-accent transition-colors"
-                    onClick={() => setReplyText(response)}
-                  >
-                    {response.length > 60 ? response.substring(0, 60) + '...' : response}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="p-2 border-t bg-background/60">
-            <Button className="w-full h-8 text-xs" disabled={!replyText.trim()} onClick={handleSend}>
-              {isSending ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Send className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              Enviar
-            </Button>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </ScrollArea>
+      
+      {/* Ações rápidas */}
+      <div className="p-3 border-t bg-muted/20">
+        <div className="grid grid-cols-3 gap-2">
+          <Button variant="outline" size="sm" className="text-xs h-9">
+            <Phone className="h-3.5 w-3.5 mr-1.5" />
+            Ligar
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs h-9">
+            <Mail className="h-3.5 w-3.5 mr-1.5" />
+            Email
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs h-9">
+            <Calendar className="h-3.5 w-3.5 mr-1.5" />
+            Agendar
+          </Button>
+        </div>
+      </div>
     </div>
   )
 } 
