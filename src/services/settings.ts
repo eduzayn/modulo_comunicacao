@@ -220,4 +220,329 @@ export async function deleteWorkflow(workflowId: string): Promise<void> {
   if (error) {
     throw new Error('Erro ao excluir cenário')
   }
+}
+
+export interface Bot {
+  id: string
+  name: string
+  type: string
+  channel: string
+  avatar?: string
+  email?: string
+  groups: string[]
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateBotData {
+  name: string
+  type: string
+  channel: string
+  avatar?: string
+  email?: string
+  groups?: string[]
+}
+
+export async function createBot(data: CreateBotData): Promise<Bot> {
+  const { data: bot, error } = await supabase
+    .from('bots')
+    .insert([
+      {
+        name: data.name,
+        type: data.type,
+        channel: data.channel,
+        avatar: data.avatar,
+        email: data.email,
+        groups: data.groups || []
+      }
+    ])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar bot')
+  }
+
+  return bot
+}
+
+export async function getBots(): Promise<Bot[]> {
+  const { data: bots, error } = await supabase
+    .from('bots')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar bots')
+  }
+
+  return bots
+}
+
+export async function toggleBot(botId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('bots')
+    .update({ enabled })
+    .eq('id', botId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar bot')
+  }
+}
+
+export async function deleteBot(botId: string): Promise<void> {
+  const { error } = await supabase
+    .from('bots')
+    .delete()
+    .eq('id', botId)
+
+  if (error) {
+    throw new Error('Erro ao excluir bot')
+  }
+}
+
+export interface Pipeline {
+  id: string
+  name: string
+  description?: string
+  stages: string[]
+  groups: string[]
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreatePipelineData {
+  name: string
+  description?: string
+  stages: string[]
+  groups: string[]
+}
+
+export async function createPipeline(data: CreatePipelineData): Promise<Pipeline> {
+  const { data: pipeline, error } = await supabase
+    .from('pipelines')
+    .insert([
+      {
+        name: data.name,
+        description: data.description,
+        stages: data.stages,
+        groups: data.groups || []
+      }
+    ])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar funil')
+  }
+
+  return pipeline
+}
+
+export async function getPipelines(): Promise<Pipeline[]> {
+  const { data: pipelines, error } = await supabase
+    .from('pipelines')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar funis')
+  }
+
+  return pipelines
+}
+
+export async function togglePipeline(pipelineId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('pipelines')
+    .update({ enabled })
+    .eq('id', pipelineId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar funil')
+  }
+}
+
+export async function deletePipeline(pipelineId: string): Promise<void> {
+  const { error } = await supabase
+    .from('pipelines')
+    .delete()
+    .eq('id', pipelineId)
+
+  if (error) {
+    throw new Error('Erro ao excluir funil')
+  }
+}
+
+export interface PipelineCadence {
+  id: string
+  pipeline_id: string
+  stage: string
+  task_title: string
+  task_description?: string
+  delay_days: number
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreatePipelineCadenceData {
+  pipeline_id: string
+  stage: string
+  task_title: string
+  task_description?: string
+  delay_days: number
+}
+
+export async function createPipelineCadence(data: CreatePipelineCadenceData): Promise<PipelineCadence> {
+  const { data: cadence, error } = await supabase
+    .from('pipeline_cadences')
+    .insert([{
+      pipeline_id: data.pipeline_id,
+      stage: data.stage,
+      task_title: data.task_title,
+      task_description: data.task_description,
+      delay_days: data.delay_days
+    }])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar cadência')
+  }
+
+  return cadence
+}
+
+export async function getPipelineCadences(pipelineId: string): Promise<PipelineCadence[]> {
+  const { data: cadences, error } = await supabase
+    .from('pipeline_cadences')
+    .select('*')
+    .eq('pipeline_id', pipelineId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar cadências')
+  }
+
+  return cadences
+}
+
+export async function togglePipelineCadence(cadenceId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('pipeline_cadences')
+    .update({ enabled })
+    .eq('id', cadenceId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar cadência')
+  }
+}
+
+export async function deletePipelineCadence(cadenceId: string): Promise<void> {
+  const { error } = await supabase
+    .from('pipeline_cadences')
+    .delete()
+    .eq('id', cadenceId)
+
+  if (error) {
+    throw new Error('Erro ao excluir cadência')
+  }
+}
+
+export type CourseCategory =
+  | 'Segunda Licenciatura'
+  | 'Formação Pedagógica'
+  | 'EJA'
+  | 'Bacharelado 2°'
+  | 'Primeira Graduação'
+  | 'Pós-Graduação'
+  | 'MBA'
+  | 'Formação Livre'
+  | 'Capacitação'
+
+export interface Course {
+  id: string
+  name: string
+  description?: string
+  category: CourseCategory
+  full_price: number
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  final_price: number
+  entry_fee: number
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateCourseData {
+  name: string
+  description?: string
+  category: CourseCategory
+  full_price: number
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  final_price: number
+  entry_fee: number
+}
+
+export async function createCourse(data: CreateCourseData): Promise<Course> {
+  const { data: course, error } = await supabase
+    .from('courses')
+    .insert([{
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      full_price: data.full_price,
+      discount_type: data.discount_type,
+      discount_value: data.discount_value,
+      final_price: data.final_price,
+      entry_fee: data.entry_fee
+    }])
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Erro ao criar curso')
+  }
+
+  return course
+}
+
+export async function getCourses(): Promise<Course[]> {
+  const { data: courses, error } = await supabase
+    .from('courses')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error('Erro ao buscar cursos')
+  }
+
+  return courses
+}
+
+export async function toggleCourse(courseId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('courses')
+    .update({ enabled })
+    .eq('id', courseId)
+
+  if (error) {
+    throw new Error('Erro ao atualizar curso')
+  }
+}
+
+export async function deleteCourse(courseId: string): Promise<void> {
+  const { error } = await supabase
+    .from('courses')
+    .delete()
+    .eq('id', courseId)
+
+  if (error) {
+    throw new Error('Erro ao excluir curso')
+  }
 } 

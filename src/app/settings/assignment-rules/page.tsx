@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { CreateRuleForm } from '@/components/settings/assignment-rules/create-rule-form'
+import { AssignmentRuleForm } from '@/features/settings'
 import { Switch } from '@/components/ui/switch'
 
 export default function AssignmentRulesPage() {
@@ -39,7 +39,7 @@ export default function AssignmentRulesPage() {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <CreateRuleForm onSuccess={() => setIsCreateRuleOpen(false)} />
+            <AssignmentRuleForm onSuccess={() => setIsCreateRuleOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>

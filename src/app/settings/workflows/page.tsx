@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { CreateWorkflowForm } from '@/components/settings/workflows/create-workflow-form'
+import { WorkflowForm } from '@/features/settings'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 
@@ -45,7 +45,7 @@ export default function WorkflowsPage() {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <CreateWorkflowForm onSuccess={() => setIsCreateWorkflowOpen(false)} />
+            <WorkflowForm onSuccess={() => setIsCreateWorkflowOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>

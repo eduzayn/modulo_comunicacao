@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getGroups, moveToGroup } from '@/services/inbox'

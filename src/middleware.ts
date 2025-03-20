@@ -18,7 +18,15 @@ const publicRoutes = [
   '/api/auth/reset-password',
   '/_next',
   '/favicon.ico',
+  '/help/faq',
 ];
+
+// Define route redirects for consistency
+const redirectRoutes: Record<string, string> = {
+  '/messages': '/communication/messages',
+  '/contacts': '/communication/contacts',
+  '/chat': '/communication/chat',
+};
 
 /**
  * Middleware function
@@ -28,6 +36,14 @@ const publicRoutes = [
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Check for redirects
+  const redirectPath = redirectRoutes[pathname];
+  if (redirectPath) {
+    const url = request.nextUrl.clone();
+    url.pathname = redirectPath;
+    return NextResponse.redirect(url);
+  }
   
   // Allow access to public routes
   if (publicRoutes.some(route => pathname.startsWith(route))) {

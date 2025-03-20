@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './button'
 import { Loader2, Play, Square } from 'lucide-react'
-import { useTextToSpeech } from '@/hooks/useTextToSpeech'
+import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { VoiceSettings } from '@/app/settings/knowledge-base/types'
 
 interface AudioPlayerProps {
@@ -13,17 +13,33 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({ text, voiceSettings }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const { speak, stop, isLoading, error } = useTextToSpeech({ voiceSettings })
 
+  // Garantir que o componente só seja renderizado no cliente
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const handlePlay = async () => {
-    if (isPlaying) {
-      stop()
-      setIsPlaying(false)
-    } else {
-      setIsPlaying(true)
-      await speak(text)
+    try {
+      if (isPlaying) {
+        stop()
+        setIsPlaying(false)
+      } else {
+        setIsPlaying(true)
+        await speak(text)
+        setIsPlaying(false)
+      }
+    } catch (error) {
+      console.error('Erro ao reproduzir áudio:', error)
       setIsPlaying(false)
     }
+  }
+
+  // Não renderizar nada até que o componente esteja montado no cliente
+  if (!isMounted) {
+    return null;
   }
 
   return (

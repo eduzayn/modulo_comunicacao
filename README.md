@@ -2,6 +2,48 @@
 
 O Módulo de Comunicação é uma solução completa e integrada para gerenciar todas as interações e comunicações dentro da plataforma educacional Edunéxia. Ele combina recursos de mensageria, inteligência artificial e gestão de canais para proporcionar uma experiência de comunicação eficiente e personalizada.
 
+## Arquitetura Feature-First
+
+O projeto utiliza uma arquitetura orientada a features para melhor organização, manutenibilidade e escalabilidade do código. Essa abordagem agrupa código relacionado a uma mesma funcionalidade de negócio, em vez de separá-lo por tipos técnicos.
+
+### Estrutura de Diretórios
+
+```
+src/
+├── app/              # Rotas e páginas Next.js
+├── components/       # Componentes globais compartilhados
+├── features/         # Funcionalidades de negócio organizadas
+│   ├── chat/         # Feature de chat
+│   │   ├── components/   # Componentes específicos da feature
+│   │   ├── hooks/        # Hooks específicos da feature
+│   │   ├── services/     # Serviços específicos da feature
+│   │   ├── types/        # Tipos específicos da feature
+│   │   ├── index.ts      # Exportações públicas
+│   │   └── README.md     # Documentação
+│   │
+│   ├── crm/          # Feature de CRM
+│   │   ├── components/   # Componentes específicos da feature
+│   │   ├── hooks/        # Hooks específicos da feature
+│   │   ├── services/     # Serviços específicos da feature
+│   │   ├── types/        # Tipos específicos da feature
+│   │   ├── index.ts      # Exportações públicas
+│   │   └── README.md     # Documentação
+│   │
+│   └── [outras features]
+│
+├── hooks/            # Hooks globais reutilizáveis
+├── services/         # Serviços globais compartilhados
+├── shared/           # Código compartilhado (utils, constants, etc)
+└── types/            # Tipos globais
+```
+
+### Features Implementadas
+
+- **Chat**: Sistema completo de chat com suporte a diferentes tipos de mensagens, conversas em tempo real e integração com IA.
+- **CRM**: Gerenciamento de contatos e negociações com rastreamento de estágios do funil de vendas.
+
+Cada feature é autossuficiente, contendo seus próprios componentes, lógica de negócio, serviços e tipos, enquanto ainda compartilha recursos globais quando necessário.
+
 ## Tecnologias Utilizadas
 
 ![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
@@ -199,6 +241,57 @@ pnpm dev
 - Relatórios personalizáveis
 - Análise de performance
 - Insights automáticos
+
+## Estrutura de Hooks
+
+O projeto agora segue uma estrutura padronizada para hooks React:
+
+- **Global Hooks**: Hooks reutilizáveis em todo o projeto estão em `src/hooks/`
+- **Component Hooks**: Hooks específicos para componentes estão em `src/components/[component-name]/`
+
+Todos os hooks seguem a convenção de nomenclatura kebab-case com prefixo `use-`. 
+Para mais detalhes, consulte os documentos:
+- [Padrões de Código](src/docs/code-standards.md)
+- [Organização de Hooks](src/docs/hooks-organization.md)
+
+Esta estrutura está sendo implementada gradualmente. Ao criar novos hooks, siga as diretrizes nos documentos acima.
+
+## Padrões de Configuração
+
+O projeto segue padrões específicos para arquivos de configuração:
+
+- **Next.js**: `next.config.js` (formato CommonJS)
+- **ESLint**: `.eslintrc.js` (formato CommonJS)
+- **PostCSS**: `postcss.config.js` (formato CommonJS)
+- **TypeScript**: `tsconfig.json` (formato JSON)
+- **Tailwind CSS**: `tailwind.config.ts` (formato TypeScript)
+
+Estes padrões garantem consistência e compatibilidade com todas as ferramentas do ecossistema.
+Para mais detalhes, consulte a [documentação de configuração](src/docs/configuration-standards.md).
+
+## Arquitetura Feature-First
+
+O projeto está sendo migrado para uma arquitetura feature-first, onde o código é organizado por funcionalidades de negócio em vez de por tipos técnicos:
+
+```
+src/
+├── features/                # Funcionalidades do sistema
+│   ├── chat/                # Feature de chat
+│   ├── ai/                  # Feature de IA
+│   ├── contacts/            # Feature de contatos
+│   └── ...
+├── shared/                  # Código compartilhado entre features
+└── app/                     # Next.js App Router (rotas da aplicação)
+```
+
+Esta arquitetura proporciona:
+- **Coesão**: Código relacionado permanece junto
+- **Encapsulamento**: Cada feature expõe apenas uma API pública
+- **Modularidade**: Features independentes e isoladas
+- **Manutenção Simplificada**: Alterações localizadas dentro das features
+
+Para mais detalhes sobre esta arquitetura e o processo de migração, consulte a 
+[documentação de arquitetura feature-first](src/docs/feature-first-architecture.md).
 
 ## Contribuição
 

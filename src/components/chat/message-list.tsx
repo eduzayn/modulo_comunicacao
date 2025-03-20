@@ -1,37 +1,70 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { Message } from '@/types/conversations';
+import React, { useRef, useEffect } from 'react';
 import { MessageItem } from './message-item';
+import { Message } from '@/types/conversations';
+import { ChatMessage } from './chat-message';
 
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
+  assistantName?: string;
+  assistantAvatar?: {
+    url: string;
+    fallback: string;
+  };
 }
 
-export function MessageList({ messages, currentUserId }: MessageListProps) {
+export function MessageList({ 
+  messages, 
+  currentUserId,
+  assistantName = "Assistente",
+  assistantAvatar = { url: "", fallback: "AI" }
+}: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Scroll to bottom when messages change
-  useEffect(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
   
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-      {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Nenhuma mensagem ainda. Comece a conversa!</p>
-        </div>
-      ) : (
-        messages.map((message) => (
+    <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      {messages.map((message) => {
+        const isCurrentUser = message.senderId === currentUserId;
+        
+        // Verificar se é uma mensagem do assistente de IA
+        const isAssistant = message.senderId === 'assistant' || message.senderId === 'ai';
+        
+        if (isAssistant) {
+          return (
+            <ChatMessage 
+              key={message.id} 
+              message={{
+                id: message.id,
+                role: 'assistant',
+                content: message.content,
+                createdAt: typeof message.createdAt === 'string' 
+                  ? new Date(message.createdAt) 
+                  : message.createdAt
+              }} 
+              assistantName={assistantName}
+              assistantAvatar={assistantAvatar}
+            />
+          );
+        }
+        
+        return (
           <MessageItem 
             key={message.id} 
             message={message} 
-            isCurrentUser={message.senderId === currentUserId}
+            isCurrentUser={isCurrentUser} 
           />
-        ))
-      )}
+        );
+      })}
       <div ref={messagesEndRef} />
     </div>
   );

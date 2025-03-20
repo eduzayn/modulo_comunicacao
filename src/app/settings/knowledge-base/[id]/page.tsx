@@ -12,17 +12,11 @@ interface EditKnowledgeBasePageProps {
   }
 }
 
-export const metadata = {
-  title: 'Editar Base de Conhecimento',
-  description: 'Edite uma base de conhecimento existente.',
-}
-
 export default function EditKnowledgeBasePage({
   params,
 }: EditKnowledgeBasePageProps) {
   const router = useRouter()
-  const { data: response, isLoading } = useKnowledgeBase(params.id)
-  const knowledgeBase = response?.data
+  const { knowledgeBase, isLoading } = useKnowledgeBase(params.id)
 
   if (isLoading) {
     return (
@@ -61,7 +55,7 @@ export default function EditKnowledgeBasePage({
         </div>
       </div>
 
-      <KnowledgeBaseForm knowledgeBase={knowledgeBase} />
+      <KnowledgeBaseForm id={params.id} onSuccess={() => router.push('/settings/knowledge-base')} />
     </div>
   )
 } 

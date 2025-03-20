@@ -1,10 +1,10 @@
 'use client'
 
 import { useKnowledgeBase } from '../hooks/use-knowledge-base'
-import { Badge } from '@/components/ui/Badge'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreVertical, Pencil, Trash2, Plus, FileText, BarChart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'

@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from '@/hooks/useContacts';
+import { useContacts, useCreateContact, useUpdateContact, useDeleteContact } from '@/hooks/use-contacts';
 
 // Tipos
 interface Contact {

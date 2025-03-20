@@ -1,7 +1,7 @@
 export interface Channel {
   id: string;
   name: string;
-  type: "whatsapp" | "email" | "chat" | "sms" | "push";
+  type: "whatsapp" | "facebook" | "instagram" | "email" | "chat" | "sms" | "push";
   status: "active" | "inactive";
   config: Record<string, string | number | boolean | object | null>;
 }
@@ -43,7 +43,7 @@ export interface Template {
   name: string;
   content: string;
   variables: string[];
-  channelType: "whatsapp" | "email" | "sms";
+  channelType: "whatsapp" | "facebook" | "instagram" | "email" | "sms";
   category: string;
   version: number;
   status: "draft" | "active" | "archived";

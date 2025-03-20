@@ -16,7 +16,7 @@ export type TemplateStatus = 'active' | 'inactive' | 'draft';
 /**
  * Template channel type
  */
-export type TemplateChannelType = 'email' | 'whatsapp' | 'sms' | 'push';
+export type TemplateChannelType = 'email' | 'whatsapp' | 'facebook' | 'instagram' | 'sms' | 'push';
 
 /**
  * Template interface

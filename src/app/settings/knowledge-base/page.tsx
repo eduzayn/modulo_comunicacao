@@ -5,11 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { KnowledgeBaseList } from './components/knowledge-base-list'
 
-export const metadata = {
-  title: 'Base de Conhecimento',
-  description: 'Gerencie suas bases de conhecimento para treinar a IA.',
-}
-
 export default function KnowledgeBasePage() {
   const router = useRouter()
 

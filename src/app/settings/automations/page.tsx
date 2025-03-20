@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getAutomations, toggleAutomation } from '@/services/settings'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import {
@@ -10,18 +8,19 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { CreateAutomationForm } from '@/components/settings/automations/create-automation-form'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
+import { AutomationForm, useAutomations } from '@/features/settings'
 
 export default function AutomationsPage() {
   const [isCreateAutomationOpen, setIsCreateAutomationOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const { data: automations = [] } = useQuery({
-    queryKey: ['automations'],
-    queryFn: getAutomations
-  })
+  const { 
+    automations = [],
+    isLoading,
+    toggleAutomationStatus
+  } = useAutomations()
 
   const filteredAutomations = automations.filter(automation =>
     automation.name.toLowerCase().includes(search.toLowerCase())
@@ -45,7 +44,7 @@ export default function AutomationsPage() {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <CreateAutomationForm onSuccess={() => setIsCreateAutomationOpen(false)} />
+            <AutomationForm onSuccess={() => setIsCreateAutomationOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -77,7 +76,7 @@ export default function AutomationsPage() {
               </div>
               <Switch
                 checked={automation.enabled}
-                onCheckedChange={(checked) => toggleAutomation(automation.id, checked)}
+                onCheckedChange={(checked) => toggleAutomationStatus({ id: automation.id, enabled: checked })}
               />
             </div>
           ))}

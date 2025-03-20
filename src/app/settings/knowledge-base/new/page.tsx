@@ -5,11 +5,6 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
 import { KnowledgeBaseForm } from '../components/knowledge-base-form'
 
-export const metadata = {
-  title: 'Nova Base de Conhecimento',
-  description: 'Crie uma nova base de conhecimento para treinar a IA.',
-}
-
 export default function NewKnowledgeBasePage() {
   const router = useRouter()
 

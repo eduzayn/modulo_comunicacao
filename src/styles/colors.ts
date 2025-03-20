@@ -63,61 +63,16 @@ export const colors = {
     800: '#991b1b',
     900: '#7f1d1d',
   },
-};
-
-// CSS Variables for use in Tailwind CSS
-export const cssVariables = {
-  // Primary colors
-  '--color-communication-light': colors.primary.communication.light,
-  '--color-communication-main': colors.primary.communication.main,
-  '--color-communication-dark': colors.primary.communication.dark,
-  '--color-communication-gradient': colors.primary.communication.gradient,
-  
-  '--color-student-light': colors.primary.student.light,
-  '--color-student-main': colors.primary.student.main,
-  '--color-student-dark': colors.primary.student.dark,
-  '--color-student-gradient': colors.primary.student.gradient,
-  
-  '--color-content-light': colors.primary.content.light,
-  '--color-content-main': colors.primary.content.main,
-  '--color-content-dark': colors.primary.content.dark,
-  '--color-content-gradient': colors.primary.content.gradient,
-  
-  '--color-enrollment-light': colors.primary.enrollment.light,
-  '--color-enrollment-main': colors.primary.enrollment.main,
-  '--color-enrollment-dark': colors.primary.enrollment.dark,
-  '--color-enrollment-gradient': colors.primary.enrollment.gradient,
-  
-  // Neutral colors
-  '--color-neutral-50': colors.neutral[50],
-  '--color-neutral-100': colors.neutral[100],
-  '--color-neutral-200': colors.neutral[200],
-  '--color-neutral-300': colors.neutral[300],
-  '--color-neutral-400': colors.neutral[400],
-  '--color-neutral-500': colors.neutral[500],
-  '--color-neutral-600': colors.neutral[600],
-  '--color-neutral-700': colors.neutral[700],
-  '--color-neutral-800': colors.neutral[800],
-  '--color-neutral-900': colors.neutral[900],
-  
-  // Semantic colors
-  '--color-success': colors.semantic.success,
-  '--color-warning': colors.semantic.warning,
-  '--color-error': colors.semantic.error,
-  '--color-info': colors.semantic.info,
-};
-
-// Helper function to get module color
-export const getModuleColor = (module: 'communication' | 'student' | 'content' | 'enrollment', variant: 'light' | 'main' | 'dark' | 'gradient' = 'main') => {
-  return colors.primary[module][variant];
-};
-
-// Helper function to get semantic color
-export const getSemanticColor = (type: 'success' | 'warning' | 'error' | 'info') => {
-  return colors.semantic[type];
-};
-
-// Helper function to get neutral color
-export const getNeutralColor = (shade: 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900) => {
-  return colors.neutral[shade];
+  info: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+  }
 };

@@ -13,6 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
+import { WhatsAppConfig, CreateChannelInput } from '@/types/channels'
+import { useChannels } from '@/hooks/use-channels'
+import { useToast } from '@/components/ui/use-toast'
 
 // Esquema de validação para o formulário
 const formSchema = z.object({
@@ -29,6 +32,8 @@ export default function WhatsappCloudApiPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
+  const { addChannel: createChannel } = useChannels()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -46,16 +51,39 @@ export default function WhatsappCloudApiPage() {
     setError(null)
 
     try {
-      // Aqui você implementaria a lógica para salvar o canal
-      // Exemplo: await createChannel({ ...data, type: 'whatsapp-cloud-api' })
+      // Criar a configuração usando a interface WhatsAppConfig
+      const whatsappConfig: WhatsAppConfig = {
+        apiKey: data.token,
+        phoneNumber: data.phoneNumber,
+        webhookUrl: `https://seu-dominio.com/api/webhooks/whatsapp/${data.businessAccountId}`,
+        messageTemplate: "Olá {{name}}, como posso ajudar?"
+      };
       
-      // Simula uma espera pela resposta da API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Criar o objeto de entrada do canal
+      const channelInput: CreateChannelInput = {
+        name: data.name,
+        type: 'whatsapp',
+        status: 'active',
+        config: whatsappConfig
+      };
+      
+      await createChannel(channelInput);
+      
+      toast({
+        title: 'Canal WhatsApp configurado com sucesso',
+        description: 'Agora você pode enviar e receber mensagens pelo WhatsApp.',
+      })
       
       router.push('/settings/channels')
     } catch (err) {
       setError('Ocorreu um erro ao salvar o canal. Por favor, tente novamente.')
       console.error(err)
+      
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao configurar canal',
+        description: 'Não foi possível conectar ao WhatsApp. Verifique suas credenciais.',
+      })
     } finally {
       setIsSubmitting(false)
     }

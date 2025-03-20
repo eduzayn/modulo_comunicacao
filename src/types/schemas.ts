@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 export const channelSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
+  id: z.string().uuid(),
+  name: z.string(),
+  type: z.enum(['whatsapp', 'facebook', 'instagram', 'email', 'chat', 'sms', 'push']),
   status: z.enum(['active', 'inactive']),
-  config: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
+  config: z.record(z.union([z.string(), z.number(), z.boolean(), z.object({}), z.null()])),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
 });
 
 export const conversationSchema = z.object({
@@ -35,9 +37,10 @@ export const templateSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Nome é obrigatório'),
   content: z.string().min(1, 'Conteúdo é obrigatório'),
-  channelType: z.enum(['whatsapp', 'email', 'chat', 'sms', 'push']),
-  category: z.string().optional(),
+  channelType: z.enum(['whatsapp', 'facebook', 'instagram', 'email', 'chat', 'sms', 'push']),
+  category: z.string(),
   variables: z.array(z.string()),
+  version: z.number(),
   status: z.enum(['draft', 'active', 'archived']),
   createdAt: z.string(),
   updatedAt: z.string(),

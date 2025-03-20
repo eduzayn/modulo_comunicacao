@@ -34,6 +34,74 @@ export interface WhatsAppConfig {
  * @swagger
  * components:
  *   schemas:
+ *     FacebookConfig:
+ *       type: object
+ *       properties:
+ *         pageId:
+ *           type: string
+ *         pageAccessToken:
+ *           type: string
+ *         enableCommentReplies:
+ *           type: boolean
+ *         enableMessageReplies:
+ *           type: boolean
+ *         notifyOnNewComment:
+ *           type: boolean
+ *         notifyOnNewMessage:
+ *           type: boolean
+ *       required:
+ *         - pageId
+ *         - pageAccessToken
+ */
+export interface FacebookConfig {
+  pageId: string;
+  pageAccessToken: string;
+  enableCommentReplies?: boolean;
+  enableMessageReplies?: boolean;
+  notifyOnNewComment?: boolean;
+  notifyOnNewMessage?: boolean;
+}
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     InstagramConfig:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *         accessToken:
+ *           type: string
+ *         businessAccountId:
+ *           type: string
+ *         enableCommentReplies:
+ *           type: boolean
+ *         enableDirectMessages:
+ *           type: boolean
+ *         notifyOnNewComment:
+ *           type: boolean
+ *         notifyOnNewMessage:
+ *           type: boolean
+ *       required:
+ *         - username
+ *         - accessToken
+ *         - businessAccountId
+ */
+export interface InstagramConfig {
+  username: string;
+  accessToken: string;
+  businessAccountId: string;
+  enableCommentReplies?: boolean;
+  enableDirectMessages?: boolean;
+  notifyOnNewComment?: boolean;
+  notifyOnNewMessage?: boolean;
+}
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
  *     EmailConfig:
  *       type: object
  *       properties:
@@ -133,7 +201,7 @@ export interface PushConfig {
 }
 
 // Define as Json compatible type for database storage
-export type ChannelConfig = WhatsAppConfig | EmailConfig | SMSConfig | ChatConfig | PushConfig;
+export type ChannelConfig = WhatsAppConfig | FacebookConfig | InstagramConfig | EmailConfig | SMSConfig | ChatConfig | PushConfig;
 export type ChannelConfigJson = Record<string, string | number | boolean | object | null>;
 
 /**
@@ -147,7 +215,7 @@ export type ChannelConfigJson = Record<string, string | number | boolean | objec
  *           type: string
  *         type:
  *           type: string
- *           enum: [whatsapp, email, chat, sms, push]
+ *           enum: [whatsapp, facebook, instagram, email, chat, sms, push]
  *         status:
  *           type: string
  *           enum: [active, inactive, maintenance]
