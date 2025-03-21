@@ -5,6 +5,11 @@
  * Fornece acesso rápido às principais áreas do sistema.
  */
 
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
@@ -14,17 +19,12 @@ import { MessageSquare, Users, BarChart3, Clock, Calendar, Settings } from 'luci
 import { ProtectedPage } from '@/components/auth/ProtectedPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export const metadata = {
-  title: 'Dashboard - Sistema de Comunicação',
-  description: 'Acesso rápido às principais funcionalidades do sistema de comunicação e gestão',
-}
-
 const areaCards = [
   {
     title: 'Comunicação',
     description: 'Chat, mensagens e gestão de contatos',
     icon: <MessageSquare className="h-6 w-6 text-primary" />,
-    href: '/communication/messages',
+    href: '/inbox',
     cta: 'Acessar comunicação',
     stats: {
       label: 'Mensagens hoje',
@@ -200,45 +200,36 @@ function Favorites() {
   )
 }
 
-export default function Home() {
-  return (
-    <ProtectedPage>
-      <main className="container px-4 py-8 mx-auto max-w-7xl">
-        <div className="flex flex-col space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao Sistema</h1>
-            <p className="text-muted-foreground">
-              Acesse rapidamente todas as funcionalidades do sistema de comunicação e gestão
-            </p>
-          </div>
+export default function HomePage() {
+  const router = useRouter();
 
-          <Tabs defaultValue="areas" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="areas">Áreas Principais</TabsTrigger>
-              <TabsTrigger value="recentes">Atividades Recentes</TabsTrigger>
-              <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="areas" className="space-y-4">
-              <Suspense fallback={<CardsSkeleton />}>
-                <MainAreaCards />
-              </Suspense>
-            </TabsContent>
-            
-            <TabsContent value="recentes">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <RecentActivities />
-              </Suspense>
-            </TabsContent>
-            
-            <TabsContent value="favoritos">
-              <Suspense fallback={<TabContentSkeleton />}>
-                <Favorites />
-              </Suspense>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-    </ProtectedPage>
-  )
+  useEffect(() => {
+    try {
+      // Verificar se há um token de bypass no localStorage
+      const hasBypassAuth = typeof window !== 'undefined' && localStorage.getItem('bypass-auth') === 'true';
+      
+      if (hasBypassAuth) {
+        // Se já está autenticado, redireciona diretamente para a caixa de entrada
+        router.push('/inbox');
+      } else {
+        // Se não está autenticado, redireciona para login com parâmetro de retorno
+        router.push('/login?returnUrl=/inbox');
+      }
+      
+    } catch (error) {
+      console.error("Erro durante o redirecionamento:", error);
+      // Evita loops infinitos em caso de erro
+    }
+  }, [router]);
+
+  // Tela de carregamento
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40">
+      <h1 className="text-2xl font-semibold mb-6">Módulo de Comunicação</h1>
+      <div className="flex items-center space-x-2">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-lg">Carregando...</span>
+      </div>
+    </div>
+  );
 }

@@ -127,10 +127,11 @@ src/app/comunicacao/
 - [x] Renomear `communication/` para `comunicacao/`
 - [x] Remover pasta `messages/` (manter apenas `mensagens/`)
 - [x] Criar estrutura `conversas/` para substituir `conversations/`
+- [x] Remover `conversations/` quando todas as referências estiverem atualizadas
+- [x] Atualizar referência no card de Comunicação na página inicial para `/inbox`
 - [ ] Implementar middleware de redirecionamento
 - [ ] Buscar e documentar todas as referências a caminhos antigos
 - [ ] Atualizar referências uma a uma, testando após cada alteração
-- [ ] Remover `conversations/` quando todas as referências estiverem atualizadas
 - [ ] Renomear `hooks/communication/` para `hooks/comunicacao/`
 - [ ] Atualizar `routes.tsx` para refletir a estrutura consolidada
 - [ ] Verificar e corrigir links em todas as páginas
