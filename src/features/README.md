@@ -33,7 +33,11 @@ feature/
 - **crm**: Gestão de relacionamento com o cliente
 - **settings**: Configurações da aplicação
 - **ai**: Recursos de inteligência artificial
+  - Análise de sentimento em mensagens
+  - Classificação automática de intenções em mensagens
+  - Extração de entidades de mensagens
 - **inbox**: Caixa de entrada unificada
+  - Integração com análise de sentimento
 - **contacts**: Gestão de contatos
 - **conversations**: Gerenciamento de conversas
 - **reports**: Relatórios e análises
@@ -252,7 +256,9 @@ O sistema oferece uma API RESTful para integração com sistemas externos, com e
 - **Supabase**: Backend como serviço (Banco de dados e autenticação)
 - **TanStack Query**: Gerenciamento de estado e dados
 - **Shadcn UI + Tailwind CSS**: UI e estilização
-- **Vercel AI SDK**: Integrações com IA
+- **React Icons**: Biblioteca de ícones para componentes de UI
+- **next-safe-action**: Validação e segurança para Server Actions
+- **Vercel AI SDK**: Integrações com IA (preparado para implementações futuras)
 
 ## 7. Diretrizes de Implementação
 
