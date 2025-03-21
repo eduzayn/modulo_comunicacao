@@ -1,0 +1,651 @@
+{
+  "description": "Chaves estrangeiras entre tabelas",
+  "query": "SELECT conrelid::regclass AS tabela_origem, a.attname AS coluna_origem, confrelid::regclass AS tabela_referenciada FROM pg_constraint JOIN pg_attribute a ON a.attnum = ANY(pg_constraint.conkey) AND a.attrelid = pg_constraint.conrelid WHERE contype = 'f'",
+  "results": [
+    {
+      "tabela_origem": "storage.objects",
+      "coluna_origem": "bucket_id",
+      "tabela_referenciada": "storage.buckets"
+    },
+    {
+      "tabela_origem": "pgsodium.key",
+      "coluna_origem": "parent_key",
+      "tabela_referenciada": "pgsodium.key"
+    },
+    {
+      "tabela_origem": "vault.secrets",
+      "coluna_origem": "key_id",
+      "tabela_referenciada": "pgsodium.key"
+    },
+    {
+      "tabela_origem": "conversations",
+      "coluna_origem": "channel_id",
+      "tabela_referenciada": "channels"
+    },
+    {
+      "tabela_origem": "messages",
+      "coluna_origem": "conversation_id",
+      "tabela_referenciada": "conversations"
+    },
+    {
+      "tabela_origem": "categories",
+      "coluna_origem": "parentid",
+      "tabela_referenciada": "categories"
+    },
+    {
+      "tabela_origem": "reviews",
+      "coluna_origem": "contentid",
+      "tabela_referenciada": "content"
+    },
+    {
+      "tabela_origem": "review_comments",
+      "coluna_origem": "reviewid",
+      "tabela_referenciada": "reviews"
+    },
+    {
+      "tabela_origem": "site.plan_features",
+      "coluna_origem": "plan_id",
+      "tabela_referenciada": "site.pricing_plans"
+    },
+    {
+      "tabela_origem": "content_media",
+      "coluna_origem": "contentid",
+      "tabela_referenciada": "content"
+    },
+    {
+      "tabela_origem": "content_media",
+      "coluna_origem": "mediaid",
+      "tabela_referenciada": "media"
+    },
+    {
+      "tabela_origem": "chatbot_mensagens",
+      "coluna_origem": "conversa_id",
+      "tabela_referenciada": "chatbot_conversas"
+    },
+    {
+      "tabela_origem": "content_categories",
+      "coluna_origem": "parent_id",
+      "tabela_referenciada": "content_categories"
+    },
+    {
+      "tabela_origem": "content_versions",
+      "coluna_origem": "content_id",
+      "tabela_referenciada": "content_items"
+    },
+    {
+      "tabela_origem": "content_versions",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "email_logs",
+      "coluna_origem": "template_id",
+      "tabela_referenciada": "email_templates"
+    },
+    {
+      "tabela_origem": "matricula_documentos",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matricula.registros"
+    },
+    {
+      "tabela_origem": "matricula_contratos",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matricula.registros"
+    },
+    {
+      "tabela_origem": "teams",
+      "coluna_origem": "account_id",
+      "tabela_referenciada": "accounts"
+    },
+    {
+      "tabela_origem": "turmas",
+      "coluna_origem": "curso_id",
+      "tabela_referenciada": "cursos"
+    },
+    {
+      "tabela_origem": "campanhas_descontos",
+      "coluna_origem": "campanha_id",
+      "tabela_referenciada": "campanhas"
+    },
+    {
+      "tabela_origem": "campanhas_descontos",
+      "coluna_origem": "desconto_id",
+      "tabela_referenciada": "descontos"
+    },
+    {
+      "tabela_origem": "programa_indicacao",
+      "coluna_origem": "recompensa_indicador_id",
+      "tabela_referenciada": "descontos"
+    },
+    {
+      "tabela_origem": "programa_indicacao",
+      "coluna_origem": "recompensa_indicado_id",
+      "tabela_referenciada": "descontos"
+    },
+    {
+      "tabela_origem": "faq_perguntas",
+      "coluna_origem": "categoria_id",
+      "tabela_referenciada": "faq_categorias"
+    },
+    {
+      "tabela_origem": "invoices",
+      "coluna_origem": "subscription_id",
+      "tabela_referenciada": "subscriptions"
+    },
+    {
+      "tabela_origem": "ai_sessions",
+      "coluna_origem": "contentid",
+      "tabela_referenciada": "content"
+    },
+    {
+      "tabela_origem": "ai_messages",
+      "coluna_origem": "sessionid",
+      "tabela_referenciada": "ai_sessions"
+    },
+    {
+      "tabela_origem": "review_requests",
+      "coluna_origem": "content_id",
+      "tabela_referenciada": "content_items"
+    },
+    {
+      "tabela_origem": "review_requests",
+      "coluna_origem": "requestor_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "review_requests",
+      "coluna_origem": "reviewer_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "review_approvals",
+      "coluna_origem": "review_id",
+      "tabela_referenciada": "review_requests"
+    },
+    {
+      "tabela_origem": "review_approvals",
+      "coluna_origem": "approver_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "refresh_tokens",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "matriculas",
+      "coluna_origem": "aluno_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "lessons",
+      "coluna_origem": "module_id",
+      "tabela_referenciada": "modules"
+    },
+    {
+      "tabela_origem": "enrollments",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "lesson_progress",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "lesson_progress",
+      "coluna_origem": "module_id",
+      "tabela_referenciada": "modules"
+    },
+    {
+      "tabela_origem": "lesson_progress",
+      "coluna_origem": "lesson_id",
+      "tabela_referenciada": "lessons"
+    },
+    {
+      "tabela_origem": "certificates",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "financial_records",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "notifications",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "user_profiles",
+      "coluna_origem": "id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "learning_path_courses",
+      "coluna_origem": "learning_path_id",
+      "tabela_referenciada": "learning_paths"
+    },
+    {
+      "tabela_origem": "learning_path_enrollments",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "learning_path_enrollments",
+      "coluna_origem": "learning_path_id",
+      "tabela_referenciada": "learning_paths"
+    },
+    {
+      "tabela_origem": "supplementary_materials",
+      "coluna_origem": "lesson_id",
+      "tabela_referenciada": "lessons"
+    },
+    {
+      "tabela_origem": "supplementary_materials",
+      "coluna_origem": "module_id",
+      "tabela_referenciada": "modules"
+    },
+    {
+      "tabela_origem": "documentos",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matriculas"
+    },
+    {
+      "tabela_origem": "contratos",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matriculas"
+    },
+    {
+      "tabela_origem": "account_users",
+      "coluna_origem": "account_id",
+      "tabela_referenciada": "accounts"
+    },
+    {
+      "tabela_origem": "account_users",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "users"
+    },
+    {
+      "tabela_origem": "team_members",
+      "coluna_origem": "team_id",
+      "tabela_referenciada": "teams"
+    },
+    {
+      "tabela_origem": "team_members",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "users"
+    },
+    {
+      "tabela_origem": "canned_responses",
+      "coluna_origem": "account_id",
+      "tabela_referenciada": "accounts"
+    },
+    {
+      "tabela_origem": "profiles",
+      "coluna_origem": "id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "audit_logs",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "error_logs",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "course_ratings",
+      "coluna_origem": "student_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "matricula.registros",
+      "coluna_origem": "aluno_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "financial.invoice_items",
+      "coluna_origem": "invoice_id",
+      "tabela_referenciada": "financial.invoices"
+    },
+    {
+      "tabela_origem": "contacts",
+      "coluna_origem": "account_id",
+      "tabela_referenciada": "accounts"
+    },
+    {
+      "tabela_origem": "inboxes",
+      "coluna_origem": "account_id",
+      "tabela_referenciada": "accounts"
+    },
+    {
+      "tabela_origem": "inbox_members",
+      "coluna_origem": "inbox_id",
+      "tabela_referenciada": "inboxes"
+    },
+    {
+      "tabela_origem": "inbox_members",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "users"
+    },
+    {
+      "tabela_origem": "auth.identities",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "auth.sessions",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "auth.refresh_tokens",
+      "coluna_origem": "session_id",
+      "tabela_referenciada": "auth.sessions"
+    },
+    {
+      "tabela_origem": "auth.mfa_factors",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "auth.mfa_challenges",
+      "coluna_origem": "factor_id",
+      "tabela_referenciada": "auth.mfa_factors"
+    },
+    {
+      "tabela_origem": "auth.mfa_amr_claims",
+      "coluna_origem": "session_id",
+      "tabela_referenciada": "auth.sessions"
+    },
+    {
+      "tabela_origem": "auth.sso_domains",
+      "coluna_origem": "sso_provider_id",
+      "tabela_referenciada": "auth.sso_providers"
+    },
+    {
+      "tabela_origem": "auth.saml_providers",
+      "coluna_origem": "sso_provider_id",
+      "tabela_referenciada": "auth.sso_providers"
+    },
+    {
+      "tabela_origem": "auth.saml_relay_states",
+      "coluna_origem": "sso_provider_id",
+      "tabela_referenciada": "auth.sso_providers"
+    },
+    {
+      "tabela_origem": "auth.saml_relay_states",
+      "coluna_origem": "flow_state_id",
+      "tabela_referenciada": "auth.flow_state"
+    },
+    {
+      "tabela_origem": "auth.one_time_tokens",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "storage.s3_multipart_uploads",
+      "coluna_origem": "bucket_id",
+      "tabela_referenciada": "storage.buckets"
+    },
+    {
+      "tabela_origem": "storage.s3_multipart_uploads_parts",
+      "coluna_origem": "upload_id",
+      "tabela_referenciada": "storage.s3_multipart_uploads"
+    },
+    {
+      "tabela_origem": "storage.s3_multipart_uploads_parts",
+      "coluna_origem": "bucket_id",
+      "tabela_referenciada": "storage.buckets"
+    },
+    {
+      "tabela_origem": "content_items",
+      "coluna_origem": "author_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "financial.payments",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matricula.registros"
+    },
+    {
+      "tabela_origem": "financial.invoices",
+      "coluna_origem": "matricula_id",
+      "tabela_referenciada": "matricula.registros"
+    },
+    {
+      "tabela_origem": "financial.invoices",
+      "coluna_origem": "aluno_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "financial.lytex_integration",
+      "coluna_origem": "payment_id",
+      "tabela_referenciada": "financial.payments"
+    },
+    {
+      "tabela_origem": "financial.negotiations",
+      "coluna_origem": "aluno_id",
+      "tabela_referenciada": "students"
+    },
+    {
+      "tabela_origem": "financial.negotiation_items",
+      "coluna_origem": "negotiation_id",
+      "tabela_referenciada": "financial.negotiations"
+    },
+    {
+      "tabela_origem": "financial.negotiation_items",
+      "coluna_origem": "payment_id",
+      "tabela_referenciada": "financial.payments"
+    },
+    {
+      "tabela_origem": "\"communication.widget_form_fields\"",
+      "coluna_origem": "widget_id",
+      "tabela_referenciada": "\"communication.widget_settings\""
+    },
+    {
+      "tabela_origem": "\"communication.widget_domains\"",
+      "coluna_origem": "widget_id",
+      "tabela_referenciada": "\"communication.widget_settings\""
+    },
+    {
+      "tabela_origem": "payment_history",
+      "coluna_origem": "invoice_id",
+      "tabela_referenciada": "invoices"
+    },
+    {
+      "tabela_origem": "payment_history",
+      "coluna_origem": "payment_method_id",
+      "tabela_referenciada": "payment_methods"
+    },
+    {
+      "tabela_origem": "ai_settings",
+      "coluna_origem": "channel_id",
+      "tabela_referenciada": "channels"
+    },
+    {
+      "tabela_origem": "channel_integrations",
+      "coluna_origem": "channel_id",
+      "tabela_referenciada": "channels"
+    },
+    {
+      "tabela_origem": "partners",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "teachers",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "learning_centers",
+      "coluna_origem": "partner_id",
+      "tabela_referenciada": "partners"
+    },
+    {
+      "tabela_origem": "learning_centers",
+      "coluna_origem": "manager_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "learning_center_staff",
+      "coluna_origem": "learning_center_id",
+      "tabela_referenciada": "learning_centers"
+    },
+    {
+      "tabela_origem": "learning_center_staff",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "assessment_templates",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "analytics_events",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "usuarios",
+      "coluna_origem": "id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "chat_messages",
+      "coluna_origem": "sender_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "professor_aluno",
+      "coluna_origem": "professor_id",
+      "tabela_referenciada": "usuarios"
+    },
+    {
+      "tabela_origem": "professor_aluno",
+      "coluna_origem": "aluno_id",
+      "tabela_referenciada": "usuarios"
+    },
+    {
+      "tabela_origem": "subscriptions",
+      "coluna_origem": "plan_id",
+      "tabela_referenciada": "subscription_plans"
+    },
+    {
+      "tabela_origem": "cursos",
+      "coluna_origem": "professor_id",
+      "tabela_referenciada": "usuarios"
+    },
+    {
+      "tabela_origem": "submissions",
+      "coluna_origem": "assessment_id",
+      "tabela_referenciada": "assessments"
+    },
+    {
+      "tabela_origem": "submissions",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "course_materials",
+      "coluna_origem": "lesson_id",
+      "tabela_referenciada": "lessons"
+    },
+    {
+      "tabela_origem": "chat_messages",
+      "coluna_origem": "parent_message_id",
+      "tabela_referenciada": "chat_messages"
+    },
+    {
+      "tabela_origem": "feedback",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "progress_tracking",
+      "coluna_origem": "user_id",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "progress_tracking",
+      "coluna_origem": "lesson_id",
+      "tabela_referenciada": "lessons"
+    },
+    {
+      "tabela_origem": "progress_tracking",
+      "coluna_origem": "material_id",
+      "tabela_referenciada": "course_materials"
+    },
+    {
+      "tabela_origem": "white_label_themes",
+      "coluna_origem": "organization_id",
+      "tabela_referenciada": "organizations"
+    },
+    {
+      "tabela_origem": "white_label_themes",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "white_label_layouts",
+      "coluna_origem": "theme_id",
+      "tabela_referenciada": "white_label_themes"
+    },
+    {
+      "tabela_origem": "white_label_layouts",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "white_label_sections",
+      "coluna_origem": "layout_id",
+      "tabela_referenciada": "white_label_layouts"
+    },
+    {
+      "tabela_origem": "white_label_section_contents",
+      "coluna_origem": "section_id",
+      "tabela_referenciada": "white_label_sections"
+    },
+    {
+      "tabela_origem": "white_label_section_contents",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "white_label_templates",
+      "coluna_origem": "created_by",
+      "tabela_referenciada": "auth.users"
+    },
+    {
+      "tabela_origem": "white_label_domains",
+      "coluna_origem": "organization_id",
+      "tabela_referenciada": "organizations"
+    },
+    {
+      "tabela_origem": "organizations",
+      "coluna_origem": "active_theme_id",
+      "tabela_referenciada": "white_label_themes"
+    },
+    {
+      "tabela_origem": "white_label_permissions",
+      "coluna_origem": "organization_id",
+      "tabela_referenciada": "organizations"
+    },
+    {
+      "tabela_origem": "conversations",
+      "coluna_origem": "group_id",
+      "tabela_referenciada": "groups"
+    },
+    {
+      "tabela_origem": "pipeline_cadences",
+      "coluna_origem": "pipeline_id",
+      "tabela_referenciada": "pipelines"
+    }
+  ]
+}
