@@ -8,7 +8,7 @@ export { sentimentService } from './services/sentiment-service';
 export { messageClassificationService } from './services/message-classification-service';
 
 // Componentes
-// TODO: Adicionar componentes da feature
+export * from './components';
 
 // Hooks
-// TODO: Adicionar hooks da feature
+export * from './hooks';
