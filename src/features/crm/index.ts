@@ -1,39 +1,29 @@
-// Componentes
-export { CrmDashboard } from './components/CrmDashboard'
-export { ContactList } from './components/ContactList'
-export { DealList } from './components/DealList'
+/**
+ * Módulo CRM - Exportação dos principais recursos
+ */
 
-// Hooks
-export { useContacts } from './hooks/use-contacts'
-export { useDeals } from './hooks/use-deals'
+// Feature CRM exports
 
 // Serviços
-export {
-  getContacts,
-  getContactById,
-  createContact,
-  updateContact,
-  deleteContact,
-  createDeal,
-  getDealsByContact,
-  updateDealStage,
-  deleteDeal
-} from './services/crm-service'
+export { crmService } from './services/crm-service';
+
+// Hooks
+export { useDeals } from './hooks/useDeals';
+export { useActivities } from './hooks/useActivities';
 
 // Tipos
 export type {
-  Contact,
-  ContactFormData,
-  ContactFilters,
-  ContactsState,
-  Deal,
-  CreateDealData,
-  DealState,
-  FunnelStage
-} from './types/crm.types'
+  DealFilter,
+  DealWithRelations,
+  DealActivityWithUser,
+  DealStats,
+  CreateDealPayload,
+  UpdateDealPayload,
+  CreateActivityPayload
+} from './types';
 
-export {
-  formatCurrency,
-  getStageLabel,
-  generateMockDeals
-} from './types/crm.types' 
+// Componentes
+// TODO: Adicionar componentes quando implementados
+// export { DealCard } from './components/DealCard';
+// export { DealList } from './components/DealList';
+// export { ActivityForm } from './components/ActivityForm';
