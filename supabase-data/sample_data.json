@@ -1,0 +1,198 @@
+{
+  "description": "Amostras de dados das principais tabelas",
+  "tables": {
+    "conversations": [
+      {
+        "id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "title": "Grupo de Desenvolvimento",
+        "created_at": "2023-05-15T10:00:00Z",
+        "updated_at": "2023-05-15T10:00:00Z",
+        "creator_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "is_group": true,
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92"
+      },
+      {
+        "id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "title": "Chat com Suporte",
+        "created_at": "2023-05-20T14:30:00Z",
+        "updated_at": "2023-05-22T09:15:00Z",
+        "creator_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "is_group": false,
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c93"
+      },
+      {
+        "id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "title": "Equipe de Produto",
+        "created_at": "2023-06-01T08:45:00Z",
+        "updated_at": "2023-06-10T16:20:00Z",
+        "creator_id": "b2c3d4e5-f6a7-5b6c-9d0e-2f3a4b5c6d7e",
+        "is_group": true,
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92"
+      }
+    ],
+    "messages": [
+      {
+        "id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "sender_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "content": "Olá pessoal, bem-vindos ao grupo de desenvolvimento!",
+        "created_at": "2023-05-15T10:05:00Z",
+        "is_read": true,
+        "parent_id": null,
+        "has_attachments": false
+      },
+      {
+        "id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "sender_id": "b2c3d4e5-f6a7-5b6c-9d0e-2f3a4b5c6d7e",
+        "content": "Obrigado pelo convite! Estou ansioso para colaborar com todos.",
+        "created_at": "2023-05-15T10:10:00Z",
+        "is_read": true,
+        "parent_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "has_attachments": false
+      },
+      {
+        "id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "sender_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "content": "Preciso de ajuda com a configuração do ambiente de desenvolvimento.",
+        "created_at": "2023-05-20T14:35:00Z",
+        "is_read": true,
+        "parent_id": null,
+        "has_attachments": true
+      },
+      {
+        "id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c95",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "sender_id": "b2c3d4e5-f6a7-5b6c-9d0e-2f3a4b5c6d7e",
+        "content": "Vamos discutir a nova funcionalidade na próxima reunião.",
+        "created_at": "2023-06-01T09:00:00Z",
+        "is_read": false,
+        "parent_id": null,
+        "has_attachments": false
+      }
+    ],
+    "message_attachments": [
+      {
+        "id": "a0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "message_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "file_path": "message_attachments/error_log.txt",
+        "file_name": "error_log.txt",
+        "file_size": 2450,
+        "file_type": "text/plain",
+        "created_at": "2023-05-20T14:35:00Z"
+      }
+    ],
+    "channels": [
+      {
+        "id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "name": "Desenvolvimento",
+        "description": "Canal para discussões relacionadas ao desenvolvimento de software",
+        "type": "chat",
+        "created_at": "2023-05-10T08:00:00Z",
+        "is_active": true,
+        "owner_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d"
+      },
+      {
+        "id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "name": "Suporte",
+        "description": "Canal de suporte técnico",
+        "type": "chat",
+        "created_at": "2023-05-10T08:30:00Z",
+        "is_active": true,
+        "owner_id": "c3d4e5f6-a7b8-6c9d-0e1f-3a4b5c6d7e8f"
+      }
+    ],
+    "conversation_participants": [
+      {
+        "id": "p0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "user_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "joined_at": "2023-05-15T10:00:00Z",
+        "is_admin": true,
+        "is_active": true,
+        "last_read_message_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c93"
+      },
+      {
+        "id": "p0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "user_id": "b2c3d4e5-f6a7-5b6c-9d0e-2f3a4b5c6d7e",
+        "joined_at": "2023-05-15T10:02:00Z",
+        "is_admin": false,
+        "is_active": true,
+        "last_read_message_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c93"
+      },
+      {
+        "id": "p0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "user_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "joined_at": "2023-05-20T14:30:00Z",
+        "is_admin": true,
+        "is_active": true,
+        "last_read_message_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c94"
+      },
+      {
+        "id": "p0a80121-7ac0-4e1c-9a5f-8f21f40b2c95",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "user_id": "c3d4e5f6-a7b8-6c9d-0e1f-3a4b5c6d7e8f",
+        "joined_at": "2023-05-20T14:30:00Z",
+        "is_admin": false,
+        "is_active": true,
+        "last_read_message_id": "m0a80121-7ac0-4e1c-9a5f-8f21f40b2c94"
+      }
+    ],
+    "tags": [
+      {
+        "id": "t0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "name": "Urgente",
+        "color": "#FF4136",
+        "created_at": "2023-05-10T09:00:00Z",
+        "creator_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92"
+      },
+      {
+        "id": "t0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "name": "Bug",
+        "color": "#FF851B",
+        "created_at": "2023-05-10T09:05:00Z",
+        "creator_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92"
+      },
+      {
+        "id": "t0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "name": "Suporte",
+        "color": "#0074D9",
+        "created_at": "2023-05-10T09:10:00Z",
+        "creator_id": "c3d4e5f6-a7b8-6c9d-0e1f-3a4b5c6d7e8f",
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c93"
+      }
+    ],
+    "conversation_tags": [
+      {
+        "id": "ct0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "conversation_id": "c0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "tag_id": "t0a80121-7ac0-4e1c-9a5f-8f21f40b2c94",
+        "created_at": "2023-05-20T14:40:00Z",
+        "creator_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d"
+      }
+    ],
+    "user_channel_settings": [
+      {
+        "id": "uc0a80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "user_id": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "notifications_enabled": true,
+        "theme": "light",
+        "updated_at": "2023-05-15T10:30:00Z"
+      },
+      {
+        "id": "uc0a80121-7ac0-4e1c-9a5f-8f21f40b2c93",
+        "user_id": "b2c3d4e5-f6a7-5b6c-9d0e-2f3a4b5c6d7e",
+        "channel_id": "d0e80121-7ac0-4e1c-9a5f-8f21f40b2c92",
+        "notifications_enabled": false,
+        "theme": "dark",
+        "updated_at": "2023-05-16T11:20:00Z"
+      }
+    ]
+  }
+} 
