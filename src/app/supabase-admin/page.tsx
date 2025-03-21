@@ -7,10 +7,12 @@ export default function SupabaseAdminPage() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'functions' | 'buckets'>('functions')
 
   const fetchFunctions = async () => {
     setLoading(true)
     setError(null)
+    setActiveTab('functions')
     
     try {
       const response = await fetch('/api/supabase')
@@ -29,24 +31,50 @@ export default function SupabaseAdminPage() {
     }
   }
 
+  const fetchBuckets = async () => {
+    setLoading(true)
+    setError(null)
+    setActiveTab('buckets')
+    
+    try {
+      const response = await fetch('/api/supabase/buckets')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao buscar buckets')
+      }
+      
+      const data = await response.json()
+      setResult(data.buckets)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const executeSqlQuery = async () => {
-    // Esta função seria usada com um formulário para executar consultas SQL
-    // customizadas via API POST
     setLoading(true)
     setError(null)
     
     try {
-      const query = `
-        SELECT n.nspname AS schema,
-        p.proname AS function_name,
-        pg_catalog.pg_get_function_result(p.oid) AS return_type,
-        pg_catalog.pg_get_function_arguments(p.oid) AS arguments
-        FROM pg_proc p
-        JOIN pg_namespace n ON n.oid = p.pronamespace
-        WHERE n.nspname = 'public'
-        ORDER BY function_name
-        LIMIT 10;
-      `
+      let query
+      
+      if (activeTab === 'functions') {
+        query = `
+          SELECT n.nspname AS schema,
+          p.proname AS function_name,
+          pg_catalog.pg_get_function_result(p.oid) AS return_type,
+          pg_catalog.pg_get_function_arguments(p.oid) AS arguments
+          FROM pg_proc p
+          JOIN pg_namespace n ON n.oid = p.pronamespace
+          WHERE n.nspname = 'public'
+          ORDER BY function_name
+          LIMIT 10;
+        `
+      } else {
+        query = `SELECT * FROM storage.buckets LIMIT 10;`
+      }
       
       const response = await fetch('/api/supabase', {
         method: 'POST',
@@ -75,11 +103,23 @@ export default function SupabaseAdminPage() {
       <h1 className="text-2xl font-bold mb-4">Supabase Admin</h1>
       
       <div className="mb-6 flex space-x-4">
-        <Button onClick={fetchFunctions} disabled={loading}>
-          {loading ? 'Carregando...' : 'Buscar Funções SQL'}
+        <Button 
+          onClick={fetchFunctions} 
+          disabled={loading}
+          variant={activeTab === 'functions' ? 'default' : 'outline'}
+        >
+          {loading && activeTab === 'functions' ? 'Carregando...' : 'Funções SQL'}
         </Button>
         
-        <Button onClick={executeSqlQuery} disabled={loading} variant="outline">
+        <Button 
+          onClick={fetchBuckets} 
+          disabled={loading}
+          variant={activeTab === 'buckets' ? 'default' : 'outline'}
+        >
+          {loading && activeTab === 'buckets' ? 'Carregando...' : 'Buckets de Armazenamento'}
+        </Button>
+        
+        <Button onClick={executeSqlQuery} disabled={loading} variant="secondary">
           {loading ? 'Carregando...' : 'Executar Consulta Exemplo'}
         </Button>
       </div>
@@ -92,7 +132,9 @@ export default function SupabaseAdminPage() {
       
       {result && (
         <div className="bg-white shadow-md rounded-lg p-4 overflow-auto max-h-[70vh]">
-          <h2 className="text-xl font-semibold mb-3">Resultados</h2>
+          <h2 className="text-xl font-semibold mb-3">
+            {activeTab === 'functions' ? 'Funções SQL' : 'Buckets de Armazenamento'}
+          </h2>
           
           {Array.isArray(result) ? (
             <table className="min-w-full divide-y divide-gray-200">

@@ -1,0 +1,5 @@
+{
+  "description": "Buckets de armazenamento no Supabase",
+  "query": "SELECT * FROM storage.buckets",
+  "results": []
+} 
