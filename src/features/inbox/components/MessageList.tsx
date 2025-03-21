@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { MessageItem } from './MessageItem';
-import { useSentimentAnalysis } from '@/features/ai/hooks';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useSentimentAnalysis } from '../../ai/hooks';
+import { Skeleton } from '../../../components/ui/skeleton';
 
 export interface Message {
   id: string;

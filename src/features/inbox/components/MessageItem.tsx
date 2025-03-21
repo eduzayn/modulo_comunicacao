@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
+import { Card } from "../../../components/ui/card";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MessageSentimentIndicator } from './MessageSentimentIndicator';

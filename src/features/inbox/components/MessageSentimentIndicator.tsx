@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { SentimentType, SentimentAnalysis } from '@/features/ai/types';
-import { sentimentService } from '@/features/ai/services/sentiment-service';
+import { SentimentType, SentimentAnalysis } from '../../ai/types';
+import { sentimentService } from '../../ai/services/sentiment-service';
 
 interface MessageSentimentIndicatorProps {
   messageText: string;
