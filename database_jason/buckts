@@ -1,0 +1,405 @@
+[
+  {
+    "id": "message_attachments",
+    "name": "message_attachments",
+    "owner": null,
+    "created_at": "2025-03-10 21:19:55.591301+00",
+    "updated_at": "2025-03-10 21:19:55.591301+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/zip"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "template_attachments",
+    "name": "template_attachments",
+    "owner": null,
+    "created_at": "2025-03-10 21:19:55.747872+00",
+    "updated_at": "2025-03-10 21:19:55.747872+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 5242880,
+    "allowed_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "channel_assets",
+    "name": "channel_assets",
+    "owner": null,
+    "created_at": "2025-03-10 21:19:55.874618+00",
+    "updated_at": "2025-03-10 21:19:55.874618+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 2097152,
+    "allowed_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/svg+xml"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "matricula_documentos",
+    "name": "matricula_documentos",
+    "owner": null,
+    "created_at": "2025-03-10 21:21:48.121611+00",
+    "updated_at": "2025-03-10 21:21:48.121611+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 5242880,
+    "allowed_mime_types": [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/gif"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "contratos",
+    "name": "contratos",
+    "owner": null,
+    "created_at": "2025-03-10 21:21:48.427112+00",
+    "updated_at": "2025-03-10 21:21:48.427112+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "application/pdf"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "perfil",
+    "name": "perfil",
+    "owner": null,
+    "created_at": "2025-03-10 21:21:48.675774+00",
+    "updated_at": "2025-03-10 21:21:48.675774+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 2097152,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "profile-images",
+    "name": "profile-images",
+    "owner": null,
+    "created_at": "2025-03-10 21:24:42.042823+00",
+    "updated_at": "2025-03-10 21:24:42.042823+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/gif"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "course-thumbnails",
+    "name": "course-thumbnails",
+    "owner": null,
+    "created_at": "2025-03-10 21:24:42.299367+00",
+    "updated_at": "2025-03-10 21:24:42.299367+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "lesson-content",
+    "name": "lesson-content",
+    "owner": null,
+    "created_at": "2025-03-10 21:24:42.628767+00",
+    "updated_at": "2025-03-10 21:24:42.628767+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "application/pdf",
+      "video/mp4",
+      "audio/mpeg",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "supplementary-materials",
+    "name": "supplementary-materials",
+    "owner": null,
+    "created_at": "2025-03-10 21:24:42.856066+00",
+    "updated_at": "2025-03-10 21:24:42.856066+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/zip"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "certificates",
+    "name": "certificates",
+    "owner": null,
+    "created_at": "2025-03-10 21:24:43.124991+00",
+    "updated_at": "2025-03-10 21:24:43.124991+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 10485760,
+    "allowed_mime_types": [
+      "application/pdf",
+      "image/png"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "content_files",
+    "name": "Content Files",
+    "owner": null,
+    "created_at": "2025-03-10 22:10:56.752756+00",
+    "updated_at": "2025-03-10 22:10:56.752756+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "avatars",
+    "name": "User Avatars",
+    "owner": null,
+    "created_at": "2025-03-10 22:10:56.752756+00",
+    "updated_at": "2025-03-10 22:10:56.752756+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "content_media",
+    "name": "Content Media",
+    "owner": null,
+    "created_at": "2025-03-10 22:10:56.752756+00",
+    "updated_at": "2025-03-10 22:10:56.752756+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "templates",
+    "name": "Template Files",
+    "owner": null,
+    "created_at": "2025-03-10 22:10:56.752756+00",
+    "updated_at": "2025-03-10 22:10:56.752756+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "videos",
+    "name": "videos",
+    "owner": null,
+    "created_at": "2025-03-10 22:33:13.399523+00",
+    "updated_at": "2025-03-10 22:33:13.399523+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 50000000,
+    "allowed_mime_types": [
+      "video/mp4",
+      "video/webm"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "backgrounds",
+    "name": "backgrounds",
+    "owner": null,
+    "created_at": "2025-03-10 22:33:13.667956+00",
+    "updated_at": "2025-03-10 22:33:13.667956+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 50000000,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "video/mp4"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "content",
+    "name": "content",
+    "owner": null,
+    "created_at": "2025-03-10 22:33:13.886262+00",
+    "updated_at": "2025-03-10 22:33:13.886262+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 50000000,
+    "allowed_mime_types": [
+      "application/pdf",
+      "text/plain",
+      "text/html",
+      "application/json"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "thumbnails",
+    "name": "thumbnails",
+    "owner": null,
+    "created_at": "2025-03-10 22:33:14.138299+00",
+    "updated_at": "2025-03-10 22:33:14.138299+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 50000000,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "voices",
+    "name": "voices",
+    "owner": null,
+    "created_at": "2025-03-10 22:33:14.838034+00",
+    "updated_at": "2025-03-10 22:33:14.838034+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 50000000,
+    "allowed_mime_types": [
+      "audio/mpeg",
+      "audio/wav",
+      "audio/ogg"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "backup_files",
+    "name": "backup_files",
+    "owner": null,
+    "created_at": "2025-03-10 22:54:51.047048+00",
+    "updated_at": "2025-03-10 22:54:51.047048+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 52428800,
+    "allowed_mime_types": [
+      "application/zip",
+      "application/x-gzip",
+      "application/json",
+      "text/plain"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "user_files",
+    "name": "Arquivos de Usuários",
+    "owner": null,
+    "created_at": "2025-03-10 23:31:19.899887+00",
+    "updated_at": "2025-03-10 23:31:19.899887+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "profile_images",
+    "name": "Imagens de Perfil",
+    "owner": null,
+    "created_at": "2025-03-10 23:31:19.899887+00",
+    "updated_at": "2025-03-10 23:31:19.899887+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "course_materials",
+    "name": "Materiais de Curso",
+    "owner": null,
+    "created_at": "2025-03-10 23:31:19.899887+00",
+    "updated_at": "2025-03-10 23:31:19.899887+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": null,
+    "allowed_mime_types": null,
+    "owner_id": null
+  },
+  {
+    "id": "receipts",
+    "name": "receipts",
+    "owner": null,
+    "created_at": "2025-03-13 00:17:25.454906+00",
+    "updated_at": "2025-03-13 00:17:25.454906+00",
+    "public": false,
+    "avif_autodetection": false,
+    "file_size_limit": 52428800,
+    "allowed_mime_types": [
+      "image/*",
+      "application/pdf"
+    ],
+    "owner_id": null
+  },
+  {
+    "id": "Avatars",
+    "name": "Avatars",
+    "owner": null,
+    "created_at": "2025-03-13 00:19:01.820025+00",
+    "updated_at": "2025-03-13 00:19:01.820025+00",
+    "public": true,
+    "avif_autodetection": false,
+    "file_size_limit": 5242880,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp"
+    ],
+    "owner_id": null
+  }
+]

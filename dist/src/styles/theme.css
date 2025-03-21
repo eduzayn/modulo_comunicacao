@@ -1,0 +1,131 @@
+/**
+ * Edunéxia Communication Module Theme
+ * 
+ * This file defines CSS variables for the theme system.
+ * It supports both light and dark modes with a blue, black, and white color palette.
+ */
+
+:root {
+  /* Base colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  /* Primary colors */
+  --color-primary-50: #e6f1ff;
+  --color-primary-100: #cce3ff;
+  --color-primary-200: #99c7ff;
+  --color-primary-300: #66aaff;
+  --color-primary-400: #338eff;
+  --color-primary-500: #0072ff;
+  --color-primary-600: #005bd9;
+  --color-primary-700: #0044b3;
+  --color-primary-800: #002e8c;
+  --color-primary-900: #001766;
+  
+  /* Secondary colors */
+  --color-secondary-50: #e6f9ff;
+  --color-secondary-100: #ccf3ff;
+  --color-secondary-200: #99e7ff;
+  --color-secondary-300: #66dbff;
+  --color-secondary-400: #33cfff;
+  --color-secondary-500: #00c3ff;
+  --color-secondary-600: #009cc9;
+  --color-secondary-700: #007594;
+  --color-secondary-800: #004e5f;
+  --color-secondary-900: #00272a;
+  
+  /* Neutral colors */
+  --color-neutral-50: #f8f9fa;
+  --color-neutral-100: #f1f3f5;
+  --color-neutral-200: #e9ecef;
+  --color-neutral-300: #dee2e6;
+  --color-neutral-400: #ced4da;
+  --color-neutral-500: #adb5bd;
+  --color-neutral-600: #6c757d;
+  --color-neutral-700: #495057;
+  --color-neutral-800: #343a40;
+  --color-neutral-900: #212529;
+  
+  /* Accent colors */
+  --color-accent-blue: #0072ff;
+  --color-accent-teal: #00c3ff;
+  --color-accent-purple: #6e56cf;
+  --color-accent-indigo: #4263eb;
+  --color-accent-cyan: #0dcaf0;
+  
+  /* Semantic colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-secondary-500) 100%);
+  --gradient-dark: linear-gradient(135deg, var(--color-neutral-900) 0%, var(--color-neutral-800) 100%);
+  --gradient-card: linear-gradient(135deg, var(--color-neutral-50) 0%, var(--color-neutral-200) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-accent-purple) 100%);
+  
+  /* Light mode theme */
+  --background: 210 33% 99%;
+  --foreground: 222 47% 11%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --primary: 214 100% 50%;
+  --primary-foreground: 210 40% 98%;
+  
+  --secondary: 195 100% 50%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  --accent: 214 100% 50%;
+  --accent-foreground: 210 40% 98%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 214 100% 50%;
+  
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  
+  --primary: 214 100% 50%;
+  --primary-foreground: 210 40% 98%;
+  
+  --secondary: 195 100% 50%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 217 33% 18%;
+  --muted-foreground: 215 20% 65%;
+  
+  --accent: 214 100% 50%;
+  --accent-foreground: 210 40% 98%;
+  
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --border: 217 33% 18%;
+  --input: 217 33% 18%;
+  --ring: 214 100% 50%;
+  
+  /* Dark mode gradient overrides */
+  --gradient-card: linear-gradient(135deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
+}

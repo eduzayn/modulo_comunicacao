@@ -1,0 +1,492 @@
+[
+  {
+    "schema": "public",
+    "function_name": "activate_theme",
+    "return_type": "void",
+    "arguments": "theme_id uuid, org_id uuid",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.activate_theme(theme_id uuid, org_id uuid)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n  -- Desativa todos os temas ativos da organização\r\n  UPDATE white_label_themes\r\n  SET is_active = false\r\n  WHERE organization_id = org_id;\r\n  \r\n  -- Ativa o tema especificado\r\n  UPDATE white_label_themes\r\n  SET \r\n    is_active = true,\r\n    updated_at = now()\r\n  WHERE id = theme_id AND organization_id = org_id;\r\n  \r\n  -- Atualiza o tema ativo na tabela de organizações\r\n  UPDATE organizations\r\n  SET active_theme_id = theme_id\r\n  WHERE id = org_id;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "approve_content_review",
+    "return_type": "boolean",
+    "arguments": "p_review_id uuid, p_comments text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.approve_content_review(p_review_id uuid, p_comments text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  v_content_id UUID;\nBEGIN\n  -- Validate input parameters\n  IF p_review_id IS NULL THEN\n    RAISE EXCEPTION 'Review ID cannot be null';\n  END IF;\n  \n  -- Check if the review exists\n  IF NOT EXISTS (SELECT 1 FROM review_requests WHERE id = p_review_id) THEN\n    RAISE EXCEPTION 'Review with ID % does not exist', p_review_id;\n  END IF;\n  \n  -- Check if the user is the assigned reviewer\n  IF NOT EXISTS (SELECT 1 FROM review_requests WHERE id = p_review_id AND reviewer_id = auth.uid()) THEN\n    RAISE EXCEPTION 'You can only approve reviews assigned to you';\n  END IF;\n  \n  -- Check if the review is in a state that can be approved\n  IF NOT EXISTS (SELECT 1 FROM review_requests WHERE id = p_review_id AND status IN ('pending', 'in_review')) THEN\n    RAISE EXCEPTION 'This review cannot be approved because it is not in pending or in_review status';\n  END IF;\n  \n  -- Get the content ID\n  SELECT content_id INTO v_content_id FROM review_requests WHERE id = p_review_id;\n  \n  -- Update the review status\n  UPDATE review_requests\n  SET \n    status = 'approved',\n    comments = CASE WHEN p_comments IS NOT NULL THEN p_comments ELSE comments END,\n    updated_at = NOW(),\n    completed_at = NOW()\n  WHERE id = p_review_id;\n  \n  -- Insert approval record\n  INSERT INTO review_approvals (\n    review_id,\n    approver_id,\n    comments\n  ) VALUES (\n    p_review_id,\n    auth.uid(),\n    p_comments\n  );\n  \n  -- Update the content status to published\n  UPDATE content_items\n  SET \n    status = 'published',\n    updated_at = NOW()\n  WHERE id = v_content_id;\n  \n  -- Log the action\n  INSERT INTO audit_logs (\n    user_id,\n    action,\n    entity_type,\n    entity_id,\n    details\n  ) VALUES (\n    auth.uid(),\n    'approve',\n    'review_requests',\n    p_review_id::text,\n    jsonb_build_object(\n      'content_id', v_content_id\n    )\n  );\n  \n  RETURN TRUE;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "calculate_course_progress",
+    "return_type": "integer",
+    "arguments": "p_student_id uuid, p_course_id uuid",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.calculate_course_progress(p_student_id uuid, p_course_id uuid)\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    total_lessons INTEGER;\r\n    completed_lessons INTEGER;\r\n    progress INTEGER;\r\nBEGIN\r\n    -- Contar total de aulas no curso\r\n    SELECT COUNT(*) INTO total_lessons\r\n    FROM lessons\r\n    WHERE course_id = p_course_id;\r\n    \r\n    -- Contar aulas completadas pelo estudante\r\n    SELECT COUNT(*) INTO completed_lessons\r\n    FROM lesson_progress\r\n    WHERE student_id = p_student_id\r\n    AND course_id = p_course_id\r\n    AND completed = TRUE;\r\n    \r\n    -- Calcular progresso\r\n    IF total_lessons = 0 THEN\r\n        progress := 0;\r\n    ELSE\r\n        progress := (completed_lessons * 100) / total_lessons;\r\n    END IF;\r\n    \r\n    RETURN progress;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "calculate_course_progress",
+    "return_type": "integer",
+    "arguments": "p_enrollment_id uuid",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.calculate_course_progress(p_enrollment_id uuid)\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\nDECLARE\n  total_lessons INTEGER;\n  completed_lessons INTEGER;\n  progress INTEGER;\nBEGIN\n  -- Obter total de aulas do curso\n  SELECT COUNT(l.id) INTO total_lessons\n  FROM enrollments e\n  JOIN courses c ON c.id = e.course_id\n  JOIN modules m ON m.course_id = c.id\n  JOIN lessons l ON l.module_id = m.id\n  WHERE e.id = p_enrollment_id;\n\n  -- Obter aulas completadas\n  SELECT COUNT(lp.id) INTO completed_lessons\n  FROM enrollments e\n  JOIN courses c ON c.id = e.course_id\n  JOIN modules m ON m.course_id = c.id\n  JOIN lessons l ON l.module_id = m.id\n  JOIN lesson_progress lp ON lp.lesson_id = l.id\n  WHERE e.id = p_enrollment_id AND lp.completed = true;\n\n  -- Calcular progresso\n  IF total_lessons > 0 THEN\n    progress := (completed_lessons * 100) / total_lessons;\n  ELSE\n    progress := 0;\n  END IF;\n\n  RETURN progress;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "check_table_exists",
+    "return_type": "boolean",
+    "arguments": "p_table_name text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.check_table_exists(p_table_name text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  _exists boolean;\r\nBEGIN\r\n  SELECT EXISTS (\r\n    SELECT FROM information_schema.tables \r\n    WHERE table_schema = 'public' \r\n    AND table_name = p_table_name\r\n  ) INTO _exists;\r\n  \r\n  RETURN _exists;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "create_bucket_if_not_exists",
+    "return_type": "text",
+    "arguments": "bucket_name text, bucket_description text DEFAULT ''::text, bucket_public text DEFAULT 'private'::text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.create_bucket_if_not_exists(bucket_name text, bucket_description text DEFAULT ''::text, bucket_public text DEFAULT 'private'::text)\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  bucket_exists BOOLEAN;\nBEGIN\n  -- Check if bucket exists\n  SELECT EXISTS (\n    SELECT 1 FROM storage.buckets WHERE name = bucket_name\n  ) INTO bucket_exists;\n  \n  -- Create bucket if it doesn't exist\n  IF NOT bucket_exists THEN\n    INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)\n    VALUES (\n      bucket_name,\n      bucket_name,\n      bucket_public = 'public',\n      50000000, -- 50MB limit\n      ARRAY[\n        'image/jpeg',\n        'image/png',\n        'image/gif',\n        'image/webp',\n        'video/mp4',\n        'video/webm',\n        'application/pdf',\n        'text/plain',\n        'text/html',\n        'application/json'\n      ]::text[]\n    );\n    RETURN 'Bucket ' || bucket_name || ' created';\n  ELSE\n    RETURN 'Bucket ' || bucket_name || ' already exists';\n  END IF;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "create_bucket_if_not_exists",
+    "return_type": "text",
+    "arguments": "bucket_name text, bucket_description text DEFAULT ''::text, bucket_public boolean DEFAULT false, file_size_limit integer DEFAULT 50000000, allowed_mime_types text[] DEFAULT ARRAY['image/jpeg'::text, 'image/png'::text, 'image/gif'::text, 'image/webp'::text, 'video/mp4'::text, 'video/webm'::text, 'application/pdf'::text, 'text/plain'::text, 'text/html'::text, 'application/json'::text]",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.create_bucket_if_not_exists(bucket_name text, bucket_description text DEFAULT ''::text, bucket_public boolean DEFAULT false, file_size_limit integer DEFAULT 50000000, allowed_mime_types text[] DEFAULT ARRAY['image/jpeg'::text, 'image/png'::text, 'image/gif'::text, 'image/webp'::text, 'video/mp4'::text, 'video/webm'::text, 'application/pdf'::text, 'text/plain'::text, 'text/html'::text, 'application/json'::text])\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  bucket_exists BOOLEAN;\nBEGIN\n  -- Check if bucket exists\n  SELECT EXISTS (\n    SELECT 1 FROM storage.buckets WHERE name = bucket_name\n  ) INTO bucket_exists;\n  \n  -- Create bucket if it doesn't exist\n  IF NOT bucket_exists THEN\n    INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)\n    VALUES (\n      bucket_name,\n      bucket_name,\n      bucket_public,\n      file_size_limit,\n      allowed_mime_types\n    );\n    RETURN 'Bucket ' || bucket_name || ' created';\n  ELSE\n    RETURN 'Bucket ' || bucket_name || ' already exists';\n  END IF;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "create_content_item",
+    "return_type": "uuid",
+    "arguments": "p_title text, p_description text, p_type text, p_content text, p_category text, p_tags text[], p_metadata jsonb, p_visibility text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.create_content_item(p_title text, p_description text, p_type text, p_content text, p_category text, p_tags text[], p_metadata jsonb, p_visibility text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  v_content_id UUID;\nBEGIN\n  -- Validate input parameters\n  IF p_title IS NULL OR p_title = '' THEN\n    RAISE EXCEPTION 'Title cannot be empty';\n  END IF;\n  \n  IF p_type IS NULL OR p_type = '' THEN\n    RAISE EXCEPTION 'Content type cannot be empty';\n  END IF;\n  \n  IF p_type NOT IN ('article', 'lesson', 'video', 'quiz', 'exercise', 'document', 'presentation', 'interactive') THEN\n    RAISE EXCEPTION 'Invalid content type: %', p_type;\n  END IF;\n  \n  IF p_visibility IS NULL OR p_visibility = '' THEN\n    RAISE EXCEPTION 'Visibility cannot be empty';\n  END IF;\n  \n  IF p_visibility NOT IN ('public', 'private', 'restricted') THEN\n    RAISE EXCEPTION 'Invalid visibility: %', p_visibility;\n  END IF;\n\n  -- Insert the content item\n  INSERT INTO content_items (\n    title,\n    description,\n    type,\n    content,\n    author_id,\n    status,\n    category,\n    tags,\n    metadata,\n    visibility\n  ) VALUES (\n    p_title,\n    p_description,\n    p_type,\n    p_content,\n    auth.uid(),\n    'draft',\n    p_category,\n    p_tags,\n    p_metadata,\n    p_visibility\n  )\n  RETURNING id INTO v_content_id;\n  \n  -- Log the action\n  INSERT INTO audit_logs (\n    user_id,\n    action,\n    entity_type,\n    entity_id,\n    details\n  ) VALUES (\n    auth.uid(),\n    'create',\n    'content_items',\n    v_content_id::text,\n    jsonb_build_object(\n      'title', p_title,\n      'type', p_type,\n      'category', p_category\n    )\n  );\n  \n  RETURN v_content_id;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "create_default_layout_for_theme",
+    "return_type": "uuid",
+    "arguments": "theme_id uuid, template_id uuid DEFAULT NULL::uuid",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.create_default_layout_for_theme(theme_id uuid, template_id uuid DEFAULT NULL::uuid)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  new_layout_id UUID;\r\nBEGIN\r\n  -- Criar novo layout\r\n  INSERT INTO white_label_layouts (\r\n    theme_id,\r\n    name,\r\n    description,\r\n    is_default,\r\n    created_by\r\n  )\r\n  VALUES (\r\n    theme_id,\r\n    'Layout Padrão',\r\n    'Layout padrão criado automaticamente',\r\n    true,\r\n    auth.uid()\r\n  )\r\n  RETURNING id INTO new_layout_id;\r\n  \r\n  -- Se um template for especificado, copiar seções do template\r\n  IF template_id IS NOT NULL THEN\r\n    -- Implementar lógica para copiar seções do template\r\n    -- (Esta parte dependerá da estrutura específica dos templates)\r\n  ELSE\r\n    -- Criar seções padrão\r\n    INSERT INTO white_label_sections (\r\n      layout_id,\r\n      section_type,\r\n      section_name,\r\n      section_order,\r\n      settings\r\n    )\r\n    VALUES\r\n      (new_layout_id, 'hero', 'Banner Principal', 1, '{\"fullWidth\": true}'::jsonb),\r\n      (new_layout_id, 'features', 'Recursos', 2, '{}'::jsonb),\r\n      (new_layout_id, 'testimonials', 'Depoimentos', 3, '{}'::jsonb),\r\n      (new_layout_id, 'cta', 'Chamada para Ação', 4, '{}'::jsonb);\r\n  END IF;\r\n  \r\n  RETURN new_layout_id;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "create_theme_from_template",
+    "return_type": "uuid",
+    "arguments": "template_id uuid, org_id uuid, theme_name text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.create_theme_from_template(template_id uuid, org_id uuid, theme_name text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  new_theme_id UUID;\r\n  template_rec RECORD;\r\nBEGIN\r\n  -- Obter dados do template\r\n  SELECT * INTO template_rec FROM white_label_templates WHERE id = template_id;\r\n  \r\n  -- Criar novo tema\r\n  INSERT INTO white_label_themes (\r\n    name,\r\n    description,\r\n    primary_color,\r\n    secondary_color,\r\n    accent_color,\r\n    font_family,\r\n    organization_id,\r\n    created_by\r\n  )\r\n  VALUES (\r\n    theme_name,\r\n    'Criado a partir do template ' || template_rec.name,\r\n    template_rec.settings->>'primary_color',\r\n    template_rec.settings->>'secondary_color',\r\n    template_rec.settings->>'accent_color',\r\n    template_rec.settings->>'font_family',\r\n    org_id,\r\n    auth.uid()\r\n  )\r\n  RETURNING id INTO new_theme_id;\r\n  \r\n  -- Criar layout padrão para o tema\r\n  PERFORM create_default_layout_for_theme(new_theme_id, template_id);\r\n  \r\n  RETURN new_theme_id;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "exec_sql",
+    "return_type": "SETOF json",
+    "arguments": "query text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.exec_sql(query text)\n RETURNS SETOF json\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    result json;\r\n    rows_affected int;\r\nBEGIN\r\n    RAISE LOG 'Executing SQL: %', query;\r\n    \r\n    -- Execute the query dynamically\r\n    EXECUTE query;\r\n    \r\n    -- For SELECT statements, return the result\r\n    IF query ~* '^\\\\s*SELECT' THEN\r\n        FOR result IN EXECUTE query LOOP\r\n            RETURN NEXT result;\r\n        END LOOP;\r\n        RETURN;\r\n    -- For other statements (INSERT, UPDATE, DELETE, etc.), get the number of affected rows\r\n    ELSE\r\n        GET DIAGNOSTICS rows_affected = ROW_COUNT;\r\n        RETURN NEXT json_build_object('affected_rows', rows_affected);\r\n        RETURN;\r\n    END IF;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "get_content_with_metadata",
+    "return_type": "jsonb",
+    "arguments": "p_content_id uuid",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.get_content_with_metadata(p_content_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  v_result JSONB;\nBEGIN\n  -- Check if the content exists\n  IF NOT EXISTS (SELECT 1 FROM content_items WHERE id = p_content_id) THEN\n    RAISE EXCEPTION 'Content with ID % does not exist', p_content_id;\n  END IF;\n  \n  -- Check if the user has access to the content\n  IF NOT EXISTS (\n    SELECT 1 FROM content_items \n    WHERE id = p_content_id \n    AND (\n      visibility = 'public' \n      OR (visibility = 'private' AND author_id = auth.uid())\n      OR (visibility = 'restricted' AND EXISTS (\n        SELECT 1 FROM user_profiles \n        WHERE id = auth.uid() \n        AND role IN ('admin', 'editor')\n      ))\n    )\n  ) THEN\n    RAISE EXCEPTION 'You do not have permission to access this content';\n  END IF;\n  \n  -- Get the content with author information and metadata\n  SELECT \n    jsonb_build_object(\n      'id', c.id,\n      'title', c.title,\n      'description', c.description,\n      'type', c.type,\n      'content', c.content,\n      'author', jsonb_build_object(\n        'id', c.author_id,\n        'name', COALESCE(up.full_name, au.email),\n        'avatar', up.avatar_url\n      ),\n      'createdAt', c.created_at,\n      'updatedAt', c.updated_at,\n      'status', c.status,\n      'category', c.category,\n      'tags', c.tags,\n      'metadata', c.metadata,\n      'visibility', c.visibility\n    )\n  INTO v_result\n  FROM content_items c\n  LEFT JOIN auth.users au ON c.author_id = au.id\n  LEFT JOIN user_profiles up ON c.author_id = up.id\n  WHERE c.id = p_content_id;\n  \n  RETURN v_result;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "get_current_user_role",
+    "return_type": "user_role",
+    "arguments": "",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.get_current_user_role()\n RETURNS user_role\n LANGUAGE sql\n SECURITY DEFINER\nAS $function$\r\n  SELECT role FROM public.usuarios WHERE id = auth.uid();\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gin_extract_query_trgm",
+    "return_type": "internal",
+    "arguments": "text, internal, smallint, internal, internal, internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_extract_query_trgm$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gin_extract_value_trgm",
+    "return_type": "internal",
+    "arguments": "text, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gin_extract_value_trgm(text, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_extract_value_trgm$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gin_trgm_consistent",
+    "return_type": "boolean",
+    "arguments": "internal, smallint, text, integer, internal, internal, internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_trgm_consistent$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gin_trgm_triconsistent",
+    "return_type": "\"char\"",
+    "arguments": "internal, smallint, text, integer, internal, internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)\n RETURNS \"char\"\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_trgm_triconsistent$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_compress",
+    "return_type": "internal",
+    "arguments": "internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_compress(internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_compress$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_consistent",
+    "return_type": "boolean",
+    "arguments": "internal, text, smallint, oid, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_consistent(internal, text, smallint, oid, internal)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_consistent$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_decompress",
+    "return_type": "internal",
+    "arguments": "internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_decompress(internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_decompress$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_distance",
+    "return_type": "double precision",
+    "arguments": "internal, text, smallint, oid, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_distance(internal, text, smallint, oid, internal)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_distance$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_in",
+    "return_type": "gtrgm",
+    "arguments": "cstring",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_in(cstring)\n RETURNS gtrgm\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_in$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_options",
+    "return_type": "void",
+    "arguments": "internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_options(internal)\n RETURNS void\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE\nAS '$libdir/pg_trgm', $function$gtrgm_options$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_out",
+    "return_type": "cstring",
+    "arguments": "gtrgm",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_out(gtrgm)\n RETURNS cstring\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_out$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_penalty",
+    "return_type": "internal",
+    "arguments": "internal, internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_penalty(internal, internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_penalty$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_picksplit",
+    "return_type": "internal",
+    "arguments": "internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_picksplit(internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_picksplit$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_same",
+    "return_type": "internal",
+    "arguments": "gtrgm, gtrgm, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_same(gtrgm, gtrgm, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_same$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "gtrgm_union",
+    "return_type": "gtrgm",
+    "arguments": "internal, internal",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.gtrgm_union(internal, internal)\n RETURNS gtrgm\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_union$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "handle_new_user",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n  INSERT INTO public.usuarios (id, email, role)\r\n  VALUES (NEW.id, NEW.email, 'aluno');\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "handle_profile_updated",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.handle_profile_updated()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n  NEW.updated_at = now();\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "handle_updated_at",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.handle_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n    NEW.updated_at = now();\n    RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "issue_certificate",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.issue_certificate()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    course_progress INTEGER;\r\n    course_title VARCHAR(255);\r\n    certificate_exists BOOLEAN;\r\nBEGIN\r\n    -- Calcular progresso do curso\r\n    course_progress := calculate_course_progress(NEW.student_id, NEW.course_id);\r\n    \r\n    -- Verificar se o progresso é 100%\r\n    IF course_progress = 100 THEN\r\n        -- Verificar se já existe um certificado para este curso e estudante\r\n        SELECT EXISTS (\r\n            SELECT 1 FROM certificates\r\n            WHERE student_id = NEW.student_id\r\n            AND course_id = NEW.course_id\r\n        ) INTO certificate_exists;\r\n        \r\n        -- Se não existir certificado, criar um\r\n        IF NOT certificate_exists THEN\r\n            -- Obter o título do curso\r\n            SELECT title INTO course_title\r\n            FROM courses\r\n            WHERE id = NEW.course_id;\r\n            \r\n            -- Inserir certificado\r\n            INSERT INTO certificates (\r\n                student_id, \r\n                course_id, \r\n                title, \r\n                issue_date, \r\n                certificate_url\r\n            )\r\n            VALUES (\r\n                NEW.student_id,\r\n                NEW.course_id,\r\n                'Certificado de Conclusão - ' || course_title,\r\n                NOW(),\r\n                'https://example.com/certificates/' || NEW.student_id || '_' || NEW.course_id || '.pdf'\r\n            );\r\n            \r\n            -- Criar notificação para o estudante\r\n            INSERT INTO notifications (\r\n                student_id,\r\n                title,\r\n                message,\r\n                read\r\n            )\r\n            VALUES (\r\n                NEW.student_id,\r\n                'Certificado Emitido',\r\n                'Parabéns! Seu certificado para o curso ' || course_title || ' foi emitido.',\r\n                FALSE\r\n            );\r\n        END IF;\r\n    END IF;\r\n    \r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "request_content_review",
+    "return_type": "uuid",
+    "arguments": "p_content_id uuid, p_reviewer_id uuid, p_comments text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.request_content_review(p_content_id uuid, p_reviewer_id uuid, p_comments text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nDECLARE\n  v_review_id UUID;\nBEGIN\n  -- Validate input parameters\n  IF p_content_id IS NULL THEN\n    RAISE EXCEPTION 'Content ID cannot be null';\n  END IF;\n  \n  IF p_reviewer_id IS NULL THEN\n    RAISE EXCEPTION 'Reviewer ID cannot be null';\n  END IF;\n  \n  -- Check if the content exists\n  IF NOT EXISTS (SELECT 1 FROM content_items WHERE id = p_content_id) THEN\n    RAISE EXCEPTION 'Content with ID % does not exist', p_content_id;\n  END IF;\n  \n  -- Check if the reviewer exists\n  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = p_reviewer_id) THEN\n    RAISE EXCEPTION 'Reviewer with ID % does not exist', p_reviewer_id;\n  END IF;\n  \n  -- Check if the user is the author of the content\n  IF NOT EXISTS (SELECT 1 FROM content_items WHERE id = p_content_id AND author_id = auth.uid()) THEN\n    RAISE EXCEPTION 'You can only request reviews for your own content';\n  END IF;\n  \n  -- Check if there's already an active review request\n  IF EXISTS (\n    SELECT 1 FROM review_requests \n    WHERE content_id = p_content_id \n    AND status IN ('pending', 'in_review')\n  ) THEN\n    RAISE EXCEPTION 'There is already an active review request for this content';\n  END IF;\n  \n  -- Insert the review request\n  INSERT INTO review_requests (\n    content_id,\n    requestor_id,\n    reviewer_id,\n    status,\n    comments\n  ) VALUES (\n    p_content_id,\n    auth.uid(),\n    p_reviewer_id,\n    'pending',\n    p_comments\n  )\n  RETURNING id INTO v_review_id;\n  \n  -- Log the action\n  INSERT INTO audit_logs (\n    user_id,\n    action,\n    entity_type,\n    entity_id,\n    details\n  ) VALUES (\n    auth.uid(),\n    'create',\n    'review_requests',\n    v_review_id::text,\n    jsonb_build_object(\n      'content_id', p_content_id,\n      'reviewer_id', p_reviewer_id\n    )\n  );\n  \n  RETURN v_review_id;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "send_email",
+    "return_type": "boolean",
+    "arguments": "to_email text, subject text, content text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.send_email(to_email text, subject text, content text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$ DECLARE smtp_settings RECORD; BEGIN SELECT * FROM public.email_settings LIMIT 1 INTO smtp_settings; PERFORM pg_notify('send_email', json_build_object('to', to_email, 'subject', subject, 'content', content, 'smtp_host', smtp_settings.smtp_host, 'smtp_port', smtp_settings.smtp_port, 'smtp_user', smtp_settings.smtp_user, 'smtp_pass', smtp_settings.smtp_pass, 'smtp_sender_name', smtp_settings.smtp_sender_name)::text); RETURN TRUE; EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "set_limit",
+    "return_type": "real",
+    "arguments": "real",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.set_limit(real)\n RETURNS real\n LANGUAGE c\n STRICT\nAS '$libdir/pg_trgm', $function$set_limit$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "set_published_at",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.set_published_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n   IF NEW.status = 'published' AND OLD.status != 'published' THEN\r\n      NEW.publishedAt = NOW();\r\n   END IF;\r\n   RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "set_review_completed_at",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.set_review_completed_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n   IF NEW.status IN ('approved', 'rejected') AND OLD.status NOT IN ('approved', 'rejected') THEN\r\n      NEW.completedAt = NOW();\r\n   END IF;\r\n   RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "show_limit",
+    "return_type": "real",
+    "arguments": "",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.show_limit()\n RETURNS real\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$show_limit$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "show_trgm",
+    "return_type": "text[]",
+    "arguments": "text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.show_trgm(text)\n RETURNS text[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$show_trgm$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "similarity",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "similarity_dist",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.similarity_dist(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity_dist$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "similarity_op",
+    "return_type": "boolean",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "strict_word_similarity",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "strict_word_similarity_commutator_op",
+    "return_type": "boolean",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_commutator_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_commutator_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "strict_word_similarity_dist_commutator_op",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_commutator_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_dist_commutator_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "strict_word_similarity_dist_op",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_dist_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "strict_word_similarity_op",
+    "return_type": "boolean",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_ai_updated_at_column",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_ai_updated_at_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n   NEW.updated_at = NOW();\r\n   RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_enrollment_last_accessed",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_enrollment_last_accessed()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  UPDATE enrollments\n  SET last_accessed_at = now()\n  WHERE student_id = NEW.student_id\n  AND course_id = (\n    SELECT course_id \n    FROM modules \n    WHERE id = (\n      SELECT module_id \n      FROM lessons \n      WHERE id = NEW.lesson_id\n    )\n  );\n  RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_enrollment_progress",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_enrollment_progress()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  UPDATE enrollments\n  SET progress = calculate_course_progress(enrollments.id)\n  WHERE student_id = NEW.student_id\n  AND course_id = (\n    SELECT course_id \n    FROM modules \n    WHERE id = (\n      SELECT module_id \n      FROM lessons \n      WHERE id = NEW.lesson_id\n    )\n  );\n  RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_modified_column",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_modified_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n    NEW.updated_at = NOW();\n    RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_module_status",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_module_status()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n    total_lessons INTEGER;\r\n    completed_lessons INTEGER;\r\nBEGIN\r\n    -- Contar total de aulas no módulo\r\n    SELECT COUNT(*) INTO total_lessons\r\n    FROM lessons\r\n    WHERE module_id = NEW.module_id;\r\n    \r\n    -- Contar aulas completadas pelo estudante no módulo\r\n    SELECT COUNT(*) INTO completed_lessons\r\n    FROM lesson_progress\r\n    WHERE student_id = NEW.student_id\r\n    AND module_id = NEW.module_id\r\n    AND completed = TRUE;\r\n    \r\n    -- Se todas as aulas foram concluídas, atualizar o status do módulo para 'completed'\r\n    IF total_lessons > 0 AND total_lessons = completed_lessons THEN\r\n        UPDATE modules\r\n        SET status = 'completed'\r\n        WHERE id = NEW.module_id;\r\n        \r\n        -- Desbloquear o próximo módulo se existir\r\n        UPDATE modules\r\n        SET status = 'available'\r\n        WHERE course_id = NEW.course_id\r\n        AND order_index = (\r\n            SELECT order_index + 1\r\n            FROM modules\r\n            WHERE id = NEW.module_id\r\n        )\r\n        AND status = 'locked';\r\n    END IF;\r\n    \r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_updated_at_column",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_updated_at_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n    NEW.updated_at = NOW();\r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "update_updated_at_timestamp",
+    "return_type": "trigger",
+    "arguments": "",
+    "function_type": "TRIGGER",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_updated_at_timestamp()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  NEW.updated_at = now();\n  RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "word_similarity",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.word_similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "word_similarity_commutator_op",
+    "return_type": "boolean",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.word_similarity_commutator_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_commutator_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "word_similarity_dist_commutator_op",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.word_similarity_dist_commutator_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_dist_commutator_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "word_similarity_dist_op",
+    "return_type": "real",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.word_similarity_dist_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_dist_op$function$\n"
+  },
+  {
+    "schema": "public",
+    "function_name": "word_similarity_op",
+    "return_type": "boolean",
+    "arguments": "text, text",
+    "function_type": "NORMAL",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.word_similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_op$function$\n"
+  },
+  {
+    "schema_name": "public",
+    "function_name": "notify_new_message",
+    "language": "plpgsql",
+    "source_code": "BEGIN\n  -- Publica no canal de notificações\n  PERFORM pg_notify(\n    'new_message', \n    json_build_object(\n      'id', NEW.id,\n      'conversation_id', NEW.conversation_id,\n      'content_type', NEW.content_type,\n      'sender_type', COALESCE(NEW.sender_type, 'user'),\n      'created_at', NEW.created_at\n    )::text\n  );\n  RETURN NEW;\nEND;"
+  },
+  {
+    "schema_name": "public",
+    "function_name": "assign_conversation",
+    "language": "plpgsql",
+    "source_code": "DECLARE\n  assigned_user_id UUID;\n  channel_id UUID;\nBEGIN\n  -- Verificar se existem as tabelas necessárias\n  IF EXISTS (\n    SELECT FROM information_schema.tables \n    WHERE table_schema = 'public' \n    AND table_name = 'conversations'\n  ) THEN\n    -- Obter o canal da conversa\n    SELECT conversations.channel_id INTO channel_id\n    FROM conversations\n    WHERE conversations.id = conversation_id;\n    \n    -- Verificar se existem as tabelas team_members e channel_teams\n    IF EXISTS (\n      SELECT FROM information_schema.tables \n      WHERE table_schema = 'public' \n      AND table_name = 'team_members'\n    ) AND EXISTS (\n      SELECT FROM information_schema.tables \n      WHERE table_schema = 'public' \n      AND table_name = 'channel_teams'\n    ) THEN\n      -- Encontrar o próximo usuário disponível (round-robin simples)\n      -- Apenas se as tabelas team_members e channel_teams existirem\n      SELECT user_id INTO assigned_user_id\n      FROM (\n        SELECT tm.user_id, COUNT(c.id) as active_conversations\n        FROM team_members tm\n        JOIN channel_teams ct ON tm.team_id = ct.team_id\n        LEFT JOIN conversations c ON c.assigned_to = tm.user_id AND c.status = 'open'\n        WHERE ct.channel_id = channel_id\n        GROUP BY tm.user_id\n        ORDER BY active_conversations ASC\n        LIMIT 1\n      ) as available_users;\n    ELSE\n      -- Alternativa mais simples se as tabelas não existirem\n      -- Atribuir ao primeiro usuário do sistema\n      SELECT id INTO assigned_user_id\n      FROM auth.users\n      LIMIT 1;\n    END IF;\n    \n    -- Se encontrou um usuário, atribui a conversa\n    IF assigned_user_id IS NOT NULL THEN\n      UPDATE conversations\n      SET assigned_to = assigned_user_id\n      WHERE id = conversation_id;\n      \n      RETURN assigned_user_id;\n    END IF;\n  END IF;\n  \n  RETURN NULL;\nEND;"
+  },
+  {
+    "schema_name": "public",
+    "function_name": "update_modified_column",
+    "language": "plpgsql",
+    "source_code": "BEGIN\n   NEW.updated_at = NOW();\n   RETURN NEW;\nEND;"
+  }
+]

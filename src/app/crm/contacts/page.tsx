@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PlusCircle, Search, Mail, Phone, ExternalLink, MoreHorizontal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/Badge'
+import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,

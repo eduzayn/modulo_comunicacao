@@ -144,4 +144,9 @@ export function useToast() {
   }
 }
 
+// Criar uma instância do hook que pode ser importada diretamente
+const { toast, dismiss, update } = useToast()
+
+// Exportar funções individuais
+export { toast, dismiss, update }
 export type { ToasterToast } 

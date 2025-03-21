@@ -1,81 +1,96 @@
 /**
  * middleware.ts
  * 
- * Description: Next.js middleware for authentication and routing
- * 
- * @module middleware
- * @author Devin AI
- * @created 2025-03-12
+ * Middleware global para gerenciar autenticação, redirecionamentos e proteção de rotas.
+ * Executa antes de cada requisição para verificar se o usuário tem permissão
+ * para acessar a rota solicitada.
  */
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-// Define public routes that don't require authentication
-const publicRoutes = [
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// Rotas públicas que não precisam de autenticação
+const PUBLIC_ROUTES = [
   '/login',
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/reset-password',
+  '/registro',
+  '/recuperar-senha',
+  '/termos',
+  '/politica-privacidade',
+  '/api/auth',
+]
+
+// Adicionar prefixos ou exatos para considerar como públicos (ex: arquivos estáticos)
+const PUBLIC_PATH_PREFIXES = [
   '/_next',
-  '/favicon.ico',
-  '/help/faq',
-];
+  '/favicon',
+  '/images',
+  '/fonts',
+  '/api/public',
+]
 
-// Define route redirects for consistency
-const redirectRoutes: Record<string, string> = {
-  '/messages': '/communication/messages',
-  '/contacts': '/communication/contacts',
-  '/chat': '/communication/chat',
-};
-
-/**
- * Middleware function
- * 
- * @param request - Next.js request
- * @returns Next.js response
- */
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
-  // Check for redirects
-  const redirectPath = redirectRoutes[pathname];
-  if (redirectPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = redirectPath;
-    return NextResponse.redirect(url);
+  const { pathname } = request.nextUrl
+
+  // Verificar se é uma rota pública
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next()
+  }
+
+  // Verificar autenticação através do cookie
+  const authToken = request.cookies.get('auth-token')?.value
+
+  // Se não estiver autenticado, redireciona para o login
+  if (!authToken) {
+    const url = new URL('/login', request.url)
+    url.searchParams.set('redirectTo', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Normalizar rotas de comunicação (redirecionar de português para inglês)
+  if (pathname.startsWith('/comunicacao')) {
+    const newUrl = new URL(pathname.replace('/comunicacao', '/communication'), request.url)
+    return NextResponse.redirect(newUrl)
   }
   
-  // Allow access to public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
+  // Redirecionar rotas antigas em português para inglês
+  const ptToEnRoutes = {
+    '/admin/agenda': '/admin/calendar',
+    '/admin/horas': '/admin/hours',
+    '/admin/relatorios': '/admin/reports',
+    '/admin/usuarios': '/admin/users',
+    '/acesso-negado': '/access-denied'
   }
   
-  // For testing purposes, we'll skip authentication
-  // In a production environment, we would check for a valid session
-  const isAuthenticated = true;
-  
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('from', pathname);
-    return NextResponse.redirect(url);
+  for (const [ptRoute, enRoute] of Object.entries(ptToEnRoutes)) {
+    if (pathname.startsWith(ptRoute)) {
+      const newUrl = new URL(pathname.replace(ptRoute, enRoute), request.url)
+      return NextResponse.redirect(newUrl)
+    }
   }
   
-  return NextResponse.next();
+  // Se chegou aqui, está autenticado e pode acessar a rota
+  return NextResponse.next()
 }
 
-/**
- * Configure middleware
- */
+// Verifica se é uma rota pública baseado nas listas definidas
+function isPublicRoute(pathname: string): boolean {
+  // Verificar rotas exatas
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return true
+  }
+
+  // Verificar prefixos públicos
+  return PUBLIC_PATH_PREFIXES.some(prefix => pathname.startsWith(prefix))
+}
+
+// Configurar quais rotas o middleware deve executar
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * Adicionar todas as rotas em que o middleware deve executar.
+     * Não fazemos match de _next e arquivos estáticos automaticamente
+     * para evitar execução desnecessária do middleware.
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next|favicon.ico|images|fonts|api/public).*)',
   ],
-};
+}

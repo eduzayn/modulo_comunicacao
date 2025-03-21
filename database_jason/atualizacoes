@@ -1,0 +1,122 @@
+[
+  {
+    "tabela": "templates",
+    "descricao": "Tabela para armazenar templates de mensagens para diferentes canais",
+    "colunas": [
+      "id (UUID): Identificador único do template",
+      "name (TEXT): Nome do template",
+      "content (TEXT): Conteúdo do template, pode conter variáveis",
+      "channel_type (TEXT): Tipo de canal (whatsapp, email, chat, sms, push, facebook, instagram)",
+      "category (TEXT): Categoria do template (opcional)",
+      "variables (TEXT[]): Lista de variáveis utilizadas no template",
+      "version (INTEGER): Versão do template",
+      "status (TEXT): Status do template (draft, active, archived)",
+      "created_at (TIMESTAMP): Data de criação",
+      "updated_at (TIMESTAMP): Data de atualização"
+    ],
+    "indices": [
+      "idx_templates_channel_type: Índice para busca por tipo de canal",
+      "idx_templates_status: Índice para busca por status"
+    ]
+  },
+  {
+    "tabela": "ai_settings",
+    "descricao": "Tabela para armazenar configurações de IA para processamento de mensagens",
+    "colunas": [
+      "id (UUID): Identificador único da configuração",
+      "model (TEXT): Modelo de IA a ser utilizado",
+      "temperature (FLOAT): Temperatura para geração de respostas",
+      "max_tokens (INTEGER): Número máximo de tokens para geração",
+      "auto_respond (BOOLEAN): Se deve responder automaticamente",
+      "sentiment_analysis (BOOLEAN): Se deve analisar sentimento das mensagens",
+      "suggest_responses (BOOLEAN): Se deve sugerir respostas",
+      "user_id (UUID): Usuário associado à configuração",
+      "channel_id (UUID): Canal associado à configuração",
+      "created_at (TIMESTAMP): Data de criação",
+      "updated_at (TIMESTAMP): Data de atualização"
+    ]
+  },
+  {
+    "tabela": "automations",
+    "descricao": "Tabela para armazenar regras de automação de mensagens e ações",
+    "colunas": [
+      "id (UUID): Identificador único da automação",
+      "name (TEXT): Nome da automação",
+      "trigger (JSONB): Gatilho e condições para acionamento",
+      "actions (JSONB): Ações a serem executadas",
+      "status (TEXT): Status da automação (active, inactive)",
+      "created_at (TIMESTAMP): Data de criação",
+      "updated_at (TIMESTAMP): Data de atualização",
+      "created_by (UUID): Usuário que criou a automação"
+    ],
+    "indices": [
+      "idx_automations_status: Índice para busca por status"
+    ]
+  },
+  {
+    "tabela": "messages",
+    "descricao": "Melhorias na tabela de mensagens com suporte a vários tipos de mídia",
+    "colunas_adicionadas": [
+      "content_type (TEXT): Tipo de conteúdo (text, image, audio, document, file)",
+      "duration (TEXT): Duração para arquivos de áudio",
+      "file_name (TEXT): Nome do arquivo para anexos",
+      "file_size (TEXT): Tamanho do arquivo para anexos",
+      "file_type (TEXT): Tipo do arquivo para anexos",
+      "tags (TEXT[]): Tags associadas à mensagem",
+      "status (TEXT): Status da mensagem (sent, delivered, read, failed)"
+    ],
+    "indices": [
+      "idx_messages_content_type: Índice para busca por tipo de conteúdo",
+      "idx_messages_status: Índice para busca por status"
+    ]
+  },
+  {
+    "tabela": "conversations",
+    "descricao": "Melhorias na tabela de conversas com campos adicionais para melhor categorização",
+    "colunas_adicionadas": [
+      "priority (TEXT): Prioridade da conversa (low, medium, high)",
+      "context (TEXT): Contexto da conversa (academic, administrative, support, general)",
+      "metadata (JSONB): Metadados adicionais para a conversa",
+      "tags (TEXT[]): Tags associadas à conversa"
+    ],
+    "indices": [
+      "idx_conversations_priority: Índice para busca por prioridade",
+      "idx_conversations_context: Índice para busca por contexto"
+    ]
+  },
+  {
+    "tabela": "channel_integrations",
+    "descricao": "Nova tabela para gerenciar integrações com provedores externos para cada canal",
+    "colunas": [
+      "id (UUID): Identificador único da integração",
+      "channel_id (UUID): Canal associado à integração",
+      "provider (TEXT): Provedor de serviço",
+      "config (JSONB): Configurações da integração",
+      "credentials (JSONB): Credenciais seguras",
+      "status (TEXT): Status da integração (active, inactive, error)",
+      "last_sync_at (TIMESTAMP): Data da última sincronização",
+      "error_message (TEXT): Mensagem de erro, se houver",
+      "created_at (TIMESTAMP): Data de criação",
+      "updated_at (TIMESTAMP): Data de atualização"
+    ],
+    "indices": [
+      "idx_channel_integrations_channel_id: Índice para busca por canal",
+      "idx_channel_integrations_status: Índice para busca por status"
+    ]
+  },
+  {
+    "funcao": "notify_new_message",
+    "descricao": "Função para enviar notificações sobre novas mensagens",
+    "tipo": "TRIGGER FUNCTION",
+    "acionada_por": "AFTER INSERT ON messages"
+  },
+  {
+    "funcao": "assign_conversation",
+    "descricao": "Função para atribuir conversas a usuários com base em regras definidas",
+    "tipo": "FUNCTION",
+    "parametros": [
+      "conversation_id (UUID): ID da conversa a ser atribuída"
+    ],
+    "retorno": "UUID: ID do usuário a quem a conversa foi atribuída"
+  }
+] 

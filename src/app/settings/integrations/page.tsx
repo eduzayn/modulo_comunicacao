@@ -3,8 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, KeyRound, Globe, Webhook, PuzzlePiece } from 'lucide-react'
+import { ArrowRight, KeyRound, Globe, Webhook } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
+import { Puzzle } from 'lucide-react'
 
 export default function IntegrationsPage() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function IntegrationsPage() {
     {
       title: 'Plugins',
       description: 'Estenda as funcionalidades do sistema com plugins personalizados',
-      icon: <PuzzlePiece className="h-10 w-10 text-primary" />,
+      icon: <Puzzle className="h-10 w-10 text-primary" />,
       href: '/settings/integrations/plugins',
       soon: true,
     },

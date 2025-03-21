@@ -72,7 +72,7 @@ const NAV_ITEMS: SidebarItem[] = [
   },
 ]
 
-export default function BaseLayout({ children, title, description }: BaseLayoutProps) {
+function BaseLayout({ children, title, description }: BaseLayoutProps) {
   const pathname = usePathname()
 
   return (
@@ -129,3 +129,6 @@ export default function BaseLayout({ children, title, description }: BaseLayoutP
     </div>
   )
 } 
+
+export { BaseLayout }
+export default BaseLayout 

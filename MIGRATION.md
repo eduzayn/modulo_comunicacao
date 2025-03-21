@@ -1,134 +1,134 @@
-# Documentação da Migração para Arquitetura Feature-First
+# Guia de Migração - Estrutura Feature-First
 
-Este documento descreve o processo de migração do projeto para uma arquitetura feature-first, focada em organizar o código por funcionalidades de negócio em vez de tipos técnicos.
+Este documento descreve o processo de migração da estrutura atual do projeto para a arquitetura feature-first.
 
-## Resumo da Migração
+## Estruturas Redundantes Removidas
 
-As seguintes features foram migradas para a nova estrutura:
+Como parte do processo de limpeza, as seguintes estruturas redundantes foram removidas:
 
-1. **Chat**: Sistema de mensagens e conversas
-2. **CRM**: Sistema de gerenciamento de relacionamento com clientes
-3. **IA**: Sistema de análise de mensagens e configuração de inteligência artificial
-4. **Settings**: Sistema de configurações do sistema
+1. **Providers duplicados**
+   - `src/providers/ReactQueryProvider.tsx`
+   - `src/providers/QueryProvider.tsx`
+   - Mantivemos apenas `src/contexts/QueryProvider.tsx`
 
-## Estrutura Anterior vs. Nova Estrutura
+2. **Hooks duplicados**
+   - `src/components/hooks/use-toast.ts`
+   - Mantivemos apenas os hooks em `src/hooks`
 
-### Estrutura Anterior:
+3. **Diretórios duplicados**
+   - `src/shared` (conceito migrado para a estrutura feature-first)
+   - `src/modules` (sobreposto com `src/features`)
+
+4. **Nomenclatura duplicada**
+   - Padronizamos para nomes em português (comunicacao, acesso-negado) 
+   - Removemos versões em inglês (communication, access-denied)
+
+## Plano de Migração para Feature-First
+
+A migração completa para a estrutura feature-first será realizada em fases:
+
+### Fase 1: Consolidação de Providers (Concluída)
+- Consolidação dos providers em `src/contexts`
+- Remoção de providers duplicados
+
+### Fase 2: Migração de Componentes
+- Mover componentes de `src/components` para suas respectivas features
+- Manter apenas componentes base de UI em `src/components/ui`
+
+```bash
+# Exemplo: Mover componentes de chat para a feature de chat
+mv src/components/chat/* src/features/chat/components/
+```
+
+### Fase 3: Migração de Hooks
+- Mover hooks específicos para suas respectivas features
+- Manter apenas hooks genuinamente globais em `src/hooks`
+
+```bash
+# Exemplo: Mover hooks de chat para a feature de chat
+mv src/hooks/useChat.ts src/features/chat/hooks/
+mv src/hooks/use-chat-state.ts src/features/chat/hooks/
+```
+
+### Fase 4: Migração de Serviços
+- Mover serviços específicos para suas respectivas features
+- Manter apenas serviços genuinamente globais em `src/services`
+
+```bash
+# Exemplo: Mover serviços de chat para a feature de chat
+mv src/services/conversation/* src/features/chat/services/
+```
+
+### Fase 5: Migração de Tipos
+- Mover tipos específicos para suas respectivas features
+- Manter apenas tipos globais em `src/types`
+
+```bash
+# Exemplo: Mover tipos específicos para suas features
+mv src/types/chat.ts src/features/chat/types/
+```
+
+## Estrutura Final Desejada
+
 ```
 src/
-  ├── components/       # Todos os componentes
-  ├── hooks/            # Todos os hooks
-  ├── services/         # Todos os serviços
-  ├── types/            # Todos os tipos
-  └── ...
+  ├── app/               # Rotas e páginas da aplicação (Next.js App Router)
+  ├── components/        # Apenas componentes base de UI
+  │   └── ui/            # Componentes Shadcn UI reutilizáveis
+  │
+  ├── contexts/          # Contextos React globais
+  │
+  ├── features/          # Diretório principal para as features
+  │   ├── chat/          # Feature de chat (completa com components, hooks, services, types)
+  │   ├── crm/           # Feature de CRM
+  │   ├── ai/            # Feature de Inteligência Artificial
+  │   └── settings/      # Feature de Configurações
+  │
+  ├── hooks/             # Apenas hooks genuinamente globais
+  │
+  ├── lib/               # Utilitários e bibliotecas compartilhadas
+  │
+  ├── services/          # Apenas serviços genuinamente globais
+  │
+  ├── types/             # Apenas tipos genuinamente globais
+  │
+  └── utils/             # Funções utilitárias globais
 ```
 
-### Nova Estrutura:
-```
-src/
-  ├── features/          # Organizado por funcionalidade
-  │   ├── chat/          # Feature de chat
-  │   │   ├── components/
-  │   │   ├── hooks/
-  │   │   ├── services/
-  │   │   ├── types/
-  │   │   └── index.ts
-  │   ├── crm/
-  │   ├── ai/
-  │   ├── settings/      # Feature de configurações
-  │   │   ├── components/
-  │   │   │   ├── automations/
-  │   │   │   ├── bots/
-  │   │   │   └── ...
-  │   │   ├── hooks/
-  │   │   ├── services/
-  │   │   ├── types/
-  │   │   └── index.ts
-  │   └── ...
-  ├── app/               # Rotas e páginas
-  ├── components/        # Componentes compartilhados 
-  └── lib/               # Utilitários compartilhados
-```
+## Diretrizes para Novas Implementações
 
-## Mudanças Realizadas
+Enquanto a migração estiver em andamento, siga estas diretrizes para novas implementações:
 
-### 1. Migração do Chat
+1. **Novas Features**: Sempre implementadas seguindo a estrutura feature-first
+2. **Novos Componentes**: 
+   - Se específicos a uma feature: implementar diretamente na pasta da feature
+   - Se genuinamente globais: implementar em `src/components/ui`
+3. **Novos Hooks**: 
+   - Se específicos a uma feature: implementar na pasta da feature
+   - Se genuinamente globais: implementar em `src/hooks`
+4. **Exportações**: 
+   - Cada feature deve exportar sua API pública via `index.ts`
+   - Nunca importe diretamente arquivos internos de uma feature
 
-- Migração dos tipos de `src/types/chat.ts` para `src/features/chat/types/chat.types.ts`
-- Migração do serviço de chat de `src/services/ai.ts` para `src/features/chat/services/chat-service.ts`
-- Migração do hook useChat de `src/hooks/useChat.ts` para `src/features/chat/hooks/use-chat.ts`
-- Criação de componentes específicos do chat em `src/features/chat/components/`
-- Criação de um arquivo de exportação em `src/features/chat/index.ts`
-- Documentação específica em `src/features/chat/README.md`
+## Como Identificar Componentes para Migração
 
-### 2. Migração do CRM
+Use estes critérios para identificar para qual feature migrar um componente:
 
-- Criação de tipos específicos em `src/features/crm/types/crm.types.ts`
-- Implementação de serviços para gerenciamento de contatos e negociações
-- Criação de hooks para gerenciamento de estado do CRM
-- Implementação de componentes para visualização de contatos e negociações
-- Documentação específica em `src/features/crm/README.md`
+1. **Propósito Principal**: Qual o objetivo principal do componente?
+2. **Dados Manipulados**: Quais dados o componente manipula?
+3. **Dependências**: De quais serviços e hooks o componente depende?
+4. **Reutilização**: O componente é específico ou reutilizado em várias áreas?
 
-### 3. Migração da IA
+## Testes Durante a Migração
 
-- Migração dos tipos de `src/types/ai.ts` para `src/features/ai/types/ai.types.ts`
-- Migração do serviço de IA de `src/services/openai/index.ts` para `src/features/ai/services/ai-service.ts`
-- Criação de hooks para gerenciamento de configurações e análise de mensagens
-- Implementação de componentes para configuração e visualização de análises
-- Documentação específica em `src/features/ai/README.md`
+É essencial testar cada parte da aplicação após mover componentes:
 
-### 4. Migração das Configurações (Settings)
+1. Verificar se rotas relevantes ainda funcionam
+2. Verificar se interações de UI continuam funcionando 
+3. Verificar se fluxos de negócio continuam intactos
+4. Verificar se a tipagem continua correta
 
-- Migração dos componentes de `src/components/settings/` para `src/features/settings/components/`
-  - Migração de `create-automation-form.tsx` para `AutomationForm.tsx`
-  - Migração de `create-bot-form.tsx` para `BotForm.tsx`
-- Criação de tipos específicos em `src/features/settings/types/settings.types.ts`
-- Implementação de serviços para gerenciamento de configurações em `src/features/settings/services/settings-service.ts`
-- Criação de hooks para gerenciamento de configurações em `src/features/settings/hooks/use-settings.ts`
-- Atualização das páginas em `src/app/settings/` para usar a nova estrutura
-- Documentação específica em `src/features/settings/README.md`
+## Ferramentas Úteis Durante a Migração
 
-## Arquivos Removidos
-
-Os seguintes arquivos foram removidos após a migração bem-sucedida:
-
-- `src/types/chat.ts`
-- `src/types/ai.ts`
-- `src/services/openai/index.ts`
-- `src/components/settings/automations/create-automation-form.tsx`
-- `src/components/settings/bots/create-bot-form.tsx`
-
-## Páginas de Exemplo
-
-Foram criadas páginas de exemplo para demonstrar o uso das features:
-
-- `/examples` - Página principal com cards para todas as features
-- `/examples/chat` - Demonstração do sistema de chat
-- `/examples/crm` - Demonstração do sistema de CRM
-- `/examples/ai` - Demonstração das funcionalidades de IA
-
-## Integração entre Features
-
-Algumas features se relacionam com outras:
-
-- **Settings → Inbox**: As configurações de canais são utilizadas pela caixa de entrada
-- **Settings → CRM**: As configurações de pipeline são utilizadas pelo CRM
-- **Settings → Chat**: As configurações de bots são utilizadas pelo chat
-
-Essas integrações são feitas através das APIs públicas de cada feature.
-
-## Benefícios da Nova Arquitetura
-
-1. **Melhor organização**: Código relacionado está agrupado por funcionalidade
-2. **Facilidade de manutenção**: Alterações em uma feature são localizadas
-3. **Melhor colaboração**: Equipes podem trabalhar em features separadas
-4. **Coesão**: Cada diretório de feature contém tudo necessário para aquela funcionalidade
-5. **Encapsulamento**: Implementações internas de uma feature são encapsuladas
-6. **APIs bem definidas**: Cada feature expõe uma API clara através do arquivo `index.ts`
-
-## Próximos Passos
-
-1. Continuar migrando outras funcionalidades para a estrutura feature-first
-2. Refatorar os componentes compartilhados para serem reutilizáveis
-3. Implementar testes específicos para cada feature
-4. Documentar mais detalhadamente a integração entre as features 
+- Script `cleanup-duplicates.sh` para remover estruturas redundantes
+- Testes para garantir que a funcionalidade permanece intacta 

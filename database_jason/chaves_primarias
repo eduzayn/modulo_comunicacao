@@ -1,0 +1,752 @@
+[
+  {
+    "table_name": "accounts",
+    "column_name": "id",
+    "constraint_name": "accounts_pkey"
+  },
+  {
+    "table_name": "matricula_documentos",
+    "column_name": "id",
+    "constraint_name": "matricula_documentos_pkey"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "id",
+    "constraint_name": "webhooks_pkey"
+  },
+  {
+    "table_name": "chatbot_intents",
+    "column_name": "id",
+    "constraint_name": "chatbot_intents_pkey"
+  },
+  {
+    "table_name": "queue_jobs",
+    "column_name": "id",
+    "constraint_name": "queue_jobs_pkey"
+  },
+  {
+    "table_name": "matricula_contratos",
+    "column_name": "id",
+    "constraint_name": "matricula_contratos_pkey"
+  },
+  {
+    "table_name": "account_users",
+    "column_name": "id",
+    "constraint_name": "account_users_pkey"
+  },
+  {
+    "table_name": "assessments",
+    "column_name": "id",
+    "constraint_name": "assessments_pkey"
+  },
+  {
+    "table_name": "backups",
+    "column_name": "id",
+    "constraint_name": "backups_pkey"
+  },
+  {
+    "table_name": "documentos",
+    "column_name": "id",
+    "constraint_name": "documentos_pkey"
+  },
+  {
+    "table_name": "contratos",
+    "column_name": "id",
+    "constraint_name": "contratos_pkey"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "constraint_name": "users_pkey"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "constraint_name": "users_pkey"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "constraint_name": "users_pkey"
+  },
+  {
+    "table_name": "matriculas",
+    "column_name": "id",
+    "constraint_name": "matriculas_pkey"
+  },
+  {
+    "table_name": "email_templates",
+    "column_name": "id",
+    "constraint_name": "email_templates_pkey"
+  },
+  {
+    "table_name": "indicadores_evasao",
+    "column_name": "id",
+    "constraint_name": "indicadores_evasao_pkey"
+  },
+  {
+    "table_name": "recomendacoes_turmas",
+    "column_name": "id",
+    "constraint_name": "recomendacoes_turmas_pkey"
+  },
+  {
+    "table_name": "preferencias_alunos",
+    "column_name": "id",
+    "constraint_name": "preferencias_alunos_pkey"
+  },
+  {
+    "table_name": "analise_evasao",
+    "column_name": "id",
+    "constraint_name": "analise_evasao_pkey"
+  },
+  {
+    "table_name": "submissions",
+    "column_name": "id",
+    "constraint_name": "submissions_pkey"
+  },
+  {
+    "table_name": "categories",
+    "column_name": "id",
+    "constraint_name": "categories_pkey"
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "id",
+    "constraint_name": "reviews_pkey"
+  },
+  {
+    "table_name": "review_comments",
+    "column_name": "id",
+    "constraint_name": "review_comments_pkey"
+  },
+  {
+    "table_name": "channels",
+    "column_name": "id",
+    "constraint_name": "channels_pkey"
+  },
+  {
+    "table_name": "messages",
+    "column_name": "id",
+    "constraint_name": "messages_pkey"
+  },
+  {
+    "table_name": "messages",
+    "column_name": "id",
+    "constraint_name": "messages_pkey"
+  },
+  {
+    "table_name": "email_logs",
+    "column_name": "id",
+    "constraint_name": "email_logs_pkey"
+  },
+  {
+    "table_name": "ai_settings",
+    "column_name": "id",
+    "constraint_name": "ai_settings_pkey"
+  },
+  {
+    "table_name": "content",
+    "column_name": "id",
+    "constraint_name": "content_pkey"
+  },
+  {
+    "table_name": "templates",
+    "column_name": "id",
+    "constraint_name": "templates_pkey"
+  },
+  {
+    "table_name": "course_materials",
+    "column_name": "id",
+    "constraint_name": "course_materials_pkey"
+  },
+  {
+    "table_name": "media",
+    "column_name": "id",
+    "constraint_name": "media_pkey"
+  },
+  {
+    "table_name": "content_media",
+    "column_name": "contentid",
+    "constraint_name": "content_media_pkey"
+  },
+  {
+    "table_name": "content_media",
+    "column_name": "mediaid",
+    "constraint_name": "content_media_pkey"
+  },
+  {
+    "table_name": "ai_prompts",
+    "column_name": "id",
+    "constraint_name": "ai_prompts_pkey"
+  },
+  {
+    "table_name": "metrics",
+    "column_name": "id",
+    "constraint_name": "metrics_pkey"
+  },
+  {
+    "table_name": "ai_sessions",
+    "column_name": "id",
+    "constraint_name": "ai_sessions_pkey"
+  },
+  {
+    "table_name": "ai_messages",
+    "column_name": "id",
+    "constraint_name": "ai_messages_pkey"
+  },
+  {
+    "table_name": "chat_messages",
+    "column_name": "id",
+    "constraint_name": "chat_messages_pkey"
+  },
+  {
+    "table_name": "learning_paths",
+    "column_name": "id",
+    "constraint_name": "learning_paths_pkey"
+  },
+  {
+    "table_name": "contacts",
+    "column_name": "id",
+    "constraint_name": "contacts_pkey"
+  },
+  {
+    "table_name": "inboxes",
+    "column_name": "id",
+    "constraint_name": "inboxes_pkey"
+  },
+  {
+    "table_name": "inbox_members",
+    "column_name": "id",
+    "constraint_name": "inbox_members_pkey"
+  },
+  {
+    "table_name": "supplementary_materials",
+    "column_name": "id",
+    "constraint_name": "supplementary_materials_pkey"
+  },
+  {
+    "table_name": "learning_path_courses",
+    "column_name": "id",
+    "constraint_name": "learning_path_courses_pkey"
+  },
+  {
+    "table_name": "learning_path_enrollments",
+    "column_name": "id",
+    "constraint_name": "learning_path_enrollments_pkey"
+  },
+  {
+    "table_name": "alunos",
+    "column_name": "id",
+    "constraint_name": "alunos_pkey"
+  },
+  {
+    "table_name": "turmas",
+    "column_name": "id",
+    "constraint_name": "turmas_pkey"
+  },
+  {
+    "table_name": "descontos",
+    "column_name": "id",
+    "constraint_name": "descontos_pkey"
+  },
+  {
+    "table_name": "feedback",
+    "column_name": "id",
+    "constraint_name": "feedback_pkey"
+  },
+  {
+    "table_name": "course_ratings",
+    "column_name": "id",
+    "constraint_name": "course_ratings_pkey"
+  },
+  {
+    "table_name": "portal_settings",
+    "column_name": "id",
+    "constraint_name": "portal_settings_pkey"
+  },
+  {
+    "table_name": "campanhas",
+    "column_name": "id",
+    "constraint_name": "campanhas_pkey"
+  },
+  {
+    "table_name": "teams",
+    "column_name": "id",
+    "constraint_name": "teams_pkey"
+  },
+  {
+    "table_name": "campanhas_descontos",
+    "column_name": "id",
+    "constraint_name": "campanhas_descontos_pkey"
+  },
+  {
+    "table_name": "programa_indicacao",
+    "column_name": "id",
+    "constraint_name": "programa_indicacao_pkey"
+  },
+  {
+    "table_name": "faq_categorias",
+    "column_name": "id",
+    "constraint_name": "faq_categorias_pkey"
+  },
+  {
+    "table_name": "team_members",
+    "column_name": "id",
+    "constraint_name": "team_members_pkey"
+  },
+  {
+    "table_name": "canned_responses",
+    "column_name": "id",
+    "constraint_name": "canned_responses_pkey"
+  },
+  {
+    "table_name": "avatars",
+    "column_name": "id",
+    "constraint_name": "avatars_pkey"
+  },
+  {
+    "table_name": "voices",
+    "column_name": "id",
+    "constraint_name": "voices_pkey"
+  },
+  {
+    "table_name": "backgrounds",
+    "column_name": "id",
+    "constraint_name": "backgrounds_pkey"
+  },
+  {
+    "table_name": "email_configurations",
+    "column_name": "id",
+    "constraint_name": "email_configurations_pkey"
+  },
+  {
+    "table_name": "progress_tracking",
+    "column_name": "id",
+    "constraint_name": "progress_tracking_pkey"
+  },
+  {
+    "table_name": "videos",
+    "column_name": "id",
+    "constraint_name": "videos_pkey"
+  },
+  {
+    "table_name": "workflows",
+    "column_name": "id",
+    "constraint_name": "workflows_pkey"
+  },
+  {
+    "table_name": "faq_perguntas",
+    "column_name": "id",
+    "constraint_name": "faq_perguntas_pkey"
+  },
+  {
+    "table_name": "parcelas",
+    "column_name": "id",
+    "constraint_name": "parcelas_pkey"
+  },
+  {
+    "table_name": "checklist_documentos",
+    "column_name": "id",
+    "constraint_name": "checklist_documentos_pkey"
+  },
+  {
+    "table_name": "validacao_documentos",
+    "column_name": "id",
+    "constraint_name": "validacao_documentos_pkey"
+  },
+  {
+    "table_name": "historico_revisoes",
+    "column_name": "id",
+    "constraint_name": "historico_revisoes_pkey"
+  },
+  {
+    "table_name": "relatorios",
+    "column_name": "id",
+    "constraint_name": "relatorios_pkey"
+  },
+  {
+    "table_name": "bolsas",
+    "column_name": "id",
+    "constraint_name": "bolsas_pkey"
+  },
+  {
+    "table_name": "lessons",
+    "column_name": "id",
+    "constraint_name": "lessons_pkey"
+  },
+  {
+    "table_name": "students",
+    "column_name": "id",
+    "constraint_name": "students_pkey"
+  },
+  {
+    "table_name": "modules",
+    "column_name": "id",
+    "constraint_name": "modules_pkey"
+  },
+  {
+    "table_name": "lesson_progress",
+    "column_name": "id",
+    "constraint_name": "lesson_progress_pkey"
+  },
+  {
+    "table_name": "certificates",
+    "column_name": "id",
+    "constraint_name": "certificates_pkey"
+  },
+  {
+    "table_name": "financial_records",
+    "column_name": "id",
+    "constraint_name": "financial_records_pkey"
+  },
+  {
+    "table_name": "notifications",
+    "column_name": "id",
+    "constraint_name": "notifications_pkey"
+  },
+  {
+    "table_name": "permissions",
+    "column_name": "id",
+    "constraint_name": "permissions_pkey"
+  },
+  {
+    "table_name": "refresh_tokens",
+    "column_name": "id",
+    "constraint_name": "refresh_tokens_pkey"
+  },
+  {
+    "table_name": "refresh_tokens",
+    "column_name": "id",
+    "constraint_name": "refresh_tokens_pkey"
+  },
+  {
+    "table_name": "error_logs",
+    "column_name": "id",
+    "constraint_name": "error_logs_pkey"
+  },
+  {
+    "table_name": "email_settings",
+    "column_name": "id",
+    "constraint_name": "email_settings_pkey"
+  },
+  {
+    "table_name": "audit_logs",
+    "column_name": "id",
+    "constraint_name": "audit_logs_pkey"
+  },
+  {
+    "table_name": "content_items",
+    "column_name": "id",
+    "constraint_name": "content_items_pkey"
+  },
+  {
+    "table_name": "content_categories",
+    "column_name": "id",
+    "constraint_name": "content_categories_pkey"
+  },
+  {
+    "table_name": "content_tags",
+    "column_name": "id",
+    "constraint_name": "content_tags_pkey"
+  },
+  {
+    "table_name": "content_versions",
+    "column_name": "id",
+    "constraint_name": "content_versions_pkey"
+  },
+  {
+    "table_name": "ai_assistance_history",
+    "column_name": "id",
+    "constraint_name": "ai_assistance_history_pkey"
+  },
+  {
+    "table_name": "review_requests",
+    "column_name": "id",
+    "constraint_name": "review_requests_pkey"
+  },
+  {
+    "table_name": "review_approvals",
+    "column_name": "id",
+    "constraint_name": "review_approvals_pkey"
+  },
+  {
+    "table_name": "groups",
+    "column_name": "id",
+    "constraint_name": "groups_pkey"
+  },
+  {
+    "table_name": "conversations",
+    "column_name": "id",
+    "constraint_name": "conversations_pkey"
+  },
+  {
+    "table_name": "partners",
+    "column_name": "id",
+    "constraint_name": "partners_pkey"
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "id",
+    "constraint_name": "user_profiles_pkey"
+  },
+  {
+    "table_name": "enrollments",
+    "column_name": "id",
+    "constraint_name": "enrollments_pkey"
+  },
+  {
+    "table_name": "user_roles",
+    "column_name": "id",
+    "constraint_name": "user_roles_pkey"
+  },
+  {
+    "table_name": "deals",
+    "column_name": "id",
+    "constraint_name": "deals_pkey"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "constraint_name": "profiles_pkey"
+  },
+  {
+    "table_name": "teachers",
+    "column_name": "id",
+    "constraint_name": "teachers_pkey"
+  },
+  {
+    "table_name": "auth_settings",
+    "column_name": "id",
+    "constraint_name": "auth_settings_pkey"
+  },
+  {
+    "table_name": "automations",
+    "column_name": "id",
+    "constraint_name": "automations_pkey"
+  },
+  {
+    "table_name": "bots",
+    "column_name": "id",
+    "constraint_name": "bots_pkey"
+  },
+  {
+    "table_name": "pipelines",
+    "column_name": "id",
+    "constraint_name": "pipelines_pkey"
+  },
+  {
+    "table_name": "pipeline_cadences",
+    "column_name": "id",
+    "constraint_name": "pipeline_cadences_pkey"
+  },
+  {
+    "table_name": "courses",
+    "column_name": "id",
+    "constraint_name": "courses_pkey"
+  },
+  {
+    "table_name": "module_access",
+    "column_name": "id",
+    "constraint_name": "module_access_pkey"
+  },
+  {
+    "table_name": "test_table",
+    "column_name": "id",
+    "constraint_name": "test_table_pkey"
+  },
+  {
+    "table_name": "chatbot_conversas",
+    "column_name": "id",
+    "constraint_name": "chatbot_conversas_pkey"
+  },
+  {
+    "table_name": "chatbot_mensagens",
+    "column_name": "id",
+    "constraint_name": "chatbot_mensagens_pkey"
+  },
+  {
+    "table_name": "ocr_verificacoes",
+    "column_name": "id",
+    "constraint_name": "ocr_verificacoes_pkey"
+  },
+  {
+    "table_name": "ocr_modelos_documentos",
+    "column_name": "id",
+    "constraint_name": "ocr_modelos_documentos_pkey"
+  },
+  {
+    "table_name": "learning_centers",
+    "column_name": "id",
+    "constraint_name": "learning_centers_pkey"
+  },
+  {
+    "table_name": "learning_center_staff",
+    "column_name": "id",
+    "constraint_name": "learning_center_staff_pkey"
+  },
+  {
+    "table_name": "assessment_templates",
+    "column_name": "id",
+    "constraint_name": "assessment_templates_pkey"
+  },
+  {
+    "table_name": "analytics_events",
+    "column_name": "id",
+    "constraint_name": "analytics_events_pkey"
+  },
+  {
+    "table_name": "admin_settings",
+    "column_name": "id",
+    "constraint_name": "admin_settings_pkey"
+  },
+  {
+    "table_name": "financial_transactions",
+    "column_name": "id",
+    "constraint_name": "financial_transactions_pkey"
+  },
+  {
+    "table_name": "system_modules",
+    "column_name": "id",
+    "constraint_name": "system_modules_pkey"
+  },
+  {
+    "table_name": "white_label_themes",
+    "column_name": "id",
+    "constraint_name": "white_label_themes_pkey"
+  },
+  {
+    "table_name": "white_label_layouts",
+    "column_name": "id",
+    "constraint_name": "white_label_layouts_pkey"
+  },
+  {
+    "table_name": "white_label_sections",
+    "column_name": "id",
+    "constraint_name": "white_label_sections_pkey"
+  },
+  {
+    "table_name": "white_label_section_contents",
+    "column_name": "id",
+    "constraint_name": "white_label_section_contents_pkey"
+  },
+  {
+    "table_name": "white_label_templates",
+    "column_name": "id",
+    "constraint_name": "white_label_templates_pkey"
+  },
+  {
+    "table_name": "white_label_domains",
+    "column_name": "id",
+    "constraint_name": "white_label_domains_pkey"
+  },
+  {
+    "table_name": "organizations",
+    "column_name": "id",
+    "constraint_name": "organizations_pkey"
+  },
+  {
+    "table_name": "white_label_permissions",
+    "column_name": "id",
+    "constraint_name": "white_label_permissions_pkey"
+  },
+  {
+    "table_name": "assignment_rules",
+    "column_name": "id",
+    "constraint_name": "assignment_rules_pkey"
+  },
+  {
+    "table_name": "communication.widget_settings",
+    "column_name": "id",
+    "constraint_name": "communication.widget_settings_pkey"
+  },
+  {
+    "table_name": "communication.widget_form_fields",
+    "column_name": "id",
+    "constraint_name": "communication.widget_form_fields_pkey"
+  },
+  {
+    "table_name": "communication.widget_domains",
+    "column_name": "id",
+    "constraint_name": "communication.widget_domains_pkey"
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "id",
+    "constraint_name": "subscription_plans_pkey"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "id",
+    "constraint_name": "subscriptions_pkey"
+  },
+  {
+    "table_name": "invoices",
+    "column_name": "id",
+    "constraint_name": "invoices_pkey"
+  },
+  {
+    "table_name": "invoices",
+    "column_name": "id",
+    "constraint_name": "invoices_pkey"
+  },
+  {
+    "table_name": "payment_methods",
+    "column_name": "id",
+    "constraint_name": "payment_methods_pkey"
+  },
+  {
+    "table_name": "payment_methods",
+    "column_name": "id",
+    "constraint_name": "payment_methods_pkey"
+  },
+  {
+    "table_name": "payment_history",
+    "column_name": "id",
+    "constraint_name": "payment_history_pkey"
+  },
+  {
+    "table_name": "customer_balance",
+    "column_name": "id",
+    "constraint_name": "customer_balance_pkey"
+  },
+  {
+    "table_name": "billing_settings",
+    "column_name": "id",
+    "constraint_name": "billing_settings_pkey"
+  },
+  {
+    "table_name": "usuarios",
+    "column_name": "id",
+    "constraint_name": "usuarios_pkey"
+  },
+  {
+    "table_name": "professor_aluno",
+    "column_name": "id",
+    "constraint_name": "professor_aluno_pkey"
+  },
+  {
+    "table_name": "cursos",
+    "column_name": "id",
+    "constraint_name": "cursos_pkey"
+  },
+  {
+    "table_name": "event_history",
+    "column_name": "id",
+    "constraint_name": "event_history_pkey"
+  },
+  {
+    "table_name": "middleware_stats",
+    "column_name": "id",
+    "constraint_name": "middleware_stats_pkey"
+  },
+  {
+    "table_name": "middleware_settings",
+    "column_name": "id",
+    "constraint_name": "middleware_settings_pkey"
+  },
+  {
+    "table_name": "channel_integrations",
+    "column_name": "id",
+    "constraint_name": "channel_integrations_pkey"
+  }
+]

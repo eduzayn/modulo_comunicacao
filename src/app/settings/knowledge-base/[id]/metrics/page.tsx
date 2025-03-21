@@ -1,7 +1,7 @@
 'use client'
 
 import { useKnowledgeBase } from '../../hooks/use-knowledge-base'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 
 interface KnowledgeBaseMetricsPageProps {
