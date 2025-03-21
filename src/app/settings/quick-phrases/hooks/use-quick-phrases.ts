@@ -1,7 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type CreateQuickPhraseFormData } from '../schemas'
 import { createQuickPhrase } from '../services/quick-phrases'
-import { importKinboxQuickPhrases } from '@/services/kinbox'
+import { createSafeActionClient } from 'next-safe-action'
+import { ActionResponse } from '@/types/actions'
+import { QuickPhrase } from '../types'
+
+// Definimos uma Server Action segura para importar as frases
+const importKinboxPhrasesAction = createSafeActionClient().action(
+  async (): Promise<ActionResponse<QuickPhrase[]>> => {
+    'use server'
+    // Importamos o módulo dinamicamente apenas no servidor
+    const { importKinboxQuickPhrases } = await import('@/services/kinbox')
+    return importKinboxQuickPhrases()
+  }
+)
 
 export function useCreateQuickPhrase() {
   const queryClient = useQueryClient()
@@ -49,7 +61,9 @@ export function useImportKinboxPhrases() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: importKinboxQuickPhrases,
+    mutationFn: async () => {
+      return importKinboxPhrasesAction()
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quickPhrases'] })
     },

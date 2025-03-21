@@ -1,4 +1,3 @@
-import { env } from '@/env.mjs'
 import { api } from '@/lib/api'
 import { type ActionResponse } from '@/types/actions'
 import { type QuickPhrase } from '@/app/settings/quick-phrases/types'
@@ -13,13 +12,8 @@ interface KinboxConfig {
 class KinboxService {
   private config: KinboxConfig
 
-  constructor() {
-    this.config = {
-      apiSecret: env.KINBOX_API_SECRET,
-      apiToken: env.KINBOX_API_TOKEN,
-      apiTokenV3: env.KINBOX_API_TOKEN_V3,
-      baseUrl: 'https://api.kinbox.com.br'
-    }
+  constructor(config: KinboxConfig) {
+    this.config = config
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {
@@ -76,7 +70,51 @@ class KinboxService {
   }
 }
 
-export const kinboxService = new KinboxService()
+// Evitamos acesso direto às variáveis de ambiente no cliente
+// Lazy-load o serviço somente quando necessário (chamada de servidor)
+let kinboxServiceInstance: KinboxService | null = null
+
+export const getKinboxService = () => {
+  // Este código só deve ser executado no servidor
+  if (typeof window !== 'undefined') {
+    console.warn('Tentativa de inicializar KinboxService no cliente, retornando stub.')
+    // Retorna uma versão simulada para o cliente que lançará erro se usada
+    const stub = {
+      getQuickPhrases: () => {
+        throw new Error('KinboxService não pode ser usado diretamente no cliente')
+      },
+      getInbox: () => {
+        throw new Error('KinboxService não pode ser usado diretamente no cliente')
+      },
+      getContacts: () => {
+        throw new Error('KinboxService não pode ser usado diretamente no cliente')
+      },
+      getMessages: () => {
+        throw new Error('KinboxService não pode ser usado diretamente no cliente')
+      },
+      sendMessage: () => {
+        throw new Error('KinboxService não pode ser usado diretamente no cliente')
+      }
+    }
+    
+    return stub as unknown as KinboxService
+  }
+
+  if (!kinboxServiceInstance) {
+    // Importa env diretamente apenas no lado do servidor
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { env } = require('@/env.mjs')
+    
+    kinboxServiceInstance = new KinboxService({
+      apiSecret: env.KINBOX_API_SECRET,
+      apiToken: env.KINBOX_API_TOKEN,
+      apiTokenV3: env.KINBOX_API_TOKEN_V3,
+      baseUrl: 'https://api.kinbox.com.br'
+    })
+  }
+  
+  return kinboxServiceInstance
+}
 
 interface KinboxQuickPhrase {
   id: string
@@ -91,7 +129,13 @@ interface KinboxQuickPhrase {
 
 export async function importKinboxQuickPhrases(): Promise<ActionResponse<QuickPhrase[]>> {
   try {
+    // Esta função só deve ser chamada a partir de uma Server Action ou API route
+    if (typeof window !== 'undefined') {
+      throw new Error('Esta função só pode ser chamada do servidor via Server Action ou API Route')
+    }
+    
     // Busca as frases rápidas usando o KinboxService
+    const kinboxService = getKinboxService()
     const kinboxPhrases: KinboxQuickPhrase[] = await kinboxService.getQuickPhrases()
 
     // Converte as frases do Kinbox para o formato do nosso sistema
