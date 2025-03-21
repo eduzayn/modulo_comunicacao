@@ -7,7 +7,7 @@ export default function SupabaseAdminPage() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'functions' | 'buckets'>('functions')
+  const [activeTab, setActiveTab] = useState<'functions' | 'buckets' | 'tables'>('functions')
 
   const fetchFunctions = async () => {
     setLoading(true)
@@ -52,6 +52,28 @@ export default function SupabaseAdminPage() {
       setLoading(false)
     }
   }
+  
+  const fetchTables = async () => {
+    setLoading(true)
+    setError(null)
+    setActiveTab('tables')
+    
+    try {
+      const response = await fetch('/api/supabase/tables')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao buscar tabelas')
+      }
+      
+      const data = await response.json()
+      setResult(data.tables)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const executeSqlQuery = async () => {
     setLoading(true)
@@ -72,8 +94,16 @@ export default function SupabaseAdminPage() {
           ORDER BY function_name
           LIMIT 10;
         `
-      } else {
+      } else if (activeTab === 'buckets') {
         query = `SELECT * FROM storage.buckets LIMIT 10;`
+      } else if (activeTab === 'tables') {
+        query = `
+          SELECT table_name, table_schema 
+          FROM information_schema.tables 
+          WHERE table_schema IN ('public', 'storage')
+          ORDER BY table_schema, table_name
+          LIMIT 20;
+        `
       }
       
       const response = await fetch('/api/supabase', {
@@ -98,11 +128,24 @@ export default function SupabaseAdminPage() {
     }
   }
 
+  const getTabTitle = () => {
+    switch (activeTab) {
+      case 'functions':
+        return 'Funções SQL'
+      case 'buckets':
+        return 'Buckets de Armazenamento'
+      case 'tables':
+        return 'Tabelas do Banco de Dados'
+      default:
+        return 'Resultados'
+    }
+  }
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Supabase Admin</h1>
       
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-6 flex flex-wrap gap-2">
         <Button 
           onClick={fetchFunctions} 
           disabled={loading}
@@ -119,6 +162,14 @@ export default function SupabaseAdminPage() {
           {loading && activeTab === 'buckets' ? 'Carregando...' : 'Buckets de Armazenamento'}
         </Button>
         
+        <Button 
+          onClick={fetchTables} 
+          disabled={loading}
+          variant={activeTab === 'tables' ? 'default' : 'outline'}
+        >
+          {loading && activeTab === 'tables' ? 'Carregando...' : 'Tabelas do Banco'}
+        </Button>
+        
         <Button onClick={executeSqlQuery} disabled={loading} variant="secondary">
           {loading ? 'Carregando...' : 'Executar Consulta Exemplo'}
         </Button>
@@ -132,9 +183,7 @@ export default function SupabaseAdminPage() {
       
       {result && (
         <div className="bg-white shadow-md rounded-lg p-4 overflow-auto max-h-[70vh]">
-          <h2 className="text-xl font-semibold mb-3">
-            {activeTab === 'functions' ? 'Funções SQL' : 'Buckets de Armazenamento'}
-          </h2>
+          <h2 className="text-xl font-semibold mb-3">{getTabTitle()}</h2>
           
           {Array.isArray(result) ? (
             <table className="min-w-full divide-y divide-gray-200">
