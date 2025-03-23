@@ -1,104 +1,234 @@
+/**
+ * page.tsx
+ * 
+ * Página inicial (dashboard) exibida na raiz da aplicação.
+ * Fornece acesso rápido às principais áreas do sistema.
+ */
+
 'use client';
 
-import React from 'react';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
-import { MessageSquare, Users, BarChart2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link'
+import { Suspense } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MessageSquare, Users, BarChart3, Clock, Calendar, Settings } from 'lucide-react'
+import { ProtectedPage } from '@/components/auth/ProtectedPage'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export default function Home() {
+const areaCards = [
+  {
+    title: 'Comunicação',
+    description: 'Chat, mensagens e gestão de contatos',
+    icon: <MessageSquare className="h-6 w-6 text-primary" />,
+    href: '/inbox',
+    cta: 'Acessar comunicação',
+    stats: {
+      label: 'Mensagens hoje',
+      value: '125'
+    }
+  },
+  {
+    title: 'Usuários',
+    description: 'Gerenciamento de usuários e permissões',
+    icon: <Users className="h-6 w-6 text-primary" />,
+    href: '/admin/users',
+    cta: 'Gerenciar usuários',
+    stats: {
+      label: 'Usuários ativos',
+      value: '42'
+    }
+  },
+  {
+    title: 'Relatórios',
+    description: 'Relatórios e estatísticas de uso',
+    icon: <BarChart3 className="h-6 w-6 text-primary" />,
+    href: '/admin/reports',
+    cta: 'Ver relatórios',
+    stats: {
+      label: 'Dados desde',
+      value: '30 dias'
+    }
+  },
+  {
+    title: 'Registro de Horas',
+    description: 'Controle e registro de horas trabalhadas',
+    icon: <Clock className="h-6 w-6 text-primary" />,
+    href: '/admin/hours',
+    cta: 'Registrar horas',
+    stats: {
+      label: 'Horas este mês',
+      value: '148h'
+    }
+  },
+  {
+    title: 'Agenda',
+    description: 'Calendário e agendamento de atividades',
+    icon: <Calendar className="h-6 w-6 text-primary" />,
+    href: '/admin/calendar',
+    cta: 'Ver agenda',
+    stats: {
+      label: 'Próximos eventos',
+      value: '8'
+    }
+  },
+  {
+    title: 'Configurações',
+    description: 'Configurações do sistema e da conta',
+    icon: <Settings className="h-6 w-6 text-primary" />,
+    href: '/admin/settings',
+    cta: 'Configurar',
+    stats: {
+      label: 'Última atualização',
+      value: '2 dias'
+    }
+  }
+]
+
+// Componentes de Carregamento
+function CardsSkeleton() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Painel Principal</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Conversas Ativas</h2>
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold">3</p>
-          <p className="text-sm text-gray-500 mt-1">2 novas hoje</p>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Contatos</h2>
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-              <Users className="h-5 w-5 text-green-600" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold">128</p>
-          <p className="text-sm text-gray-500 mt-1">5 novos esta semana</p>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Taxa de Resposta</h2>
-            <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-              <BarChart2 className="h-5 w-5 text-purple-600" />
-            </div>
-          </div>
-          <p className="text-3xl font-bold">98%</p>
-          <p className="text-sm text-gray-500 mt-1">+2% em relação ao mês anterior</p>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Conversas Recentes</h2>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-semibold">
-                    {i === 1 ? 'M' : i === 2 ? 'J' : 'C'}
-                  </div>
-                  <div>
-                    <p className="font-medium">{i === 1 ? 'Maria Silva' : i === 2 ? 'João Santos' : 'Carlos Oliveira'}</p>
-                    <p className="text-sm text-gray-500">Última mensagem: {i === 1 ? '5 min atrás' : i === 2 ? '1 hora atrás' : 'ontem'}</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/chat-test">Ver</Link>
-                </Button>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array(6).fill(0).map((_, i) => (
+        <Card key={i} className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
               </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/chat-test">Ver todas as conversas</Link>
-            </Button>
-          </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center py-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-8" />
+            </div>
+          </CardContent>
+          <CardFooter className="bg-muted/50 pt-2">
+            <Skeleton className="h-9 w-full" />
+          </CardFooter>
         </Card>
-        
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Atividades Recentes</h2>
-          <div className="space-y-3">
-            {[
-              { text: 'Nova mensagem recebida de Maria Silva', time: '5 min atrás' },
-              { text: 'João Santos visualizou sua mensagem', time: '1 hora atrás' },
-              { text: 'Você enviou um documento para Carlos Oliveira', time: 'ontem' },
-              { text: 'Nova conversa iniciada com Ana Pereira', time: 'ontem' },
-              { text: 'Mensagem marcada como resolvida', time: '2 dias atrás' }
-            ].map((activity, i) => (
-              <div key={i} className="flex items-start gap-3 border-b pb-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-2"></div>
-                <div>
-                  <p className="text-sm">{activity.text}</p>
-                  <p className="text-xs text-gray-500">{activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <Button variant="outline" className="w-full">
-              Ver todas as atividades
+      ))}
+    </div>
+  )
+}
+
+function TabContentSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-5 w-48 mb-2" />
+        <Skeleton className="h-4 w-64" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-24 w-full" />
+      </CardContent>
+    </Card>
+  )
+}
+
+// Componentes para Suspense
+function MainAreaCards() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {areaCards.map((card, index) => (
+        <Card key={index} className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center gap-4 pb-2">
+            <div className="rounded-full bg-primary/10 p-2">
+              {card.icon}
+            </div>
+            <div>
+              <CardTitle>{card.title}</CardTitle>
+              <CardDescription>{card.description}</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center py-2">
+              <span className="text-sm text-muted-foreground">{card.stats.label}</span>
+              <span className="font-medium">{card.stats.value}</span>
+            </div>
+          </CardContent>
+          <CardFooter className="bg-muted/50 pt-2">
+            <Button asChild className="w-full">
+              <Link href={card.href}>{card.cta}</Link>
             </Button>
-          </div>
+          </CardFooter>
         </Card>
+      ))}
+    </div>
+  )
+}
+
+function RecentActivities() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Atividades Recentes</CardTitle>
+        <CardDescription>
+          Suas últimas interações com o sistema
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Aqui serão exibidas suas atividades recentes no sistema.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function Favorites() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Favoritos</CardTitle>
+        <CardDescription>
+          Acesso rápido às suas áreas mais usadas
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Você ainda não adicionou nenhuma área aos favoritos.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      // Verificar se há um token de bypass no localStorage
+      const hasBypassAuth = typeof window !== 'undefined' && localStorage.getItem('bypass-auth') === 'true';
+      
+      if (hasBypassAuth) {
+        // Se já está autenticado, redireciona diretamente para a caixa de entrada
+        router.push('/inbox');
+      } else {
+        // Se não está autenticado, redireciona para login com parâmetro de retorno
+        router.push('/login?returnUrl=/inbox');
+      }
+      
+    } catch (error) {
+      console.error("Erro durante o redirecionamento:", error);
+      // Evita loops infinitos em caso de erro
+    }
+  }, [router]);
+
+  // Tela de carregamento
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40">
+      <h1 className="text-2xl font-semibold mb-6">Módulo de Comunicação</h1>
+      <div className="flex items-center space-x-2">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-lg">Carregando...</span>
       </div>
     </div>
   );

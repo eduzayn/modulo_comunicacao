@@ -1,0 +1,318 @@
+{
+  "description": "Estrutura detalhada das tabelas principais",
+  "tables": {
+    "conversations": {
+      "description": "Tabela que armazena as conversas entre usuários",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único da conversa",
+          "primary_key": true
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "description": "Título da conversa"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação da conversa"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora da última atualização da conversa"
+        },
+        {
+          "name": "creator_id",
+          "type": "uuid",
+          "description": "ID do usuário que criou a conversa"
+        },
+        {
+          "name": "is_group",
+          "type": "boolean",
+          "description": "Indica se a conversa é um grupo ou individual"
+        },
+        {
+          "name": "channel_id",
+          "type": "uuid",
+          "description": "ID do canal ao qual a conversa pertence"
+        }
+      ]
+    },
+    "messages": {
+      "description": "Tabela que armazena as mensagens das conversas",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único da mensagem",
+          "primary_key": true
+        },
+        {
+          "name": "conversation_id",
+          "type": "uuid",
+          "description": "ID da conversa à qual a mensagem pertence"
+        },
+        {
+          "name": "sender_id",
+          "type": "uuid",
+          "description": "ID do usuário que enviou a mensagem"
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "description": "Conteúdo da mensagem"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação da mensagem"
+        },
+        {
+          "name": "is_read",
+          "type": "boolean",
+          "description": "Indica se a mensagem foi lida"
+        },
+        {
+          "name": "parent_id",
+          "type": "uuid",
+          "description": "ID da mensagem à qual esta responde (para threads)"
+        },
+        {
+          "name": "has_attachments",
+          "type": "boolean",
+          "description": "Indica se a mensagem possui anexos"
+        }
+      ]
+    },
+    "message_attachments": {
+      "description": "Tabela que armazena os anexos de mensagens",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único do anexo",
+          "primary_key": true
+        },
+        {
+          "name": "message_id",
+          "type": "uuid",
+          "description": "ID da mensagem à qual o anexo pertence"
+        },
+        {
+          "name": "file_path",
+          "type": "text",
+          "description": "Caminho do arquivo no bucket de armazenamento"
+        },
+        {
+          "name": "file_name",
+          "type": "text",
+          "description": "Nome original do arquivo"
+        },
+        {
+          "name": "file_size",
+          "type": "integer",
+          "description": "Tamanho do arquivo em bytes"
+        },
+        {
+          "name": "file_type",
+          "type": "text",
+          "description": "Tipo MIME do arquivo"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação do anexo"
+        }
+      ]
+    },
+    "channels": {
+      "description": "Tabela que armazena os canais de comunicação",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único do canal",
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "description": "Nome do canal"
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "description": "Descrição do canal"
+        },
+        {
+          "name": "type",
+          "type": "text",
+          "description": "Tipo do canal (e.g., chat, fórum, email)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação do canal"
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "description": "Indica se o canal está ativo"
+        },
+        {
+          "name": "owner_id",
+          "type": "uuid",
+          "description": "ID do usuário proprietário do canal"
+        }
+      ]
+    },
+    "conversation_participants": {
+      "description": "Tabela que armazena os participantes das conversas",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único do participante na conversa",
+          "primary_key": true
+        },
+        {
+          "name": "conversation_id",
+          "type": "uuid",
+          "description": "ID da conversa"
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "description": "ID do usuário participante"
+        },
+        {
+          "name": "joined_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora em que o usuário entrou na conversa"
+        },
+        {
+          "name": "is_admin",
+          "type": "boolean",
+          "description": "Indica se o usuário é administrador da conversa"
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "description": "Indica se o participante está ativo na conversa"
+        },
+        {
+          "name": "last_read_message_id",
+          "type": "uuid",
+          "description": "ID da última mensagem lida pelo participante"
+        }
+      ]
+    },
+    "tags": {
+      "description": "Tabela que armazena tags para classificar conversas e mensagens",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único da tag",
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "description": "Nome da tag"
+        },
+        {
+          "name": "color",
+          "type": "text",
+          "description": "Cor associada à tag"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação da tag"
+        },
+        {
+          "name": "creator_id",
+          "type": "uuid",
+          "description": "ID do usuário que criou a tag"
+        },
+        {
+          "name": "channel_id",
+          "type": "uuid",
+          "description": "ID do canal ao qual a tag pertence"
+        }
+      ]
+    },
+    "conversation_tags": {
+      "description": "Tabela de relacionamento entre conversas e tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único do relacionamento",
+          "primary_key": true
+        },
+        {
+          "name": "conversation_id",
+          "type": "uuid",
+          "description": "ID da conversa"
+        },
+        {
+          "name": "tag_id",
+          "type": "uuid",
+          "description": "ID da tag"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora de criação do relacionamento"
+        },
+        {
+          "name": "creator_id",
+          "type": "uuid",
+          "description": "ID do usuário que adicionou a tag à conversa"
+        }
+      ]
+    },
+    "user_channel_settings": {
+      "description": "Configurações do usuário para canais específicos",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "description": "Identificador único das configurações",
+          "primary_key": true
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "description": "ID do usuário"
+        },
+        {
+          "name": "channel_id",
+          "type": "uuid",
+          "description": "ID do canal"
+        },
+        {
+          "name": "notifications_enabled",
+          "type": "boolean",
+          "description": "Indica se as notificações estão habilitadas para este canal"
+        },
+        {
+          "name": "theme",
+          "type": "text",
+          "description": "Tema visual escolhido pelo usuário para o canal"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "description": "Data e hora da última atualização das configurações"
+        }
+      ]
+    }
+  }
+} 

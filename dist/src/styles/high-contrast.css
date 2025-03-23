@@ -1,0 +1,393 @@
+/* High Contrast Mode Styles */
+:root {
+  --high-contrast-text: #000000;
+  --high-contrast-background: #FFFFFF;
+  --high-contrast-border: #000000;
+  --high-contrast-link: #0000EE;
+  --high-contrast-visited-link: #551A8B;
+  --high-contrast-button: #000000;
+  --high-contrast-button-text: #FFFFFF;
+  --high-contrast-focus: #FF0000;
+  --high-contrast-error: #FF0000;
+  --high-contrast-success: #006600;
+  --high-contrast-warning: #FF6600;
+  --high-contrast-info: #0066CC;
+  --high-contrast-disabled: #767676;
+  --high-contrast-input-background: #FFFFFF;
+  --high-contrast-input-text: #000000;
+  --high-contrast-input-border: #000000;
+  --high-contrast-table-header: #DDDDDD;
+  --high-contrast-table-border: #000000;
+  --high-contrast-table-row-odd: #FFFFFF;
+  --high-contrast-table-row-even: #F0F0F0;
+}
+
+/* Base Styles */
+.high-contrast {
+  color-scheme: light;
+}
+
+.high-contrast body {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-text);
+}
+
+/* Text and Typography */
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6,
+.high-contrast p,
+.high-contrast span,
+.high-contrast div {
+  color: var(--high-contrast-text);
+}
+
+/* Links */
+.high-contrast a {
+  color: var(--high-contrast-link);
+  text-decoration: underline;
+}
+
+.high-contrast a:visited {
+  color: var(--high-contrast-visited-link);
+}
+
+.high-contrast a:hover,
+.high-contrast a:focus {
+  text-decoration: underline;
+  outline: 2px solid var(--high-contrast-focus);
+  outline-offset: 2px;
+}
+
+/* Buttons */
+.high-contrast button:not([aria-disabled="true"]),
+.high-contrast .btn:not([aria-disabled="true"]) {
+  background-color: var(--high-contrast-button);
+  color: var(--high-contrast-button-text);
+  border: 2px solid var(--high-contrast-border);
+  text-decoration: none;
+}
+
+.high-contrast button:hover:not([aria-disabled="true"]),
+.high-contrast .btn:hover:not([aria-disabled="true"]) {
+  background-color: var(--high-contrast-button-text);
+  color: var(--high-contrast-button);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast button:focus:not([aria-disabled="true"]),
+.high-contrast .btn:focus:not([aria-disabled="true"]) {
+  outline: 2px solid var(--high-contrast-focus);
+  outline-offset: 2px;
+}
+
+.high-contrast button[aria-disabled="true"],
+.high-contrast .btn[aria-disabled="true"],
+.high-contrast button:disabled,
+.high-contrast .btn:disabled {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-disabled);
+  border: 2px solid var(--high-contrast-disabled);
+}
+
+/* Form Elements */
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  background-color: var(--high-contrast-input-background);
+  color: var(--high-contrast-input-text);
+  border: 2px solid var(--high-contrast-input-border);
+}
+
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast textarea:focus {
+  outline: 2px solid var(--high-contrast-focus);
+  outline-offset: 2px;
+}
+
+.high-contrast input:disabled,
+.high-contrast select:disabled,
+.high-contrast textarea:disabled {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-disabled);
+  border: 2px solid var(--high-contrast-disabled);
+}
+
+.high-contrast label {
+  color: var(--high-contrast-text);
+  font-weight: bold;
+}
+
+.high-contrast ::placeholder {
+  color: var(--high-contrast-disabled);
+}
+
+/* Checkboxes and Radio Buttons */
+.high-contrast input[type="checkbox"],
+.high-contrast input[type="radio"] {
+  border: 2px solid var(--high-contrast-border);
+  background-color: var(--high-contrast-background);
+}
+
+.high-contrast input[type="checkbox"]:checked,
+.high-contrast input[type="radio"]:checked {
+  background-color: var(--high-contrast-text);
+  border-color: var(--high-contrast-border);
+}
+
+/* Tables */
+.high-contrast table {
+  border-collapse: collapse;
+  border: 2px solid var(--high-contrast-table-border);
+}
+
+.high-contrast th {
+  background-color: var(--high-contrast-table-header);
+  color: var(--high-contrast-text);
+  border: 1px solid var(--high-contrast-table-border);
+  font-weight: bold;
+}
+
+.high-contrast td {
+  border: 1px solid var(--high-contrast-table-border);
+}
+
+.high-contrast tr:nth-child(odd) {
+  background-color: var(--high-contrast-table-row-odd);
+}
+
+.high-contrast tr:nth-child(even) {
+  background-color: var(--high-contrast-table-row-even);
+}
+
+/* Cards and Containers */
+.high-contrast .card,
+.high-contrast .container,
+.high-contrast .box {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .card-header,
+.high-contrast .container-header,
+.high-contrast .box-header {
+  background-color: var(--high-contrast-table-header);
+  border-bottom: 2px solid var(--high-contrast-border);
+}
+
+/* Alerts and Notifications */
+.high-contrast .alert,
+.high-contrast .notification {
+  border: 2px solid var(--high-contrast-border);
+  background-color: var(--high-contrast-background);
+}
+
+.high-contrast .alert-info,
+.high-contrast .notification-info {
+  border-left: 4px solid var(--high-contrast-info);
+}
+
+.high-contrast .alert-success,
+.high-contrast .notification-success {
+  border-left: 4px solid var(--high-contrast-success);
+}
+
+.high-contrast .alert-warning,
+.high-contrast .notification-warning {
+  border-left: 4px solid var(--high-contrast-warning);
+}
+
+.high-contrast .alert-error,
+.high-contrast .notification-error {
+  border-left: 4px solid var(--high-contrast-error);
+}
+
+/* Navigation */
+.high-contrast nav {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .nav-link {
+  color: var(--high-contrast-link);
+  text-decoration: underline;
+}
+
+.high-contrast .nav-link[aria-current="page"] {
+  font-weight: bold;
+  background-color: var(--high-contrast-table-header);
+  color: var(--high-contrast-text);
+  border: 1px solid var(--high-contrast-border);
+}
+
+/* Tabs */
+.high-contrast .tabs-list {
+  border-bottom: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .tab {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-text);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .tab[aria-selected="true"] {
+  background-color: var(--high-contrast-table-header);
+  font-weight: bold;
+}
+
+/* Dialog/Modal */
+.high-contrast .dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.high-contrast .dialog-content {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .dialog-title {
+  color: var(--high-contrast-text);
+  border-bottom: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .dialog-close {
+  color: var(--high-contrast-text);
+  background-color: transparent;
+  border: 1px solid var(--high-contrast-border);
+}
+
+/* Progress Indicators */
+.high-contrast .progress {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .progress-bar {
+  background-color: var(--high-contrast-text);
+}
+
+/* Icons */
+.high-contrast svg,
+.high-contrast img[role="img"],
+.high-contrast .icon {
+  fill: currentColor;
+  color: var(--high-contrast-text);
+}
+
+/* Focus Indicators */
+.high-contrast *:focus {
+  outline: 2px solid var(--high-contrast-focus);
+  outline-offset: 2px;
+}
+
+/* Status Colors */
+.high-contrast .text-error,
+.high-contrast .text-danger {
+  color: var(--high-contrast-error);
+}
+
+.high-contrast .text-success {
+  color: var(--high-contrast-success);
+}
+
+.high-contrast .text-warning {
+  color: var(--high-contrast-warning);
+}
+
+.high-contrast .text-info {
+  color: var(--high-contrast-info);
+}
+
+.high-contrast .bg-error,
+.high-contrast .bg-danger {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-error);
+  color: var(--high-contrast-text);
+}
+
+.high-contrast .bg-success {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-success);
+  color: var(--high-contrast-text);
+}
+
+.high-contrast .bg-warning {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-warning);
+  color: var(--high-contrast-text);
+}
+
+.high-contrast .bg-info {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-info);
+  color: var(--high-contrast-text);
+}
+
+/* Tooltips */
+.high-contrast .tooltip .tooltip-text {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-text);
+  border: 2px solid var(--high-contrast-border);
+}
+
+/* Pagination */
+.high-contrast .pagination-link {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-link);
+  border: 1px solid var(--high-contrast-border);
+  text-decoration: underline;
+}
+
+.high-contrast .pagination-link[aria-current="page"] {
+  background-color: var(--high-contrast-text);
+  color: var(--high-contrast-background);
+  border: 1px solid var(--high-contrast-border);
+  font-weight: bold;
+}
+
+/* Breadcrumbs */
+.high-contrast .breadcrumbs-link {
+  color: var(--high-contrast-link);
+  text-decoration: underline;
+}
+
+.high-contrast .breadcrumbs-link[aria-current="page"] {
+  color: var(--high-contrast-text);
+  font-weight: bold;
+}
+
+/* Accordion */
+.high-contrast .accordion-button {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-text);
+  border: 2px solid var(--high-contrast-border);
+}
+
+.high-contrast .accordion-panel {
+  background-color: var(--high-contrast-background);
+  border: 2px solid var(--high-contrast-border);
+  border-top: none;
+}
+
+/* Skip Links */
+.high-contrast .skip-link:focus {
+  background-color: var(--high-contrast-background);
+  color: var(--high-contrast-text);
+  border: 2px solid var(--high-contrast-border);
+  text-decoration: underline;
+}
+
+/* Loading Indicators */
+.high-contrast .loading-spinner {
+  border-color: var(--high-contrast-border);
+  border-top-color: var(--high-contrast-text);
+}
+
+.high-contrast .loading-text {
+  color: var(--high-contrast-text);
+}

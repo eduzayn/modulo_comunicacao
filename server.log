@@ -1,0 +1,12 @@
+
+> modulo_comunicacao@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+ ⚠ Port 3001 is in use, trying 3002 instead.
+   ▲ Next.js 14.1.0
+   - Local:        http://localhost:3002
+   - Environments: .env.local, .env
+
+ ⚠ Disabling SWC Minifer will not be an option in the next major version. Please report any issues you may be experiencing to https://github.com/vercel/next.js/issues
+ ✓ Ready in 3.9s
